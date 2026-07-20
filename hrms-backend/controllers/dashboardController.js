@@ -12,35 +12,60 @@ exports.getSummary = async (req, res) => {
       Employee.countDocuments({ status: 'ACTIVE' }),
     ]);
 
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+    const thisMonthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+
     const employeesByDepartment = await Employee.aggregate([
-  {
-    $group: {
-      _id: '$department',
-      count: { $sum: 1 },
-    },
-  },
-  {
-    $lookup: {
-      from: 'departments',
-      localField: '_id',
-      foreignField: '_id',
-      as: 'departmentInfo',
-    },
-  },
-  {
-    $unwind: '$departmentInfo',
-  },
-  {
-    $project: {
-      _id: 0,
-      departmentName: '$departmentInfo.name',
-      count: 1,
-    },
-  },
-  {
-    $sort: { count: -1 },
-  },
-]);
+      {
+        $project: {
+          department: 1,
+          isLastMonth: { $cond: [{ $lte: ['$hireDate', lastMonthEnd] }, 1, 0] },
+          isThisMonth: { $cond: [{ $lte: ['$hireDate', thisMonthEnd] }, 1, 0] },
+        },
+      },
+      {
+        $group: {
+          _id: '$department',
+          lastMonthCount: { $sum: '$isLastMonth' },
+          thisMonthCount: { $sum: '$isThisMonth' },
+        },
+      },
+      {
+        $lookup: {
+          from: 'departments',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'departmentInfo',
+        },
+      },
+      {
+        $unwind: '$departmentInfo',
+      },
+      {
+        $project: {
+          _id: 0,
+          departmentName: '$departmentInfo.name',
+          lastMonthCount: 1,
+          thisMonthCount: 1,
+        },
+      },
+      {
+        $sort: { thisMonthCount: -1 },
+      },
+    ]);
+
+    const totalEmployeesLastMonth = employeesByDepartment.reduce((sum, item) => sum + item.lastMonthCount, 0);
+    const totalEmployeesThisMonth = employeesByDepartment.reduce((sum, item) => sum + item.thisMonthCount, 0);
+
+    employeesByDepartment.unshift({
+      departmentName: 'Tổng',
+      lastMonthCount: totalEmployeesLastMonth,
+      thisMonthCount: totalEmployeesThisMonth,
+    });
 
     res.status(200).json({
       totalEmployees,
