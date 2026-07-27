@@ -1,0 +1,153 @@
+.stat-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  cursor: default;
+  animation: fadeInCard 0.4s ease-out backwards;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover) !important;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ─── Soft icon backgrounds — Light Mode ─── */
+.bg-primary-soft {
+  background-color: var(--color-primary-subtle) !important;
+}
+.bg-primary-soft svg {
+  stroke: var(--color-primary) !important;
+}
+
+.bg-success-soft {
+  background-color: var(--color-success-bg) !important;
+}
+.bg-success-soft svg {
+  stroke: var(--color-success) !important;
+}
+
+.bg-info-soft {
+  background-color: var(--color-info-bg) !important;
+}
+.bg-info-soft svg {
+  stroke: var(--color-info) !important;
+}
+
+.bg-warning-soft {
+  background-color: var(--color-warning-bg) !important;
+}
+.bg-warning-soft svg {
+  stroke: var(--color-warning) !important;
+}
+
+/* ─── Soft icon backgrounds — Dark Mode ─── */
+.dark-theme .bg-primary-soft {
+  background-color: rgba(79, 70, 229, 0.2) !important;
+}
+.dark-theme .bg-primary-soft svg {
+  stroke: var(--color-primary) !important;
+}
+
+.dark-theme .bg-success-soft {
+  background-color: var(--color-success-bg) !important;
+}
+.dark-theme .bg-success-soft svg {
+  stroke: var(--color-success) !important;
+}
+
+.dark-theme .bg-info-soft {
+  background-color: var(--color-info-bg) !important;
+}
+.dark-theme .bg-info-soft svg {
+  stroke: var(--color-info) !important;
+}
+
+.dark-theme .bg-warning-soft {
+  background-color: var(--color-warning-bg) !important;
+}
+.dark-theme .bg-warning-soft svg {
+  stroke: var(--color-warning) !important;
+}
+
+/* ─── Avatar small ─── */
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ─── Card animation delays ─── */
+.col-md-3:nth-child(1) .stat-card { animation-delay: 0.05s; }
+.col-md-3:nth-child(2) .stat-card { animation-delay: 0.10s; }
+.col-md-3:nth-child(3) .stat-card { animation-delay: 0.15s; }
+.col-md-3:nth-child(4) .stat-card { animation-delay: 0.20s; }
+
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar for table container */
+.scrollable-table-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-table-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-table-container::-webkit-scrollbar-thumb {
+  background-color: var(--border-color);
+  border-radius: 4px;
+}
+
+.scrollable-table-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-muted);
+}
+
+.scrollable-table-container thead th {
+  position: sticky;
+  top: 0;
+  background-color: var(--table-header-bg) !important;
+  color: var(--table-header-text) !important;
+  z-index: 10;
+  box-shadow: inset 0 -1px 0 var(--table-border);
+}
+
+/* ─── Chart container height — optimised for 1080p @ 125% (CSS 864px) ─── */
+.chart-container {
+  min-height: 240px !important;
+  height: 240px !important;
+}
+
+/* ─── Entry animations for Chart Card ─── */
+.chart-card {
+  animation: fadeInChartCard 0.4s ease-out backwards;
+}
+
+@keyframes fadeInChartCard {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

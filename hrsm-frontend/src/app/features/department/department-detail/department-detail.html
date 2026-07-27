@@ -1,0 +1,142 @@
+<div class="page-fade">
+  <app-spinner *ngIf="isLoading()"></app-spinner>
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+  <div *ngIf="department() as dept">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <a routerLink="/departments" class="btn btn-sm btn-outline-secondary">← Quay lại</a>
+      <a [routerLink]="['/departments/edit', dept._id]" class="btn btn-sm btn-primary">Sửa phòng ban</a>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="mb-1">{{ dept.name }}</h4>
+        <p class="text-muted mb-0">{{ dept.description || 'Không có mô tả' }}</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Nhân viên thuộc phòng ban ({{ employees().length }})</h5>
+          <a [routerLink]="['/employees/new']" [queryParams]="{ departmentId: dept._id }" class="btn btn-sm btn-outline-primary">
+            + Thêm nhân viên
+          </a>
+        </div>
+
+        <app-spinner *ngIf="isLoadingEmployees()"></app-spinner>
+
+        <table class="table table-sm mb-0" style="overflow: visible !important;" *ngIf="!isLoadingEmployees() && employees().length > 0">
+          <thead>
+            <tr>
+              <th style="width: 50px;"></th>
+              <th>Họ tên</th>
+              <th>Email</th>
+              <th>Chức vụ</th>
+              <th>Trạng thái</th>
+              <th *ngIf="authService.isAdmin()" style="width: 120px;" class="text-center">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let emp of employees(); let i = index">
+              <td>
+                <img *ngIf="emp.avatarUrl" [src]="'http://localhost:5000' + emp.avatarUrl" class="avatar-sm" />
+                <div *ngIf="!emp.avatarUrl" class="avatar-initials">
+                  {{ getInitials(emp.firstName, emp.lastName) }}
+                </div>
+              </td>
+              <td><a [routerLink]="['/employees', emp._id]" class="text-decoration-none">{{ emp.firstName }} {{ emp.lastName }}</a></td>
+              <td>{{ emp.email }}</td>
+              <td>{{ emp.position || '-' }}</td>
+              <td>
+                <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'" [class.bg-secondary]="emp.status === 'INACTIVE'">
+                  {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+                </span>
+              </td>
+              <td class="action-column text-center" *ngIf="authService.isAdmin()">
+                <div class="actions-dropdown-container" [class.dropup]="i >= employees().length - 2">
+                  <button class="btn-icon" (click)="toggleActionsMenu(emp._id!, $event)" title="Hành động">
+                    <i class="pi pi-ellipsis-v"></i>
+                  </button>
+                  <div class="actions-dropdown-menu" *ngIf="activeActionsMenuId() === emp._id">
+                    <a
+                      *ngIf="emp.status === 'ACTIVE'"
+                      [routerLink]="['/employees/edit', emp._id]"
+                      class="dropdown-item"
+                    >
+                      <i class="pi pi-pencil"></i> Sửa
+                    </a>
+                    <button
+                      *ngIf="emp.status === 'INACTIVE'"
+                      class="dropdown-item disabled-item"
+                      disabled
+                      title="Nhân viên đã ngừng hoạt động, không thể sửa"
+                    >
+                      <i class="pi pi-pencil"></i> Sửa
+                    </button>
+                    <button
+                      class="dropdown-item text-primary"
+                      (click)="openTransferModal(emp); closeActionsMenu()"
+                    >
+                      <i class="pi pi-send"></i> Chuyển phòng
+                    </button>
+                    <button
+                      *ngIf="emp.status === 'INACTIVE'"
+                      class="dropdown-item text-danger"
+                      (click)="onDelete(emp); closeActionsMenu()"
+                    >
+                      <i class="pi pi-trash"></i> Xóa
+                    </button>
+                    <button
+                      *ngIf="emp.status === 'ACTIVE'"
+                      class="dropdown-item disabled-item"
+                      disabled
+                      title="Nhân viên đang hoạt động, không thể xóa"
+                    >
+                      <i class="pi pi-trash"></i> Xóa
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p *ngIf="!isLoadingEmployees() && employees().length === 0" class="text-muted mb-0">
+          Chưa có nhân viên nào trong phòng ban này.
+        </p>
+      </div>
+    </div>
+
+    <!-- Modal Chuyển phòng ban tùy chỉnh -->
+    <div class="modal-backdrop-custom" *ngIf="isTransferModalOpen()">
+      <div class="modal-box" style="min-width: 400px;" *ngIf="selectedEmployeeForTransfer() as emp">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Chuyển phòng ban</h5>
+          <button type="button" class="btn-close" (click)="closeTransferModal()"></button>
+        </div>
+
+        <div class="mb-4">
+          <p class="mb-2">Chọn phòng ban mới cho nhân viên <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>:</p>
+          <div class="mb-3">
+            <label class="form-label small text-muted">Phòng ban hiện tại: {{ dept.name }}</label>
+            <app-custom-select
+              [options]="transferOptions()"
+              placeholder="-- Chọn phòng ban mới --"
+              [ngModel]="selectedTargetDepartmentId()"
+              (ngModelChange)="selectedTargetDepartmentId.set($event)"
+            ></app-custom-select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="closeTransferModal()">Hủy</button>
+          <button type="button" class="btn btn-primary" [disabled]="!selectedTargetDepartmentId()" (click)="confirmTransferDepartment(selectedTargetDepartmentId())">
+            Xác nhận chuyển
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

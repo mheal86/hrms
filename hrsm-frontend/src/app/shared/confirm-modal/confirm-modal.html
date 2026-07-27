@@ -1,0 +1,9 @@
+<div class="modal-backdrop-custom" *ngIf="confirmService.state().isOpen">
+  <div class="modal-box">
+    <p class="mb-4">{{ confirmService.state().message }}</p>
+    <div class="d-flex justify-content-end gap-2">
+      <button class="btn btn-secondary" (click)="confirmService.onCancel()">Hủy</button>
+      <button class="btn btn-danger" (click)="confirmService.onConfirm()">Đồng ý</button>
+    </div>
+  </div>
+</div>

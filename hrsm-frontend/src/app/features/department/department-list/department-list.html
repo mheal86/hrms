@@ -1,0 +1,68 @@
+<div class="page-fade list-layout-container">
+  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <input
+      type="text"
+      class="form-control"
+      style="max-width: 300px;"
+      placeholder="Tìm theo tên hoặc mô tả..."
+      [(ngModel)]="searchTerm"
+      (input)="onSearchInput()"
+    />
+    <a *ngIf="authService.isAdmin()" routerLink="/departments/new" class="btn btn-primary">+ Thêm phòng ban</a>
+  </div>
+
+  <app-table-skeleton *ngIf="isLoading()" [rows]="5" [columns]="3"></app-table-skeleton>
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+  <div class="table-responsive scrollable-table-container" *ngIf="!isLoading() && departments().length > 0">
+    <table class="table table-hover mb-0">
+      <thead>
+        <tr>
+          <th>Tên phòng ban</th>
+          <th>Mô tả</th>
+          <th class="text-center" style="width: 130px;" *ngIf="authService.isAdmin()">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let dept of departments(); let i = index">
+          <td><a [routerLink]="['/departments', dept._id]" class="text-decoration-none">{{ dept.name }}</a></td>
+          <td>{{ dept.description }}</td>
+          <td class="action-column text-center" *ngIf="authService.isAdmin()">
+            <div class="actions-dropdown-container" [class.dropup]="i >= departments().length - 2">
+              <button class="btn-icon" (click)="toggleActionsMenu(dept._id!, $event)" title="Hành động">
+                <i class="pi pi-ellipsis-v"></i>
+              </button>
+              <div class="actions-dropdown-menu" *ngIf="activeActionsMenuId() === dept._id">
+                <a [routerLink]="['/departments/edit', dept._id]" class="dropdown-item" title="Sửa phòng ban">
+                  <i class="pi pi-pencil"></i> Sửa
+                </a>
+                <button class="dropdown-item text-danger" (click)="onDelete(dept); closeActionsMenu()" title="Xóa phòng ban">
+                  <i class="pi pi-trash"></i> Xóa
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mt-3 paginator-row" *ngIf="!isLoading() && total() > 0">
+    <span class="text-muted small">{{ total() }} phòng ban</span>
+    <p-paginator
+      (onPageChange)="onPageChange($event)"
+      [first]="first"
+      [rows]="pageSize"
+      [totalRecords]="total()"
+      [rowsPerPageOptions]="[5, 10, 20, 30]"
+      styleClass="border-none bg-transparent p-0"
+    />
+  </div>
+
+  <div *ngIf="!isLoading() && departments().length === 0" class="empty-state">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5">
+      <path d="M3 21h18M5 21V7l8-4v18M13 9h6v12M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
+    </svg>
+    <p class="mt-3 text-muted">Chưa có phòng ban nào</p>
+  </div>
+</div>

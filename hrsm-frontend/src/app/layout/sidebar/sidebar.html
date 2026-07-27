@@ -1,0 +1,30 @@
+<div class="sidebar-backdrop d-md-none" *ngIf="sidebarState.isOpen()" (click)="sidebarState.close()"></div>
+
+<aside class="app-sidebar" [class.sidebar-open]="sidebarState.isOpen()" [class.collapsed]="sidebarState.isDesktopCollapsed()">
+  <ul class="nav flex-column p-3">
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Trang chủ">
+        <i class="pi pi-home nav-icon"></i>
+        <span class="nav-text">Trang chủ</span>
+      </a>
+    </li>
+    <li class="nav-item" *ngIf="authService.isAdmin()">
+      <a class="nav-link" routerLink="/departments" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Phòng ban">
+        <i class="pi pi-building nav-icon"></i>
+        <span class="nav-text">Phòng ban</span>
+      </a>
+    </li>
+    <li class="nav-item" *ngIf="authService.isAdmin()">
+      <a class="nav-link" routerLink="/employees" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Nhân viên">
+        <i class="pi pi-users nav-icon"></i>
+        <span class="nav-text">Nhân viên</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" routerLink="/profile" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Hồ sơ cá nhân">
+        <i class="pi pi-user nav-icon"></i>
+        <span class="nav-text">Hồ sơ cá nhân</span>
+      </a>
+    </li>
+  </ul>
+</aside>

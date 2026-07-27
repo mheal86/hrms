@@ -1,0 +1,166 @@
+<div class="page-fade">
+
+  <app-spinner *ngIf="isLoading()"></app-spinner>
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+
+  <div *ngIf="profileData() as data" class="row">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <img
+            *ngIf="data.employee?.avatarUrl"
+            [src]="'http://localhost:5000' + data.employee?.avatarUrl"
+            width="120" height="120"
+            style="object-fit: cover; border-radius: 50%;"
+          />
+          <div *ngIf="!data.employee?.avatarUrl" class="avatar-initials-lg">
+            {{ getInitials(data.employee?.firstName, data.employee?.lastName, data.username) }}
+          </div>
+          <h5 class="mt-3 mb-0">
+            {{ data.employee ? (data.employee.firstName + ' ' + data.employee.lastName) : data.username }}
+          </h5>
+          <p class="text-muted small mb-3">{{ data.username }}</p>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary btn-sm" (click)="openPasswordModal()">
+              Đổi mật khẩu
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Thông tin cá nhân</h5>
+            <!-- Chỉ hiển thị nút Chỉnh sửa khi nhân viên đang hoạt động -->
+            <button
+              *ngIf="!isEditMode() && data.employee?.status !== 'INACTIVE'"
+              class="btn btn-sm btn-outline-secondary"
+              (click)="enterEditMode()"
+            >
+              Chỉnh sửa
+            </button>
+          </div>
+
+          <!-- Thông báo khi nhân viên ngừng hoạt động -->
+          <div *ngIf="data.employee?.status === 'INACTIVE'" class="alert alert-warning py-2 mb-3 small">
+            <strong>⚠️ Tài khoản này đã ngừng hoạt động.</strong>
+            Bạn không thể chỉnh sửa thông tin cá nhân.
+          </div>
+
+          <div *ngIf="!isEditMode()">
+            <table class="table table-borderless mb-0">
+              <tr *ngIf="data.employee">
+                <td class="fw-bold" style="width: 150px;">Email</td>
+                <td>{{ data.employee.email }}</td>
+              </tr>
+              <tr *ngIf="data.employee">
+                <td class="fw-bold">Chức vụ</td>
+                <td>{{ data.employee.position || '-' }}</td>
+              </tr>
+              <tr *ngIf="data.employee">
+                <td class="fw-bold">Phòng ban</td>
+                <td>{{ data.employee.department?.name || '-' }}</td>
+              </tr>
+              <tr *ngIf="data.employee">
+                <td class="fw-bold">Số điện thoại</td>
+                <td>{{ data.employee.phone || '-' }}</td>
+              </tr>
+              <tr *ngIf="data.employee">
+                <td class="fw-bold">Địa chỉ</td>
+                <td>{{ data.employee.address || '-' }}</td>
+              </tr>
+              <tr *ngIf="data.employee?.status === 'INACTIVE'">
+                <td class="fw-bold text-danger">Ngày ngừng hoạt động</td>
+                <td class="text-danger">{{ data.employee?.deactivatedDate ? (data.employee?.deactivatedDate | date: 'dd/MM/yyyy') : '-' }}</td>
+              </tr>
+              <tr *ngIf="!data.employee">
+                <td colspan="2" class="text-muted">Tài khoản này chưa gắn hồ sơ nhân viên.</td>
+              </tr>
+            </table>
+          </div>
+
+          <div *ngIf="isEditMode()">
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="phone"
+                  placeholder="VD: 0912345678"
+                  [class.is-invalid]="form.get('phone')?.invalid && form.get('phone')?.touched"
+                />
+                <div class="invalid-feedback">Số điện thoại phải đủ 10 số và bắt đầu bằng 0</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  formControlName="address"
+                  [class.is-invalid]="form.get('address')?.invalid && form.get('address')?.touched"
+                />
+                <div class="invalid-feedback">Địa chỉ không hợp lệ (cần ít nhất 3 ký tự chữ)</div>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" [disabled]="isSaving()">
+                  {{ isSaving() ? 'Đang lưu...' : 'Lưu thay đổi' }}
+                </button>
+                <button type="button" class="btn btn-outline-secondary" (click)="cancelEdit()">Hủy</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop-custom" *ngIf="isPasswordModalOpen()">
+    <div class="modal-box">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Đổi mật khẩu</h5>
+        <button type="button" class="btn-close" (click)="closePasswordModal()"></button>
+      </div>
+
+      <div *ngIf="passwordErrorMessage()" class="alert alert-danger py-2">{{ passwordErrorMessage() }}</div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+        <div class="mb-3">
+          <label class="form-label">Mật khẩu hiện tại</label>
+          <input
+            type="password" class="form-control" formControlName="currentPassword"
+            [class.is-invalid]="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched"
+          />
+          <div class="invalid-feedback">Vui lòng nhập mật khẩu hiện tại</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Mật khẩu mới</label>
+          <input
+            type="password" class="form-control" formControlName="newPassword"
+            [class.is-invalid]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched"
+          />
+          <div class="invalid-feedback">Mật khẩu mới phải có ít nhất 6 ký tự</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Xác nhận mật khẩu mới</label>
+          <input
+            type="password" class="form-control" formControlName="confirmPassword"
+            [class.is-invalid]="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched"
+          />
+          <div class="invalid-feedback">Vui lòng xác nhận mật khẩu mới</div>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-secondary" (click)="closePasswordModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isChangingPassword()">
+            {{ isChangingPassword() ? 'Đang xử lý...' : 'Đổi mật khẩu' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

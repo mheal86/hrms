@@ -1,0 +1,133 @@
+:host {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1030;
+}
+
+/* ─── Header / Navbar ─── */
+.app-navbar {
+  background: var(--bg-sidebar) !important;  /* Deep Indigo — consistent with sidebar */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  height: 56px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar-brand {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  color: #ffffff !important;
+  letter-spacing: -0.02em;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.navbar-brand span {
+  color: #818cf8;  /* Indigo-400 accent on brand */
+}
+
+/* Hamburger */
+.hamburger-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #a5b4fc;  /* Indigo-300 */
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.hamburger-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* PrimeNG Desktop Toggler Customization */
+.app-navbar ::ng-deep .p-button-secondary.p-button-text {
+  color: #a5b4fc !important;
+  transition: all 0.2s ease;
+  padding: 6px !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+}
+
+.app-navbar ::ng-deep .p-button-secondary.p-button-text:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* User info text */
+.navbar-user-text {
+  color: #e0e7ff;  /* Indigo-100 */
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.navbar-user-role {
+  color: #a5b4fc;  /* Indigo-300 */
+  font-size: 0.78rem;
+}
+
+/* Logout button */
+.logout-btn {
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  color: #fecaca !important;
+  background-color: rgba(239, 68, 68, 0.06) !important;
+  padding: 8px !important;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  transition: all 0.25s ease-in-out;
+}
+
+.logout-btn:hover {
+  background: var(--color-error) !important;
+  border-color: var(--color-error) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+  transform: translateY(-1.5px);
+}
+
+/* Theme toggle button */
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  color: #a5b4fc;  /* Indigo-300 */
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transform: rotate(20deg);
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.9);
+}
+
+/* Icon animation */
+.sun-icon, .moon-icon {
+  animation: rotateIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes rotateIn {
+  from { transform: rotate(-60deg) scale(0.7); opacity: 0; }
+  to   { transform: rotate(0) scale(1);        opacity: 1; }
+}
