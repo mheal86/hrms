@@ -1,4 +1,9 @@
 const Department = require('../models/Department');
+const Employee = require('../models/Employee');
+
+const escapeRegex = (string) => {
+  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
 
 // GET /api/departments
 exports.getAll = async (req, res) => {
@@ -11,12 +16,15 @@ exports.getAll = async (req, res) => {
 
     if (search) {
       const tokens = search.split(/\s+/).filter(Boolean);
-      filter.$and = tokens.map((token) => ({
-        $or: [
-          { name: { $regex: token, $options: 'i' } },
-          { description: { $regex: token, $options: 'i' } },
-        ],
-      }));
+      filter.$and = tokens.map((token) => {
+        const escapedToken = escapeRegex(token);
+        return {
+          $or: [
+            { name: { $regex: escapedToken, $options: 'i' } },
+            { description: { $regex: escapedToken, $options: 'i' } },
+          ],
+        };
+      });
     }
 
     const skip = (page - 1) * limit;
@@ -56,7 +64,26 @@ exports.getById = async (req, res) => {
 // POST /api/departments
 exports.create = async (req, res) => {
   try {
-    const department = new Department(req.body);
+    const { name, description } = req.body;
+    const trimmedName = (name || '').trim();
+
+    if (!trimmedName) {
+      return res.status(400).json({ message: 'Tên phòng ban là bắt buộc' });
+    }
+
+    // Chỉ cho phép chữ, số, khoảng trắng, dấu chấm, dấu ngoặc, dấu gạch ngang
+    const nameRegex = /^[\p{L}0-9\s().-]+$/u;
+    if (!nameRegex.test(trimmedName)) {
+      return res.status(400).json({ message: 'Tên phòng ban không được chứa ký tự đặc biệt' });
+    }
+
+    const escapedName = escapeRegex(trimmedName);
+    const existing = await Department.findOne({ name: { $regex: `^${escapedName}$`, $options: 'i' } });
+    if (existing) {
+      return res.status(400).json({ message: 'Tên phòng ban này đã tồn tại' });
+    }
+
+    const department = new Department({ name: trimmedName, description });
     const saved = await department.save();
     res.status(201).json(saved);
   } catch (err) {
@@ -67,7 +94,29 @@ exports.create = async (req, res) => {
 // PUT /api/departments/:id
 exports.update = async (req, res) => {
   try {
-    const updated = await Department.findByIdAndUpdate(req.params.id, req.body, {
+    const { name, description } = req.body;
+    const trimmedName = (name || '').trim();
+
+    if (!trimmedName) {
+      return res.status(400).json({ message: 'Tên phòng ban là bắt buộc' });
+    }
+
+    // Chỉ cho phép chữ, số, khoảng trắng, dấu chấm, dấu ngoặc, dấu gạch ngang
+    const nameRegex = /^[\p{L}0-9\s().-]+$/u;
+    if (!nameRegex.test(trimmedName)) {
+      return res.status(400).json({ message: 'Tên phòng ban không được chứa ký tự đặc biệt' });
+    }
+
+    const escapedName = escapeRegex(trimmedName);
+    const existing = await Department.findOne({ 
+      name: { $regex: `^${escapedName}$`, $options: 'i' },
+      _id: { $ne: req.params.id }
+    });
+    if (existing) {
+      return res.status(400).json({ message: 'Tên phòng ban này đã tồn tại' });
+    }
+
+    const updated = await Department.findByIdAndUpdate(req.params.id, { name: trimmedName, description }, {
       new: true,
       runValidators: true,
     });
@@ -83,7 +132,18 @@ exports.update = async (req, res) => {
 // DELETE /api/departments/:id
 exports.remove = async (req, res) => {
   try {
-    const deleted = await Department.findByIdAndDelete(req.params.id);
+    const departmentId = req.params.id;
+
+    // Kiểm tra xem phòng ban còn nhân viên không
+    const employeeCount = await Employee.countDocuments({ department: departmentId });
+    if (employeeCount > 0) {
+      return res.status(400).json({
+        message: `Phòng ban này còn ${employeeCount} nhân viên. Vui lòng sắp xếp lại nhân viên trước khi xóa.`,
+        employeeCount,
+      });
+    }
+
+    const deleted = await Department.findByIdAndDelete(departmentId);
     if (!deleted) {
       return res.status(404).json({ message: 'Department not found' });
     }

@@ -5,10 +5,11 @@ const User = require('../models/User');
 // GET /api/dashboard/summary
 exports.getSummary = async (req, res) => {
   try {
+    const activeEmployeeIds = await Employee.find({ status: 'ACTIVE' }).distinct('_id');
     const [totalEmployees, totalDepartments, totalUsers, activeEmployees] = await Promise.all([
       Employee.countDocuments(),
       Department.countDocuments(),
-      User.countDocuments(),
+      User.countDocuments({ employee: { $in: activeEmployeeIds } }),
       Employee.countDocuments({ status: 'ACTIVE' }),
     ]);
 
@@ -43,12 +44,15 @@ exports.getSummary = async (req, res) => {
         },
       },
       {
-        $unwind: '$departmentInfo',
+        $unwind: {
+          path: '$departmentInfo',
+          preserveNullAndEmptyArrays: true
+        },
       },
       {
         $project: {
           _id: 0,
-          departmentName: '$departmentInfo.name',
+          departmentName: { $ifNull: ['$departmentInfo.name', 'Chưa phân phòng'] },
           lastMonthCount: 1,
           thisMonthCount: 1,
         },

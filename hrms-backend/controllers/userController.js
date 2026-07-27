@@ -54,6 +54,24 @@ exports.create = async (req, res) => {
   }
 };
 
+// GET /api/users/check-username?username=xyz
+exports.checkUsername = async (req, res) => {
+  try {
+    const { username } = req.query;
+    if (!username) {
+      return res.status(400).json({ message: 'Username query parameter is required' });
+    }
+    const user = await User.findOne({ username: username.trim() });
+    if (user) {
+      return res.status(200).json({ exists: true, message: 'Username already exists' });
+    }
+    res.status(200).json({ exists: false });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 // GET /api/users
 exports.getAll = async (req, res) => {
   try {

@@ -51,6 +51,10 @@ const employeeSchema = new mongoose.Schema(
       enum: ['ACTIVE', 'INACTIVE'],
       default: 'ACTIVE',
     },
+    deactivatedDate: {
+      type: Date,
+      default: null,
+    },
     department: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Department',

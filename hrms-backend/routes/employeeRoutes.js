@@ -10,6 +10,7 @@ router.post('/', verifyToken, requireAdmin, employeeController.create);
 router.put('/:id', verifyToken, requireAdmin, employeeController.update);
 router.delete('/:id', verifyToken, requireAdmin, employeeController.remove);
 router.post('/:id/avatar', verifyToken, requireAdmin, upload.single('avatar'), employeeController.uploadAvatar);
+router.get('/:id/history', verifyToken, employeeController.getHistory);
 
 router.post('/:id/avatar', upload.single('avatar'), employeeController.uploadAvatar);
 

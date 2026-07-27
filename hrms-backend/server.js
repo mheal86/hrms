@@ -6,6 +6,7 @@ const connectDB = require('./config/db');
 // Đăng ký model để Mongoose biết schema tồn tại (dùng cho populate)
 require('./models/Role');
 require('./models/User');
+require('./models/DepartmentHistory');
 
 const departmentRoutes = require('./routes/departmentRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
