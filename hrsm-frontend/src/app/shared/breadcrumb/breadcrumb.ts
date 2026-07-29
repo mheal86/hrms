@@ -1,12 +1,9 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs';
-
-interface BreadcrumbItem {
-  label: string;
-  url: string;
-}
+import { Router, NavigationEnd } from '@angular/router';
+import { filter, Subject, takeUntil } from 'rxjs';
+import { Breadcrumb as PrimeBreadcrumb } from 'primeng/breadcrumb';
+import { MenuItem } from 'primeng/api';
 
 const LABEL_MAP: Record<string, string> = {
   dashboard: 'Trang chủ',
@@ -19,35 +16,51 @@ const LABEL_MAP: Record<string, string> = {
 
 @Component({
   selector: 'app-breadcrumb',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, PrimeBreadcrumb],
   templateUrl: './breadcrumb.html',
   styleUrl: './breadcrumb.css',
 })
-export class Breadcrumb implements OnInit {
-  items = signal<BreadcrumbItem[]>([]);
+export class Breadcrumb implements OnInit, OnDestroy {
+  items = signal<MenuItem[]>([]);
+  
+  // destroy$ đóng vai trò như một "công tắc điều khiển từ xa" để báo tín hiệu hủy đăng ký
+  private destroy$ = new Subject<void>();
 
   constructor(private router: Router) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.buildBreadcrumb(this.router.url);
 
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event) => {
-      this.buildBreadcrumb((event as NavigationEnd).urlAfterRedirects);
-    });
+    // Lắng nghe sự kiện chuyển trang của router
+    this.router.events
+      .pipe(
+        filter((event) => event instanceof NavigationEnd),
+        // takeUntil: Nói với RxJS "chỉ hứng sự kiện CHO ĐẾN KHI nút destroy$ phát tín hiệu"
+        takeUntil(this.destroy$)
+      )
+      .subscribe((event) => {
+        this.buildBreadcrumb((event as NavigationEnd).urlAfterRedirects);
+      });
   }
 
-  private buildBreadcrumb(url: string): void {
+  // ngOnDestroy: Vòng đời tự động chạy khi component bị hủy (người dùng rời trang)
+  ngOnDestroy() {
+    this.destroy$.next(); // Bấm công tắc: phát đi tín hiệu hủy đăng ký cho tất cả các subscribe có dùng takeUntil
+    this.destroy$.complete(); // Đóng hoàn toàn luồng tín hiệu hủy để giải phóng RAM
+  }
+
+  private buildBreadcrumb(url: string) {
     const cleanUrl = url.split('?')[0];
     const segments = cleanUrl.split('/').filter((s) => s && !this.isLikelyId(s));
 
-    const items: BreadcrumbItem[] = [];
+    const items: MenuItem[] = [];
     let path = '';
 
     segments.forEach((segment) => {
       path += `/${segment}`;
       items.push({
         label: LABEL_MAP[segment] || segment,
-        url: path,
+        routerLink: path,
       });
     });
 

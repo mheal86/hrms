@@ -7,15 +7,15 @@ export class SidebarState {
   isOpen = signal(false);
   isDesktopCollapsed = signal(false);
 
-  toggle(): void {
+  toggle() {
     this.isOpen.update((v) => !v);
   }
 
-  close(): void {
+  close() {
     this.isOpen.set(false);
   }
 
-  toggleDesktop(): void {
+  toggleDesktop() {
     this.isDesktopCollapsed.update((v) => !v);
   }
 }

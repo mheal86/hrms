@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Employee } from '../employee';
 import { Employee as EmployeeModel } from '../employee-model';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-employee-detail',
@@ -11,51 +12,65 @@ import { Spinner } from '../../../shared/spinner/spinner';
   templateUrl: './employee-detail.html',
   styleUrl: './employee-detail.css',
 })
-export class EmployeeDetail implements OnInit {
+export class EmployeeDetail implements OnInit, OnDestroy {
   employee = signal<EmployeeModel | null>(null);
   history = signal<any[]>([]);
   isLoading = signal(false);
   isLoadingHistory = signal(false);
   errorMessage = signal('');
+  departmentId = signal<string | null>(null);
+  private destroy$ = new Subject<void>();
 
   constructor(private employeeService: Employee, private route: ActivatedRoute, private location: Location) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.loadEmployee(id);
       this.loadHistory(id);
     }
+    this.departmentId.set(this.route.snapshot.queryParamMap.get('departmentId'));
   }
 
-  loadEmployee(id: string): void {
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  loadEmployee(id: string) {
     this.isLoading.set(true);
-    this.employeeService.getById(id).subscribe({
-      next: (data) => {
-        this.employee.set(data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
-        this.isLoading.set(false);
-      },
-    });
+    this.employeeService
+      .getById(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.employee.set(data);
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
+          this.isLoading.set(false);
+        },
+      });
   }
 
-  loadHistory(id: string): void {
+  loadHistory(id: string) {
     this.isLoadingHistory.set(true);
-    this.employeeService.getHistory(id).subscribe({
-      next: (data) => {
-        this.history.set(data);
-        this.isLoadingHistory.set(false);
-      },
-      error: () => {
-        this.isLoadingHistory.set(false);
-      },
-    });
+    this.employeeService
+      .getHistory(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.history.set(data);
+          this.isLoadingHistory.set(false);
+        },
+        error: () => {
+          this.isLoadingHistory.set(false);
+        },
+      });
   }
 
-  goBack(): void {
+  goBack() {
     this.location.back();
   }
 

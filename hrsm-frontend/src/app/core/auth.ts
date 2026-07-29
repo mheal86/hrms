@@ -29,7 +29,7 @@ export class Auth {
     );
   }
 
-  logout(): void {
+  logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.router.navigate(['/login']);

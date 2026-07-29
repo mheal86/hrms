@@ -1,9 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Department } from '../department';
 import { Spinner } from '../../../shared/spinner/spinner';
+import { Subject, takeUntil } from 'rxjs';
 
 function departmentNameValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
@@ -26,12 +27,13 @@ function departmentNameValidator(control: AbstractControl): ValidationErrors | n
   templateUrl: './department-form.html',
   styleUrl: './department-form.css',
 })
-export class DepartmentForm implements OnInit {
+export class DepartmentForm implements OnInit, OnDestroy {
   form: FormGroup;
   isEditMode = signal(false);
   departmentId: string | null = null;
   errorMessage = signal('');
   isLoading = signal(false);
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
@@ -45,7 +47,7 @@ export class DepartmentForm implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.departmentId = this.route.snapshot.paramMap.get('id');
 
     if (this.departmentId) {
@@ -54,24 +56,32 @@ export class DepartmentForm implements OnInit {
     }
   }
 
-  loadDepartment(id: string): void {
-    this.isLoading.set(true);
-    this.departmentService.getById(id).subscribe({
-      next: (data) => {
-        this.form.patchValue({
-          name: data.name,
-          description: data.description,
-        });
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
-        this.isLoading.set(false);
-      },
-    });
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  onSubmit(): void {
+  loadDepartment(id: string) {
+    this.isLoading.set(true);
+    this.departmentService
+      .getById(id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.form.patchValue({
+            name: data.name,
+            description: data.description,
+          });
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -84,7 +94,7 @@ export class DepartmentForm implements OnInit {
       ? this.departmentService.update(this.departmentId!, formValue)
       : this.departmentService.create(formValue);
 
-    request.subscribe({
+    request.pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.isLoading.set(false);
         this.router.navigate(['/departments']);
@@ -96,7 +106,10 @@ export class DepartmentForm implements OnInit {
     });
   }
 
-  onCancel(): void {
+  onCancel() {
+    // Reset form để xóa trạng thái touched/dirty trước khi rời trang
+    this.form.reset();
+    this.form.markAsUntouched();
     this.router.navigate(['/departments']);
   }
 }

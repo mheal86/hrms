@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, ViewChild, ElementRef, AfterViewInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Dashboard as DashboardService, DashboardSummary } from '../dashboard';
@@ -7,6 +7,7 @@ import { Employee as EmployeeModel } from '../../employee/employee-model';
 import { Chart, registerables } from 'chart.js';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { Auth } from '../../../core/auth';
+import { Subject, takeUntil } from 'rxjs';
 
 Chart.register(...registerables);
 
@@ -16,7 +17,7 @@ Chart.register(...registerables);
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard implements OnInit, AfterViewInit {
+export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   summary = signal<DashboardSummary | null>(null);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -32,6 +33,7 @@ export class Dashboard implements OnInit, AfterViewInit {
 
   @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
   private chartInstance: Chart | null = null;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private dashboardService: DashboardService,
@@ -39,37 +41,45 @@ export class Dashboard implements OnInit, AfterViewInit {
     public authService: Auth
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadSummary();
     this.loadRecentEmployees();
   }
 
-  ngAfterViewInit(): void {
+  ngAfterViewInit() {
     // Canvas đã sẵn sàng trong DOM, nhưng lúc này data có thể chưa về kịp
     // nên việc vẽ chart thực sự được gọi trong loadSummary() sau khi có data
   }
 
-  loadSummary(): void {
-    this.isLoading.set(true);
-    this.dashboardService.getSummary().subscribe({
-      next: (data) => {
-        this.summary.set(data);
-        this.isLoading.set(false);
-        setTimeout(() => this.renderChart(data), 150);
-
-        this.animateCountUp(this.displayTotalEmployees, data.totalEmployees);
-        this.animateCountUp(this.displayActiveEmployees, data.activeEmployees);
-        this.animateCountUp(this.displayTotalDepartments, data.totalDepartments);
-        this.animateCountUp(this.displayTotalUsers, data.totalUsers);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
-        this.isLoading.set(false);
-      },
-    });
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  private animateCountUp(target: ReturnType<typeof signal<number>>, endValue: number): void {
+  loadSummary() {
+    this.isLoading.set(true);
+    this.dashboardService
+      .getSummary()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.summary.set(data);
+          this.isLoading.set(false);
+          setTimeout(() => this.renderChart(data), 150);
+
+          this.animateCountUp(this.displayTotalEmployees, data.totalEmployees);
+          this.animateCountUp(this.displayActiveEmployees, data.activeEmployees);
+          this.animateCountUp(this.displayTotalDepartments, data.totalDepartments);
+          this.animateCountUp(this.displayTotalUsers, data.totalUsers);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  private animateCountUp(target: ReturnType<typeof signal<number>>, endValue: number) {
     const duration = 800; // ms
     const startTime = performance.now();
 
@@ -92,17 +102,20 @@ export class Dashboard implements OnInit, AfterViewInit {
     requestAnimationFrame(step);
   }
 
-  loadRecentEmployees(): void {
+  loadRecentEmployees() {
     this.isLoadingRecent.set(true);
-    this.employeeService.getAll(1, 5, '', 'createdAt', 'desc').subscribe({
-      next: (res) => {
-        this.recentEmployees.set(res.data);
-        this.isLoadingRecent.set(false);
-      },
-      error: () => {
-        this.isLoadingRecent.set(false);
-      },
-    });
+    this.employeeService
+      .getAll(1, 5, '', 'createdAt', 'desc')
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.recentEmployees.set(res.data);
+          this.isLoadingRecent.set(false);
+        },
+        error: () => {
+          this.isLoadingRecent.set(false);
+        },
+      });
   }
 
   getInitials(firstName: string, lastName: string): string {
@@ -115,14 +128,14 @@ export class Dashboard implements OnInit, AfterViewInit {
   }
 
   @HostListener('window:themeChanged')
-  onThemeChanged(): void {
+  onThemeChanged() {
     const currentSummary = this.summary();
     if (currentSummary) {
       this.renderChart(currentSummary);
     }
   }
 
-  private renderChart(data: DashboardSummary): void {
+  private renderChart(data: DashboardSummary) {
     if (!this.chartCanvas) return;
 
     if (this.chartInstance) {

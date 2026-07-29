@@ -1,13 +1,12 @@
 <div class="page-fade list-layout-container">
   <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <input
-      type="text"
-      class="form-control"
-      style="max-width: 300px;"
-      placeholder="Tìm theo tên hoặc mô tả..."
-      [(ngModel)]="searchTerm"
-      (input)="onSearchInput()"
-    />
+    <div class="input-group" style="max-width: 320px;">
+      <input type="text" class="form-control" placeholder="Tìm theo tên hoặc mô tả..."
+        [(ngModel)]="searchTerm" (keydown.enter)="onSearchTrigger()" />
+      <button class="btn btn-outline-secondary" type="button" (click)="onSearchTrigger()" title="Tìm kiếm">
+        <i class="pi pi-search"></i>
+      </button>
+    </div>
     <a *ngIf="authService.isAdmin()" routerLink="/departments/new" class="btn btn-primary">+ Thêm phòng ban</a>
   </div>
 
@@ -24,7 +23,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let dept of departments(); let i = index">
+      @for (dept of departments(); track dept._id; let i = $index) {
+        <tr>
           <td><a [routerLink]="['/departments', dept._id]" class="text-decoration-none">{{ dept.name }}</a></td>
           <td>{{ dept.description }}</td>
           <td class="action-column text-center" *ngIf="authService.isAdmin()">
@@ -36,27 +36,23 @@
                 <a [routerLink]="['/departments/edit', dept._id]" class="dropdown-item" title="Sửa phòng ban">
                   <i class="pi pi-pencil"></i> Sửa
                 </a>
-                <button class="dropdown-item text-danger" (click)="onDelete(dept); closeActionsMenu()" title="Xóa phòng ban">
+                <button class="dropdown-item text-danger" (click)="onDelete(dept); closeActionsMenu()"
+                  title="Xóa phòng ban">
                   <i class="pi pi-trash"></i> Xóa
                 </button>
               </div>
             </div>
           </td>
         </tr>
+      }
       </tbody>
     </table>
   </div>
 
   <div class="d-flex justify-content-between align-items-center mt-3 paginator-row" *ngIf="!isLoading() && total() > 0">
     <span class="text-muted small">{{ total() }} phòng ban</span>
-    <p-paginator
-      (onPageChange)="onPageChange($event)"
-      [first]="first"
-      [rows]="pageSize"
-      [totalRecords]="total()"
-      [rowsPerPageOptions]="[5, 10, 20, 30]"
-      styleClass="border-none bg-transparent p-0"
-    />
+    <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="pageSize" [totalRecords]="total()"
+      [rowsPerPageOptions]="[5, 10, 20, 30]" styleClass="border-none bg-transparent p-0" />
   </div>
 
   <div *ngIf="!isLoading() && departments().length === 0" class="empty-state">

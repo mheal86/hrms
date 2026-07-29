@@ -7,6 +7,10 @@ import { LOCALE_ID } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeng/themes/aura';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { provideFormlyCore } from '@ngx-formly/core';
+import { withFormlyBootstrap } from '@ngx-formly/bootstrap';
+import { FormlyFieldCustomSelect } from './shared/custom-select/custom-select-type';
 
 import { routes } from './app.routes';
 import { authInterceptorInterceptor } from './core/auth-interceptor-interceptor';
@@ -26,6 +30,18 @@ export const appConfig: ApplicationConfig = {
           darkModeSelector: '.dark-theme',
         }
       }
-    })
+    }),
+    MessageService,
+    ConfirmationService,
+    provideFormlyCore({
+      validationMessages: [
+        { name: 'required', message: 'Trường này là bắt buộc' },
+        { name: 'email', message: 'Email không hợp lệ' },
+      ],
+      types: [
+        { name: 'custom-select', component: FormlyFieldCustomSelect, wrappers: ['form-field'] },
+      ],
+    }),
+    provideFormlyCore(withFormlyBootstrap())
   ],
 };

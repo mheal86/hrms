@@ -34,7 +34,7 @@
             placeholder="Nhập password"
             [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
           />
-          <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()">
+          <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
             <svg *ngIf="!showPassword()" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
               <circle cx="12" cy="12" r="3" />

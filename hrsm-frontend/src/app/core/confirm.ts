@@ -1,44 +1,26 @@
-import { Injectable, signal } from '@angular/core';
-
-export interface ConfirmState {
-  isOpen: boolean;
-  message: string;
-  resolve: ((value: boolean) => void) | null;
-}
+import { Injectable } from '@angular/core';
+import { ConfirmationService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Confirm {
-  state = signal<ConfirmState>({
-    isOpen: false,
-    message: '',
-    resolve: null,
-  });
+  constructor(private confirmationService: ConfirmationService) {}
 
   ask(message: string): Promise<boolean> {
     return new Promise((resolve) => {
-      this.state.set({
-        isOpen: true,
+      this.confirmationService.confirm({
         message,
-        resolve,
+        header: 'Xác nhận',
+        icon: 'pi pi-exclamation-triangle',
+        acceptIcon: 'none',
+        rejectIcon: 'none',
+        rejectButtonStyleClass: 'p-button-text',
+        acceptLabel: 'Đồng ý',
+        rejectLabel: 'Hủy',
+        accept: () => resolve(true),
+        reject: () => resolve(false)
       });
     });
-  }
-
-  onConfirm(): void {
-    const current = this.state();
-    current.resolve?.(true);
-    this.close();
-  }
-
-  onCancel(): void {
-    const current = this.state();
-    current.resolve?.(false);
-    this.close();
-  }
-
-  private close(): void {
-    this.state.set({ isOpen: false, message: '', resolve: null });
   }
 }

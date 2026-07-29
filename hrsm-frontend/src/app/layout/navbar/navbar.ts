@@ -15,20 +15,20 @@ export class Navbar implements OnInit {
 
   constructor(public authService: Auth, public sidebarState: SidebarState) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     const theme = localStorage.getItem('theme') || 'light';
     this.isDarkMode = theme === 'dark';
     this.applyTheme();
   }
 
-  toggleTheme(): void {
+  toggleTheme() {
     this.isDarkMode = !this.isDarkMode;
     localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
     this.applyTheme();
     window.dispatchEvent(new Event('themeChanged'));
   }
 
-  private applyTheme(): void {
+  private applyTheme() {
     const root = document.documentElement;
     if (this.isDarkMode) {
       root.classList.add('dark-theme');
@@ -39,7 +39,7 @@ export class Navbar implements OnInit {
     }
   }
 
-  onLogout(): void {
+  onLogout() {
     this.authService.logout();
   }
 }

@@ -1,118 +1,115 @@
 <div class="page-fade">
-<app-spinner *ngIf="isLoading()"></app-spinner>
-<div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+  <app-spinner *ngIf="isLoading()"></app-spinner>
+  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
 
-<div *ngIf="employee() as emp" class="row">
-  <div class="col-md-4">
-    <div class="card text-center">
-      <div class="card-body">
-        <img
-          *ngIf="emp.avatarUrl"
-          [src]="'http://localhost:5000' + emp.avatarUrl"
-          width="120"
-          height="120"
-          style="object-fit: cover; border-radius: 50%;"
-        />
-        <div *ngIf="!emp.avatarUrl" class="avatar-initials-lg">
-          {{ getInitials(emp.firstName, emp.lastName) }}
-        </div>
-        <h5 class="mt-3 mb-0">{{ emp.firstName }} {{ emp.lastName }}</h5>
-        <p class="text-muted">{{ emp.position || '-' }}</p>
-        <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'" [class.bg-secondary]="emp.status === 'INACTIVE'">
-          {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
-        </span>
-
-        <div class="d-grid gap-2 mt-3">
-          <!-- Chỉ hiển thị nút Sửa khi nhân viên đang hoạt động -->
-          <a
-            *ngIf="emp.status === 'ACTIVE'"
-            [routerLink]="['/employees/edit', emp._id]"
-            class="btn btn-primary btn-sm"
-          >Sửa thông tin</a>
-          <div *ngIf="emp.status === 'INACTIVE'" class="alert alert-warning py-2 mb-1 small text-start">
-            <strong>⚠️ Nhân viên đã ngừng hoạt động.</strong><br/>
-            Không thể chỉnh sửa thông tin.
+  <div *ngIf="employee() as emp" class="row">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <img *ngIf="emp.avatarUrl" [src]="'http://localhost:5000' + emp.avatarUrl" width="120" height="120"
+            style="object-fit: cover; border-radius: 50%;" />
+          <div *ngIf="!emp.avatarUrl" class="avatar-initials-lg">
+            {{ getInitials(emp.firstName, emp.lastName) }}
           </div>
-          <a routerLink="/employees" class="btn btn-outline-secondary btn-sm">Quay lại</a>
+          <h5 class="mt-3 mb-0">{{ emp.firstName }} {{ emp.lastName }}</h5>
+          <p class="text-muted">{{ emp.position || '-' }}</p>
+          <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'"
+            [class.bg-secondary]="emp.status === 'INACTIVE'">
+            {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
+          </span>
+
+          <div class="d-grid gap-2 mt-3">
+            <!-- Chỉ hiển thị nút Sửa khi nhân viên đang hoạt động -->
+            <a *ngIf="emp.status === 'ACTIVE'" [routerLink]="['/employees/edit', emp._id]"
+              [queryParams]="{ departmentId: departmentId() }"
+              class="btn btn-primary btn-sm">Sửa thông tin</a>
+            <div *ngIf="emp.status === 'INACTIVE'" class="alert alert-warning py-2 mb-1 small text-start">
+              <strong>⚠️ Nhân viên đã ngừng hoạt động.</strong><br />
+              Không thể chỉnh sửa thông tin.
+            </div>
+            <button type="button" (click)="goBack()" class="btn btn-outline-secondary btn-sm">Quay lại</button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="col-md-8">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="mb-3">Thông tin chi tiết</h5>
-        <table class="table table-borderless mb-0">
-          <tr>
-            <td class="fw-bold" style="width: 180px;">Email</td>
-            <td>{{ emp.email }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Số điện thoại</td>
-            <td>{{ emp.phone || '-' }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Giới tính</td>
-            <td>{{ emp.gender === 'MALE' ? 'Nam' : emp.gender === 'FEMALE' ? 'Nữ' : emp.gender === 'OTHER' ? 'Khác' : '-' }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Ngày sinh</td>
-            <td>{{ emp.dateOfBirth ? (emp.dateOfBirth | date: 'dd/MM/yyyy') : '-' }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Địa chỉ</td>
-            <td>{{ emp.address || '-' }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Phòng ban</td>
-            <td>{{ getDepartmentName(emp.department) }}</td>
-          </tr>
-          <tr>
-            <td class="fw-bold">Ngày vào làm</td>
-            <td>{{ emp.hireDate ? (emp.hireDate | date: 'dd/MM/yyyy') : '-' }}</td>
-          </tr>
-          <tr *ngIf="emp.status === 'INACTIVE'">
-            <td class="fw-bold text-danger">Ngày ngừng hoạt động</td>
-            <td class="text-danger">{{ emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-' }}</td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    <!-- Bảng lịch sử chuyển phòng ban -->
-    <div class="card mt-3">
-      <div class="card-body">
-        <h5 class="mb-3">Lịch sử chuyển phòng ban</h5>
-        <app-spinner *ngIf="isLoadingHistory()"></app-spinner>
-        
-        <div class="table-responsive" *ngIf="!isLoadingHistory() && history().length > 0">
-          <table class="table table-sm mb-0">
-            <thead>
-              <tr>
-                <th>Phòng ban cũ</th>
-                <th>Phòng ban mới</th>
-                <th>Ngày chuyển</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let h of history()">
-                <td>
-                  <span *ngIf="h.fromDepartment">{{ h.fromDepartment.name }}</span>
-                  <span *ngIf="!h.fromDepartment" class="text-muted small">Ban đầu (Tuyển dụng)</span>
-                </td>
-                <td><strong>{{ h.toDepartment?.name || '-' }}</strong></td>
-                <td>{{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}</td>
-              </tr>
-            </tbody>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="mb-3">Thông tin chi tiết</h5>
+          <table class="table table-borderless mb-0">
+            <tr>
+              <td class="fw-bold" style="width: 180px;">Email</td>
+              <td>{{ emp.email }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Số điện thoại</td>
+              <td>{{ emp.phone || '-' }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Giới tính</td>
+              <td>{{ emp.gender === 'MALE' ? 'Nam' : emp.gender === 'FEMALE' ? 'Nữ' : emp.gender === 'OTHER' ? 'Khác' :
+                '-' }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Ngày sinh</td>
+              <td>{{ emp.dateOfBirth ? (emp.dateOfBirth | date: 'dd/MM/yyyy') : '-' }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Địa chỉ</td>
+              <td>{{ emp.address || '-' }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Phòng ban</td>
+              <td>{{ getDepartmentName(emp.department) }}</td>
+            </tr>
+            <tr>
+              <td class="fw-bold">Ngày vào làm</td>
+              <td>{{ emp.hireDate ? (emp.hireDate | date: 'dd/MM/yyyy') : '-' }}</td>
+            </tr>
+            <tr *ngIf="emp.status === 'INACTIVE'">
+              <td class="fw-bold text-danger">Ngày ngừng hoạt động</td>
+              <td class="text-danger">{{ emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-' }}</td>
+            </tr>
           </table>
         </div>
+      </div>
 
-        <p *ngIf="!isLoadingHistory() && history().length === 0" class="text-muted mb-0">
-          Chưa có lịch sử chuyển phòng ban.
-        </p>
+      <!-- Bảng lịch sử chuyển phòng ban -->
+      <div class="card mt-3">
+        <div class="card-body">
+          <h5 class="mb-3">Lịch sử chuyển phòng ban</h5>
+          <app-spinner *ngIf="isLoadingHistory()"></app-spinner>
+
+          <div class="table-responsive" *ngIf="!isLoadingHistory() && history().length > 0">
+            <table class="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Phòng ban cũ</th>
+                  <th>Phòng ban mới</th>
+                  <th>Ngày chuyển</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (h of history(); track h.transferDate) {
+                  <tr>
+                    <td>
+                      <span *ngIf="h.fromDepartment">{{ h.fromDepartment.name }}</span>
+                      <span *ngIf="!h.fromDepartment" class="text-muted small">Ban đầu (Tuyển dụng)</span>
+                    </td>
+                    <td><strong>{{ h.toDepartment?.name || '-' }}</strong></td>
+                    <td>{{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <p *ngIf="!isLoadingHistory() && history().length === 0" class="text-muted mb-0">
+            Chưa có lịch sử chuyển phòng ban.
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div>
 </div>

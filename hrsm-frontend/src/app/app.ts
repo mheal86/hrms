@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ToastContainer } from './shared/toast-container/toast-container';
-import { ConfirmModal } from './shared/confirm-modal/confirm-modal';
+import { Toast } from 'primeng/toast';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ToastContainer, ConfirmModal],
+  imports: [RouterOutlet, Toast, ConfirmDialog],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

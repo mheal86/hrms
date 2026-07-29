@@ -126,6 +126,7 @@ exports.update = async (req, res) => {
 
     if (newPassword) {
       user.password = await bcrypt.hash(newPassword, 10);
+      user.tokenVersion = (user.tokenVersion || 0) + 1;
     }
 
     await user.save();

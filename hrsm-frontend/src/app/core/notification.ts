@@ -1,36 +1,17 @@
-import { Injectable, signal } from '@angular/core';
-
-export interface Toast {
-  id: number;
-  message: string;
-  type: 'success' | 'error';
-}
+import { Injectable } from '@angular/core';
+import { MessageService } from 'primeng/api';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Notification {
-  toasts = signal<Toast[]>([]);
-  private nextId = 1;
+  constructor(private messageService: MessageService) {}
 
-  success(message: string): void {
-    this.show(message, 'success');
+  success(message: string) {
+    this.messageService.add({ severity: 'success', summary: 'Thành công', detail: message });
   }
 
-  error(message: string): void {
-    this.show(message, 'error');
-  }
-
-  private show(message: string, type: 'success' | 'error'): void {
-    const id = this.nextId++;
-    this.toasts.update((list) => [...list, { id, message, type }]);
-
-    setTimeout(() => {
-      this.remove(id);
-    }, 3000);
-  }
-
-  remove(id: number): void {
-    this.toasts.update((list) => list.filter((t) => t.id !== id));
+  error(message: string) {
+    this.messageService.add({ severity: 'error', summary: 'Lỗi', detail: message });
   }
 }

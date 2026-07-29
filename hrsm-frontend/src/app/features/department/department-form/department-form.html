@@ -25,7 +25,9 @@
       </div>
 
       <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading()">Lưu</button>
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">Hủy</button>
+      <button type="button" class="btn btn-secondary"
+        (mousedown)="$event.preventDefault()"
+        (click)="onCancel()">Hủy</button>
     </form>
   </div>
 </div>

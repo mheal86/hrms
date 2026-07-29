@@ -1,9 +1,11 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Profile as ProfileService, ProfileData } from '../profile';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { Notification } from '../../../core/notification';
+import { Subject, takeUntil } from 'rxjs';
+import { Auth } from '../../../core/auth';
 
 function phoneValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
@@ -27,7 +29,7 @@ function addressValidator(control: AbstractControl): ValidationErrors | null {
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
-export class Profile implements OnInit {
+export class Profile implements OnInit, OnDestroy {
   profileData = signal<ProfileData | null>(null);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -40,12 +42,21 @@ export class Profile implements OnInit {
   isPasswordModalOpen = signal(false);
   passwordErrorMessage = signal('');
   isChangingPassword = signal(false);
+  passwordFormSubmitted = signal(false);
   passwordForm: FormGroup;
+
+  // Toggle hiển thị mật khẩu cho từng trường trong modal đổi mật khẩu
+  showCurrentPassword = signal(false);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private fb: FormBuilder,
     private profileService: ProfileService,
-    private notificationService: Notification
+    private notificationService: Notification,
+    private authService: Auth
   ) {
     this.form = this.fb.group({
       phone: ['', phoneValidator],
@@ -59,33 +70,47 @@ export class Profile implements OnInit {
     });
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadProfile();
   }
 
-  loadProfile(): void {
-    this.isLoading.set(true);
-    this.profileService.getProfile().subscribe({
-      next: (data) => {
-        this.profileData.set(data);
-        this.form.patchValue({
-          phone: data.employee?.phone || '',
-          address: data.employee?.address || '',
-        });
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        this.errorMessage.set(err.error?.message || 'Không tải được thông tin');
-        this.isLoading.set(false);
-      },
-    });
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  enterEditMode(): void {
+  loadProfile() {
+    this.isLoading.set(true);
+    this.profileService
+      .getProfile()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.profileData.set(data);
+          this.form.patchValue({
+            phone: data.employee?.phone || '',
+            address: data.employee?.address || '',
+          });
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Không tải được thông tin');
+          this.isLoading.set(false);
+        },
+      });
+  }
+
+  enterEditMode() {
     this.isEditMode.set(true);
   }
 
-  cancelEdit(): void {
+  onPhoneInput(event: any) {
+    const input = event.target;
+    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+    this.form.get('phone')?.setValue(input.value, { emitEvent: false });
+  }
+
+  cancelEdit() {
     const data = this.profileData();
     this.form.patchValue({
       phone: data?.employee?.phone || '',
@@ -95,7 +120,7 @@ export class Profile implements OnInit {
     this.isEditMode.set(false);
   }
 
-  onSubmit(): void {
+  onSubmit() {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -103,33 +128,53 @@ export class Profile implements OnInit {
 
     this.isSaving.set(true);
 
-    this.profileService.updateProfile(this.form.value).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        this.isEditMode.set(false);
-        this.notificationService.success('Cập nhật thành công');
-        this.loadProfile();
-      },
-      error: (err) => {
-        this.isSaving.set(false);
-        this.notificationService.error(err.error?.message || 'Cập nhật thất bại');
-      },
-    });
+    this.profileService
+      .updateProfile(this.form.value)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isSaving.set(false);
+          this.isEditMode.set(false);
+          this.notificationService.success('Cập nhật thành công');
+          this.loadProfile();
+        },
+        error: (err) => {
+          this.isSaving.set(false);
+          this.notificationService.error(err.error?.message || 'Cập nhật thất bại');
+        },
+      });
   }
 
-  openPasswordModal(): void {
+  openPasswordModal() {
     this.passwordForm.reset();
+    this.passwordFormSubmitted.set(false);
     this.passwordErrorMessage.set('');
+    // Reset trạng thái hiển thị mật khẩu mỗi lần mở modal
+    this.showCurrentPassword.set(false);
+    this.showNewPassword.set(false);
+    this.showConfirmPassword.set(false);
     this.isPasswordModalOpen.set(true);
   }
 
-  closePasswordModal(): void {
+  closePasswordModal() {
     this.isPasswordModalOpen.set(false);
+    this.passwordForm.reset();
+    this.passwordFormSubmitted.set(false);
+    this.passwordErrorMessage.set('');
+    // Reset trạng thái khi đóng modal
+    this.showCurrentPassword.set(false);
+    this.showNewPassword.set(false);
+    this.showConfirmPassword.set(false);
   }
 
-  onChangePassword(): void {
-    this.passwordErrorMessage.set('');
+  toggleCurrentPassword() { this.showCurrentPassword.update(v => !v); }
+  toggleNewPassword() { this.showNewPassword.update(v => !v); }
+  toggleConfirmPassword() { this.showConfirmPassword.update(v => !v); }
 
+  onChangePassword() {
+    this.passwordErrorMessage.set('');
+    this.passwordFormSubmitted.set(true);
+ 
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
@@ -144,17 +189,21 @@ export class Profile implements OnInit {
 
     this.isChangingPassword.set(true);
 
-    this.profileService.changePassword(currentPassword, newPassword).subscribe({
-      next: () => {
-        this.isChangingPassword.set(false);
-        this.notificationService.success('Đổi mật khẩu thành công');
-        this.closePasswordModal();
-      },
-      error: (err) => {
-        this.isChangingPassword.set(false);
-        this.passwordErrorMessage.set(err.error?.message || 'Đổi mật khẩu thất bại');
-      },
-    });
+    this.profileService
+      .changePassword(currentPassword, newPassword)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.isChangingPassword.set(false);
+          this.notificationService.success('Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+          this.closePasswordModal();
+          this.authService.logout();
+        },
+        error: (err) => {
+          this.isChangingPassword.set(false);
+          this.passwordErrorMessage.set(err.error?.message || 'Đổi mật khẩu thất bại');
+        },
+      });
   }
 
   getInitials(firstName?: string, lastName?: string, username?: string): string {

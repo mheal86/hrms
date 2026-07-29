@@ -61,3 +61,26 @@
 .dark-theme .modal-backdrop-custom {
   background: rgba(0, 0, 0, 0.75);
 }
+
+/* ─── Premium Choice Card Styles ─── */
+.hover-card-action {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-card-action:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-primary-light) !important;
+  background-color: var(--surface-hover);
+  box-shadow: var(--shadow-card-hover) !important;
+}
+
+.hover-card-action .pi {
+  transition: transform 0.25s ease;
+}
+
+.hover-card-action:hover .pi {
+  transform: scale(1.1);
+}

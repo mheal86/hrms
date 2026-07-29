@@ -1,8 +1,8 @@
-import { Component, OnInit, signal, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 import { Employee } from '../employee';
 import { Employee as EmployeeModel } from '../employee-model';
 import { Auth } from '../../../core/auth';
@@ -20,7 +20,7 @@ import { CustomSelectComponent, SelectOption } from '../../../shared/custom-sele
   templateUrl: './employee-list.html',
   styleUrl: './employee-list.css',
 })
-export class EmployeeList implements OnInit {
+export class EmployeeList implements OnInit, OnDestroy {
   employees = signal<EmployeeModel[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -52,7 +52,7 @@ export class EmployeeList implements OnInit {
 
   activeActionsMenuId = signal<string | null>(null);
 
-  toggleActionsMenu(id: string, event: Event): void {
+  toggleActionsMenu(id: string, event: Event) {
     event.stopPropagation();
     if (this.activeActionsMenuId() === id) {
       this.activeActionsMenuId.set(null);
@@ -62,11 +62,11 @@ export class EmployeeList implements OnInit {
   }
 
   @HostListener('document:click')
-  closeActionsMenu(): void {
+  closeActionsMenu() {
     this.activeActionsMenuId.set(null);
   }
 
-  private searchSubject = new Subject<string>();
+  private destroy$ = new Subject<void>();
 
   constructor(
     private employeeService: Employee,
@@ -74,26 +74,28 @@ export class EmployeeList implements OnInit {
     private notificationService: Notification,
     private confirmService: Confirm,
     private departmentService: Department
-  ) {
-    this.searchSubject.pipe(debounceTime(300)).subscribe(() => {
-      this.currentPage.set(1);
-      this.first = 0;
-      this.loadEmployees();
-    });
-  }
+  ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadDepartmentsForFilter();
     this.loadEmployees();
   }
 
-  loadDepartmentsForFilter(): void {
-    this.departmentService.getAllUnpaginated().subscribe({
-      next: (data) => this.departments.set(data),
-    });
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  loadEmployees(): void {
+  loadDepartmentsForFilter() {
+    this.departmentService
+      .getAllUnpaginated()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => this.departments.set(data),
+      });
+  }
+
+  loadEmployees() {
     this.isLoading.set(true);
     this.employeeService
       .getAll(
@@ -105,6 +107,7 @@ export class EmployeeList implements OnInit {
         this.departmentFilter,
         this.statusFilter
       )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
           this.employees.set(res.data);
@@ -119,17 +122,19 @@ export class EmployeeList implements OnInit {
       });
   }
 
-  onSearchInput(): void {
-    this.searchSubject.next(this.searchTerm);
-  }
-
-  onFilterChange(): void {
+  onSearchTrigger() {
     this.currentPage.set(1);
     this.first = 0;
     this.loadEmployees();
   }
 
-  onSort(field: string): void {
+  onFilterChange() {
+    this.currentPage.set(1);
+    this.first = 0;
+    this.loadEmployees();
+  }
+
+  onSort(field: string) {
     if (this.sortField === field) {
       this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
     } else {
@@ -141,7 +146,7 @@ export class EmployeeList implements OnInit {
     this.loadEmployees();
   }
 
-  onPageChange(event: any): void {
+  onPageChange(event: any) {
     this.first = event.first;
     this.pageSize = event.rows;
     this.currentPage.set((event.page ?? 0) + 1);
@@ -156,27 +161,33 @@ export class EmployeeList implements OnInit {
     );
     if (!confirmed) return;
 
-    this.employeeService.delete(emp._id).subscribe({
-      next: () => {
-        this.loadEmployees();
-        this.notificationService.success('Xóa nhân viên thành công');
-      },
-      error: (err) => this.notificationService.error(err.error?.message || 'Xóa thất bại'),
-    });
+    this.employeeService
+      .delete(emp._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadEmployees();
+          this.notificationService.success('Xóa nhân viên thành công');
+        },
+        error: (err) => this.notificationService.error(err.error?.message || 'Xóa thất bại'),
+      });
   }
 
-  onToggleStatus(emp: EmployeeModel): void {
+  onToggleStatus(emp: EmployeeModel) {
     if (!emp._id) return;
 
     const newStatus = emp.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
 
-    this.employeeService.update(emp._id, { ...emp, status: newStatus }).subscribe({
-      next: () => {
-        this.notificationService.success('Cập nhật trạng thái thành công');
-        this.loadEmployees();
-      },
-      error: (err) => this.notificationService.error(err.error?.message || 'Cập nhật thất bại'),
-    });
+    this.employeeService
+      .update(emp._id, { ...emp, status: newStatus })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.notificationService.success('Cập nhật trạng thái thành công');
+          this.loadEmployees();
+        },
+        error: (err) => this.notificationService.error(err.error?.message || 'Cập nhật thất bại'),
+      });
   }
 
   getSortIcon(field: string): string {

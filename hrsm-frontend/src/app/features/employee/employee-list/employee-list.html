@@ -1,28 +1,19 @@
 <div class="page-fade list-layout-container">
   <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div class="d-flex gap-2 flex-wrap flex-grow-1">
-      <input
-        type="text"
-        class="form-control"
-        style="max-width: 300px;"
-        placeholder="Tìm theo tên hoặc email..."
-        [(ngModel)]="searchTerm"
-        (input)="onSearchInput()"
-      />
-      <app-custom-select
-        style="width: 200px; display: inline-block;"
-        [(ngModel)]="departmentFilter"
-        (ngModelChange)="onFilterChange()"
-        [options]="departmentOptions"
-        placeholder="Tất cả phòng ban"
-      ></app-custom-select>
-      <app-custom-select
-        style="width: 180px; display: inline-block;"
-        [(ngModel)]="statusFilter"
-        (ngModelChange)="onFilterChange()"
-        [options]="statusOptions"
-        placeholder="Tất cả trạng thái"
-      ></app-custom-select>
+      <div class="input-group" style="max-width: 320px;">
+        <input type="text" class="form-control" placeholder="Tìm theo tên hoặc email..."
+          [(ngModel)]="searchTerm" (keydown.enter)="onSearchTrigger()" />
+        <button class="btn btn-outline-secondary" type="button" (click)="onSearchTrigger()" title="Tìm kiếm">
+          <i class="pi pi-search"></i>
+        </button>
+      </div>
+      <app-custom-select style="width: 200px; display: inline-block;" [(ngModel)]="departmentFilter"
+        (ngModelChange)="onFilterChange()" [options]="departmentOptions"
+        placeholder="Tất cả phòng ban"></app-custom-select>
+      <app-custom-select style="width: 180px; display: inline-block;" [(ngModel)]="statusFilter"
+        (ngModelChange)="onFilterChange()" [options]="statusOptions"
+        placeholder="Tất cả trạng thái"></app-custom-select>
     </div>
     <a *ngIf="authService.isAdmin()" routerLink="/employees/new" class="btn btn-primary">+ Thêm nhân viên</a>
   </div>
@@ -50,7 +41,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let emp of employees(); let i = index">
+      @for (emp of employees(); track emp._id; let i = $index) {
+        <tr>
           <td class="text-center">
             <img *ngIf="emp.avatarUrl" [src]="'http://localhost:5000' + emp.avatarUrl" class="avatar-sm" />
             <div *ngIf="!emp.avatarUrl" class="avatar-initials">
@@ -66,13 +58,10 @@
           <td>{{ getDepartmentName(emp.department) }}</td>
           <td>{{ emp.position }}</td>
           <td class="text-center">
-            <span
-              class="badge"
-              [class.bg-success]="emp.status === 'ACTIVE'"
+            <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'"
               [class.bg-secondary]="emp.status === 'INACTIVE'"
               [style.cursor]="authService.isAdmin() ? 'pointer' : 'default'"
-              (click)="authService.isAdmin() && onToggleStatus(emp)"
-            >
+              (click)="authService.isAdmin() && onToggleStatus(emp)">
               {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
             </span>
           </td>
@@ -82,40 +71,26 @@
                 <i class="pi pi-ellipsis-v"></i>
               </button>
               <div class="actions-dropdown-menu" *ngIf="activeActionsMenuId() === emp._id">
-                <a
-                  *ngIf="emp.status === 'ACTIVE'"
-                  [routerLink]="['/employees/edit', emp._id]"
-                  class="dropdown-item"
-                >
+                <a *ngIf="emp.status === 'ACTIVE'" [routerLink]="['/employees/edit', emp._id]" class="dropdown-item">
                   <i class="pi pi-pencil"></i> Sửa
                 </a>
-                <button
-                  *ngIf="emp.status === 'INACTIVE'"
-                  class="dropdown-item disabled-item"
-                  disabled
-                  title="Nhân viên đã ngừng hoạt động, không thể sửa"
-                >
+                <button *ngIf="emp.status === 'INACTIVE'" class="dropdown-item disabled-item" disabled
+                  title="Nhân viên đã ngừng hoạt động, không thể sửa">
                   <i class="pi pi-pencil"></i> Sửa
                 </button>
-                <button
-                  *ngIf="emp.status === 'INACTIVE'"
-                  class="dropdown-item text-danger"
-                  (click)="onDelete(emp); closeActionsMenu()"
-                >
+                <button *ngIf="emp.status === 'INACTIVE'" class="dropdown-item text-danger"
+                  (click)="onDelete(emp); closeActionsMenu()">
                   <i class="pi pi-trash"></i> Xóa
                 </button>
-                <button
-                  *ngIf="emp.status === 'ACTIVE'"
-                  class="dropdown-item disabled-item"
-                  disabled
-                  title="Nhân viên đang hoạt động, không thể xóa"
-                >
+                <button *ngIf="emp.status === 'ACTIVE'" class="dropdown-item disabled-item" disabled
+                  title="Nhân viên đang hoạt động, không thể xóa">
                   <i class="pi pi-trash"></i> Xóa
                 </button>
               </div>
             </div>
           </td>
         </tr>
+      }
       </tbody>
     </table>
   </div>
@@ -131,13 +106,7 @@
 
   <div class="d-flex justify-content-between align-items-center mt-3 paginator-row" *ngIf="!isLoading() && total() > 0">
     <span class="text-muted small">{{ total() }} nhân viên</span>
-    <p-paginator
-      (onPageChange)="onPageChange($event)"
-      [first]="first"
-      [rows]="pageSize"
-      [totalRecords]="total()"
-      [rowsPerPageOptions]="[5, 10, 20, 30]"
-      styleClass="border-none bg-transparent p-0"
-    />
+    <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="pageSize" [totalRecords]="total()"
+      [rowsPerPageOptions]="[5, 10, 20, 30]" styleClass="border-none bg-transparent p-0" />
   </div>
 </div>

@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
 // Kiểm tra đã login chưa (có JWT hợp lệ không)
-exports.verifyToken = (req, res, next) => {
+exports.verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -12,7 +13,19 @@ exports.verifyToken = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // gắn thông tin user (id, role) vào request
+    
+    // Kiểm tra tokenVersion động trong Database
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: 'User no longer exists' });
+    }
+
+    // Nếu token không chứa tokenVersion hoặc tokenVersion không trùng khớp với DB
+    if (decoded.tokenVersion === undefined || user.tokenVersion !== decoded.tokenVersion) {
+      return res.status(401).json({ message: 'Token has been invalidated (password changed)' });
+    }
+
+    req.user = decoded; // gắn thông tin user (id, role, tokenVersion) vào request
     next();
   } catch (err) {
     return res.status(401).json({ message: 'Invalid or expired token' });

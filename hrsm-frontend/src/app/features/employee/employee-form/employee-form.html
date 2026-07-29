@@ -7,143 +7,12 @@
   <div class="card">
     <div class="card-body p-4">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Họ <span class="text-danger">*</span></label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="firstName"
-              [class.is-invalid]="form.get('firstName')?.invalid && form.get('firstName')?.touched"
-            />
-            <div class="invalid-feedback">Họ là bắt buộc</div>
-          </div>
+        <!-- Formly Dynamic Fields for Employee -->
+        <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
 
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Tên <span class="text-danger">*</span></label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="lastName"
-              [class.is-invalid]="form.get('lastName')?.invalid && form.get('lastName')?.touched"
-            />
-            <div class="invalid-feedback">Tên là bắt buộc</div>
-          </div>
-
-          <div class="col-md-4 mb-3">
-            <label class="form-label">Giới tính <span class="text-danger">*</span></label>
-            <app-custom-select
-              formControlName="gender"
-              placeholder="Chọn giới tính"
-              [options]="genderOptions"
-              [isInvalid]="!!(form.get('gender')?.invalid && form.get('gender')?.touched)"
-            ></app-custom-select>
-            <div class="invalid-feedback" *ngIf="form.get('gender')?.invalid && form.get('gender')?.touched" style="display: block;">Vui lòng chọn giới tính</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Email <span class="text-danger">*</span></label>
-            <input
-              type="email"
-              class="form-control"
-              formControlName="email"
-              [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched"
-            />
-            <div class="invalid-feedback" *ngIf="form.get('email')?.errors?.['required']">Email là bắt buộc</div>
-            <div class="invalid-feedback" *ngIf="form.get('email')?.errors?.['email'] || form.get('email')?.errors?.['emailInvalid']">Email không hợp lệ</div>
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Số điện thoại</label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="phone"
-              placeholder="VD: 0912345678"
-              [class.is-invalid]="form.get('phone')?.invalid && form.get('phone')?.touched"
-            />
-            <div class="invalid-feedback">Số điện thoại phải đủ 10 số và bắt đầu bằng 0</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
-            <input
-              type="date"
-              class="form-control"
-              formControlName="dateOfBirth"
-              [class.is-invalid]="form.get('dateOfBirth')?.invalid && form.get('dateOfBirth')?.touched"
-            />
-            <div class="invalid-feedback" *ngIf="form.get('dateOfBirth')?.errors?.['required']">Ngày sinh là bắt buộc</div>
-            <div class="invalid-feedback" *ngIf="form.get('dateOfBirth')?.errors?.['futureDate']">Ngày sinh không được ở tương lai</div>
-            <div class="invalid-feedback" *ngIf="form.get('dateOfBirth')?.errors?.['tooYoung']">Nhân viên phải từ 18 tuổi trở lên</div>
-            <div class="invalid-feedback" *ngIf="form.get('dateOfBirth')?.errors?.['tooOld']">Nhân viên không được quá 65 tuổi</div>
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label class="form-label">Địa chỉ</label>
-            <input
-              type="text"
-              class="form-control"
-              formControlName="address"
-              [class.is-invalid]="form.get('address')?.invalid && form.get('address')?.touched"
-            />
-            <div class="invalid-feedback">Địa chỉ không hợp lệ</div>
-          </div>
-        </div>
-
-        <div class="row">
-          <div [class]="isEditMode() ? 'col-md-4 mb-3' : 'col-md-6 mb-3'">
-            <label class="form-label">Chức vụ <span class="text-danger">*</span></label>
-            <app-custom-select
-              formControlName="position"
-              placeholder="Chọn chức vụ"
-              [options]="positionOptions"
-              [isInvalid]="!!(form.get('position')?.invalid && form.get('position')?.touched)"
-            ></app-custom-select>
-            <div class="invalid-feedback" *ngIf="form.get('position')?.invalid && form.get('position')?.touched" style="display: block;">Vui lòng chọn chức vụ</div>
-          </div>
-
-          <div [class]="isEditMode() ? 'col-md-4 mb-3' : 'col-md-6 mb-3'">
-            <label class="form-label">Phòng ban <span class="text-danger">*</span></label>
-            <app-custom-select
-              formControlName="department"
-              placeholder="Chọn phòng ban"
-              [options]="departmentOptions"
-              [isInvalid]="!!(form.get('department')?.invalid && form.get('department')?.touched)"
-            ></app-custom-select>
-            <div class="invalid-feedback" *ngIf="form.get('department')?.invalid && form.get('department')?.touched" style="display: block;">Bắt buộc</div>
-          </div>
-
-          <div class="col-md-4 mb-3" *ngIf="isEditMode()">
-            <label class="form-label">Trạng thái</label>
-            <app-custom-select
-              formControlName="status"
-              placeholder="Chọn trạng thái"
-              [options]="statusOptions"
-            ></app-custom-select>
-          </div>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Avatar</label>
-          <div class="d-flex align-items-center gap-3">
-            <img
-              *ngIf="currentAvatarUrl()"
-              [src]="'http://localhost:5000' + currentAvatarUrl()"
-              width="60"
-              height="60"
-              style="object-fit: cover; border-radius: 50%;"
-            />
-            <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" style="max-width: 400px;" />
-          </div>
-        </div>
-
-        <div class="mb-3 p-3 account-section">
-          <div class="form-check" *ngIf="isEditMode()">
+        <div class="mb-4 p-3 account-section">
+          <!-- Hộp kiểm sửa tài khoản (chỉ hiện ở chế độ sửa) -->
+          <div class="form-check mb-3" *ngIf="isEditMode()">
             <input
               type="checkbox"
               class="form-check-input account-checkbox"
@@ -151,55 +20,50 @@
               [checked]="createAccount()"
               (change)="toggleCreateAccount()"
             />
-            <label class="form-check-label fw-medium" for="createAccountCheck">
+            <label class="form-check-label fw-semibold text-main" for="createAccountCheck">
               {{ existingAccount() ? 'Sửa thông tin tài khoản đăng nhập' : 'Cấp tài khoản đăng nhập cho nhân viên này' }}
             </label>
           </div>
 
-          <!-- Nhãn tiêu đề khi thêm mới (ẩn checkbox) -->
-          <div *ngIf="!isEditMode()" class="mb-2">
-            <h5 class="mb-1" style="font-size: 1rem; font-weight: 600;">Tài khoản đăng nhập</h5>
-            <p class="text-muted small mb-0">Cung cấp tài khoản đăng nhập bắt buộc cho nhân viên mới</p>
+          <!-- Tiêu đề khi thêm mới (bắt buộc tạo tài khoản) -->
+          <div *ngIf="!isEditMode()" class="mb-3">
+            <h5 class="mb-1 text-main" style="font-size: 1.05rem; font-weight: 600;">Tài khoản đăng nhập & Ảnh đại diện</h5>
+            <p class="text-muted small mb-0">Cung cấp tài khoản đăng nhập bắt buộc cho nhân viên mới và tải ảnh đại diện lên</p>
           </div>
 
-          <div [formGroup]="accountForm" *ngIf="createAccount()" [class.mt-3]="isEditMode()">
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Username <span class="text-danger">*</span></label>
-                <input
-                  type="text"
-                  class="form-control"
-                  formControlName="username"
-                  [class.is-invalid]="accountForm.get('username')?.invalid && accountForm.get('username')?.touched"
-                  (blur)="checkUsernameExists()"
-                />
-                <div class="invalid-feedback" *ngIf="accountForm.get('username')?.errors?.['required']">Username là bắt buộc</div>
-                <div class="invalid-feedback" *ngIf="accountForm.get('username')?.errors?.['hasSpaces']">Username không được chứa khoảng trắng</div>
-                <div class="invalid-feedback" *ngIf="accountForm.get('username')?.errors?.['invalidChars']">Username chỉ được chứa chữ, số, dấu chấm, gạch dưới, gạch ngang</div>
-                <div class="invalid-feedback" *ngIf="accountForm.get('username')?.errors?.['duplicateUsername']">Tên tài khoản này đã tồn tại</div>
-              </div>
+          <!-- 1. Hàng Tài khoản: Chia đều 3 cột chạy 100% dòng -->
+          <div class="row mb-3" [formGroup]="accountForm" *ngIf="createAccount()">
+            <div class="col-12">
+              <formly-form [form]="accountForm" [fields]="accountFields" [model]="accountModel"></formly-form>
+            </div>
+          </div>
 
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Password {{ existingAccount() ? '(để trống nếu giữ nguyên)' : '' }} <span class="text-danger" *ngIf="!existingAccount()">*</span></label>
-                <input
-                  type="password"
-                  class="form-control"
-                  formControlName="password"
-                  [class.is-invalid]="accountForm.get('password')?.invalid && accountForm.get('password')?.touched"
+          <!-- 2. Hàng Ảnh đại diện (Độc lập dưới cùng) -->
+          <div class="row align-items-center">
+            <div class="col-12">
+              <label class="form-label mb-2">Ảnh đại diện</label>
+              <div class="d-flex align-items-center gap-3">
+                <!-- Preview ảnh hình tròn -->
+                <img
+                  *ngIf="localAvatarUrl() || currentAvatarUrl()"
+                  [src]="localAvatarUrl() ? localAvatarUrl() : ('http://localhost:5000' + currentAvatarUrl())"
+                  width="70"
+                  height="70"
+                  style="object-fit: cover; border-radius: 50%; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm);"
                 />
-                <div class="invalid-feedback">Password là bắt buộc khi cấp tài khoản mới</div>
-              </div>
+                <div
+                  *ngIf="!localAvatarUrl() && !currentAvatarUrl()"
+                  class="d-flex align-items-center justify-content-center bg-light border text-muted"
+                  style="width: 70px; height: 70px; border-radius: 50%; font-size: 0.75rem;"
+                >
+                  Chưa có ảnh
+                </div>
 
-              <div class="col-md-4 mb-3">
-                <label class="form-label">Vai trò</label>
-                <app-custom-select
-                  formControlName="roleName"
-                  placeholder="Chọn vai trò"
-                  [options]="[
-                    { label: 'User', value: 'USER' },
-                    { label: 'Admin', value: 'ADMIN' }
-                  ]"
-                ></app-custom-select>
+                <!-- Input chọn file và chú thích -->
+                <div class="d-flex flex-column gap-1">
+                  <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" style="max-width: 350px;" />
+                  <span class="text-muted small">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 2MB.</span>
+                </div>
               </div>
             </div>
           </div>

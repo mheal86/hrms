@@ -26,12 +26,14 @@
 }
 
 .modal-box {
-  background: white;
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
   padding: 24px;
-  border-radius: 10px;
+  border-radius: 12px;
   min-width: 360px;
   max-width: 90%;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-modal);
 }
 
 .avatar-initials-lg {

@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
-    "zone.js": "^0.16.2"
-  }
-}

@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema(
       ref: 'Employee',
       default: null,
     },
+    tokenVersion: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
