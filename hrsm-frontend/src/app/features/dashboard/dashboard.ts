@@ -1,20 +1,25 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface DashboardSummary {
   totalEmployees: number;
   totalDepartments: number;
   totalUsers: number;
   activeEmployees: number;
-  employeesByDepartment: { departmentName: string; lastMonthCount: number; thisMonthCount: number }[];
+  employeesByDepartment: {
+    departmentName: string;
+    lastMonthCount: number;
+    thisMonthCount: number;
+  }[];
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class Dashboard {
-  private apiUrl = 'http://localhost:5000/api/dashboard';
+  private apiUrl = `${environment.apiUrl}/dashboard`;
 
   constructor(private http: HttpClient) {}
 

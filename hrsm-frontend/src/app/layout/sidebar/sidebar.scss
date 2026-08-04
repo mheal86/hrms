@@ -11,10 +11,13 @@
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 1020;
-  transition: background-color 0.3s ease, width 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
   /* Scrollbar styling */
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,0.1) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 .app-sidebar::-webkit-scrollbar {
@@ -28,7 +31,7 @@
 
 /* Nav links inherit white-on-dark context from sidebar */
 .app-sidebar .nav-link {
-  color: #a5b4fc;  /* Indigo-300 — readable on dark bg */
+  color: #a5b4fc; /* Indigo-300 — readable on dark bg */
   padding: 9px 14px;
   border-radius: 8px;
   margin-bottom: 3px;
@@ -59,19 +62,21 @@
   display: inline-block;
   opacity: 1;
   max-width: 150px;
-  transition: opacity 0.25s ease, max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.25s ease,
+    max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
   white-space: nowrap;
 }
 
 .app-sidebar .nav-link:hover {
   background-color: rgba(255, 255, 255, 0.07);
-  color: #e0e7ff;  /* Indigo-100 */
+  color: #e0e7ff; /* Indigo-100 */
 }
 
 .app-sidebar .nav-link.active {
   background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff !important;
+  color: #ffffff;
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
 }
 
@@ -106,12 +111,12 @@
 
 @media (min-width: 768px) {
   .app-sidebar.collapsed {
-    width: 70px !important;
+    width: 70px;
   }
 
   .app-sidebar.collapsed .nav {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   .app-sidebar.collapsed .nav-text {
@@ -125,9 +130,9 @@
   }
 
   .app-sidebar.collapsed .nav-link {
-    justify-content: center !important;
-    padding: 11px 0 !important;
-    gap: 0 !important;
+    justify-content: center;
+    padding: 11px 0;
+    gap: 0;
   }
 
   .app-sidebar.collapsed .nav-item {

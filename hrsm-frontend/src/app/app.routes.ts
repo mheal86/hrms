@@ -13,24 +13,32 @@ import { EmployeeDetail } from './features/employee/employee-detail/employee-det
 import { DepartmentDetail } from './features/department/department-detail/department-detail';
 
 export const routes: Routes = [
-  { path: 'login', component: Login, title: 'Đăng nhập - HRMS' },
-  { 
+  { path: 'login', component: Login, title: 'ROUTE_TITLE.LOGIN' },
+  {
     path: '',
     component: MainLayout,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: Dashboard, title: 'Dashboard - HRMS' },
-      { path: 'departments', component: DepartmentList, title: 'Department - HRMS' },
-      { path: 'departments/new', component: DepartmentForm, title: 'Thêm phòng ban - HRMS' },
-      { path: 'departments/edit/:id', component: DepartmentForm, title: 'Sửa phòng ban - HRMS' },
-      { path: 'departments/:id', component: DepartmentDetail, title: 'Chi tiết phòng ban - HRMS' },
-      { path: 'employees', component: EmployeeList, title: 'Employee - HRMS' },
-      { path: 'employees/new', component: EmployeeForm, title: 'Thêm nhân viên - HRMS' },
-      { path: 'employees/edit/:id', component: EmployeeForm, title: 'Sửa nhân viên - HRMS' },
-      { path: 'employees/:id', component: EmployeeDetail, title: 'Chi tiết nhân viên - HRMS' },
-      { path: 'profile', component: Profile, title: 'Profile - HRMS' },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+      { path: 'dashboard', component: Dashboard, title: 'ROUTE_TITLE.DASHBOARD' },
+      { path: 'departments', component: DepartmentList, title: 'ROUTE_TITLE.DEPARTMENTS' },
+      { path: 'departments/new', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_ADD' },
+      {
+        path: 'departments/edit/:id',
+        component: DepartmentForm,
+        title: 'ROUTE_TITLE.DEPARTMENT_EDIT',
+      },
+      {
+        path: 'departments/:id',
+        component: DepartmentDetail,
+        title: 'ROUTE_TITLE.DEPARTMENT_DETAIL',
+      },
+      { path: 'employees', component: EmployeeList, title: 'ROUTE_TITLE.EMPLOYEES' },
+      { path: 'employees/new', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_ADD' },
+      { path: 'employees/edit/:id', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_EDIT' },
+      { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
+      { path: 'profile', component: Profile, title: 'ROUTE_TITLE.PROFILE' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     ],
   },
-  { path: '**', component: NotFound, title: 'Không tìm thấy trang - HRMS' },
+  { path: '**', component: NotFound, title: 'ROUTE_TITLE.NOT_FOUND' },
 ];

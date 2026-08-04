@@ -6,7 +6,7 @@ import { Skeleton } from 'primeng/skeleton';
   selector: 'app-table-skeleton',
   imports: [CommonModule, Skeleton],
   templateUrl: './table-skeleton.html',
-  styleUrl: './table-skeleton.css',
+  styleUrl: './table-skeleton.scss',
 })
 export class TableSkeleton {
   @Input() rows = 5;

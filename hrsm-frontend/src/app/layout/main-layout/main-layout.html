@@ -1,9 +1,6 @@
 <app-navbar></app-navbar>
 
-<main
-  class="flex-grow-1 p-3"
-  [class.sidebar-collapsed-layout]="sidebarState.isDesktopCollapsed()"
->
+<main class="flex-grow-1 p-3" [class.sidebar-collapsed-layout]="sidebarState.isDesktopCollapsed()">
   <app-sidebar></app-sidebar>
   <app-breadcrumb></app-breadcrumb>
   <router-outlet></router-outlet>

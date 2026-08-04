@@ -16,6 +16,6 @@ import { CustomSelectComponent } from './custom-select';
       [isInvalid]="showError"
     ></app-custom-select>
   `,
-  imports: [CommonModule, ReactiveFormsModule, CustomSelectComponent, FormlyModule]
+  imports: [CommonModule, ReactiveFormsModule, CustomSelectComponent, FormlyModule],
 })
 export class FormlyFieldCustomSelect extends FieldType<FieldTypeConfig> {}

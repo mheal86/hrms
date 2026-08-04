@@ -5,6 +5,6 @@ import { ProgressSpinner } from 'primeng/progressspinner';
   selector: 'app-spinner',
   imports: [ProgressSpinner],
   templateUrl: './spinner.html',
-  styleUrl: './spinner.css',
+  styleUrl: './spinner.scss',
 })
 export class Spinner {}

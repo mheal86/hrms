@@ -20,7 +20,12 @@ exports.getSummary = async (req, res) => {
     const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
     const thisMonthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
 
-    const employeesByDepartment = await Employee.aggregate([
+    const allDepts = await Department.find();
+
+    const activeEmployeesByDept = await Employee.aggregate([
+      {
+        $match: { status: 'ACTIVE' },
+      },
       {
         $project: {
           department: 1,
@@ -35,41 +40,41 @@ exports.getSummary = async (req, res) => {
           thisMonthCount: { $sum: '$isThisMonth' },
         },
       },
-      {
-        $lookup: {
-          from: 'departments',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'departmentInfo',
-        },
-      },
-      {
-        $unwind: {
-          path: '$departmentInfo',
-          preserveNullAndEmptyArrays: true
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          departmentName: { $ifNull: ['$departmentInfo.name', 'Chưa phân phòng'] },
-          lastMonthCount: 1,
-          thisMonthCount: 1,
-        },
-      },
-      {
-        $sort: { thisMonthCount: -1 },
-      },
     ]);
 
-    const totalEmployeesLastMonth = employeesByDepartment.reduce((sum, item) => sum + item.lastMonthCount, 0);
-    const totalEmployeesThisMonth = employeesByDepartment.reduce((sum, item) => sum + item.thisMonthCount, 0);
-
-    employeesByDepartment.unshift({
-      departmentName: 'Tổng',
-      lastMonthCount: totalEmployeesLastMonth,
-      thisMonthCount: totalEmployeesThisMonth,
+    const countMap = {};
+    activeEmployeesByDept.forEach((item) => {
+      if (item._id) {
+        countMap[item._id.toString()] = {
+          lastMonthCount: item.lastMonthCount,
+          thisMonthCount: item.thisMonthCount,
+        };
+      } else {
+        countMap['unassigned'] = {
+          lastMonthCount: item.lastMonthCount,
+          thisMonthCount: item.thisMonthCount,
+        };
+      }
     });
+
+    const employeesByDepartment = allDepts.map((dept) => {
+      const counts = countMap[dept._id.toString()] || { lastMonthCount: 0, thisMonthCount: 0 };
+      return {
+        departmentName: dept.name,
+        lastMonthCount: counts.lastMonthCount,
+        thisMonthCount: counts.thisMonthCount,
+      };
+    });
+
+    if (countMap['unassigned']) {
+      employeesByDepartment.push({
+        departmentName: 'Chưa phân phòng',
+        lastMonthCount: countMap['unassigned'].lastMonthCount,
+        thisMonthCount: countMap['unassigned'].thisMonthCount,
+      });
+    }
+
+    employeesByDepartment.sort((a, b) => b.thisMonthCount - a.thisMonthCount);
 
     res.status(200).json({
       totalEmployees,

@@ -24,3 +24,10 @@ export interface PaginatedResponse<T> {
     totalPages: number;
   };
 }
+
+export interface EmployeeHistory {
+  _id?: string;
+  fromDepartment: { _id: string; name: string } | null;
+  toDepartment: { _id: string; name: string } | null;
+  transferDate: string;
+}

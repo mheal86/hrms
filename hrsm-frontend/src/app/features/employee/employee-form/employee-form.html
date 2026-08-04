@@ -1,76 +1,123 @@
 <div class="page-fade">
-  <h3>{{ isEditMode() ? 'Sửa nhân viên' : 'Thêm nhân viên mới' }}</h3>
+  <h3>
+    {{ isEditMode() ? ('EMPLOYEE.EDIT_TITLE' | translate) : ('EMPLOYEE.ADD_TITLE' | translate) }}
+  </h3>
 
-  <app-spinner *ngIf="isLoading()"></app-spinner>
-  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+  @if (isLoading()) {
+    <app-spinner></app-spinner>
+  }
+  @if (errorMessage()) {
+    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
 
   <div class="card">
     <div class="card-body p-4">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <!-- Formly Dynamic Fields for Employee -->
-        <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
+        <formly-form [form]="form" [fields]="employeeFields" [model]="model"></formly-form>
 
         <div class="mb-4 p-3 account-section">
           <!-- Hộp kiểm sửa tài khoản (chỉ hiện ở chế độ sửa) -->
-          <div class="form-check mb-3" *ngIf="isEditMode()">
-            <input
-              type="checkbox"
-              class="form-check-input account-checkbox"
-              id="createAccountCheck"
-              [checked]="createAccount()"
-              (change)="toggleCreateAccount()"
-            />
-            <label class="form-check-label fw-semibold text-main" for="createAccountCheck">
-              {{ existingAccount() ? 'Sửa thông tin tài khoản đăng nhập' : 'Cấp tài khoản đăng nhập cho nhân viên này' }}
-            </label>
-          </div>
+          @if (isEditMode()) {
+            <div class="form-check mb-3">
+              <input
+                type="checkbox"
+                class="form-check-input account-checkbox"
+                id="createAccountCheck"
+                [checked]="createAccount()"
+                (change)="toggleCreateAccount()"
+              />
+              <label class="form-check-label fw-semibold text-main" for="createAccountCheck">
+                {{
+                  existingAccount()
+                    ? ('EMPLOYEE.EDIT_ACCOUNT_LABEL' | translate)
+                    : ('EMPLOYEE.CREATE_ACCOUNT_LABEL' | translate)
+                }}
+              </label>
+            </div>
+          }
 
           <!-- Tiêu đề khi thêm mới (bắt buộc tạo tài khoản) -->
-          <div *ngIf="!isEditMode()" class="mb-3">
-            <h5 class="mb-1 text-main" style="font-size: 1.05rem; font-weight: 600;">Tài khoản đăng nhập & Ảnh đại diện</h5>
-            <p class="text-muted small mb-0">Cung cấp tài khoản đăng nhập bắt buộc cho nhân viên mới và tải ảnh đại diện lên</p>
-          </div>
+          @if (!isEditMode()) {
+            <div class="mb-3">
+              <h5 class="mb-1 text-main" style="font-size: 1.05rem; font-weight: 600">
+                {{ 'EMPLOYEE.ACCOUNT_SECTION_TITLE' | translate }}
+              </h5>
+              <p class="text-muted small mb-0">
+                {{ 'EMPLOYEE.ACCOUNT_SECTION_SUBTITLE' | translate }}
+              </p>
+            </div>
+          }
 
           <!-- 1. Hàng Tài khoản: Chia đều 3 cột chạy 100% dòng -->
-          <div class="row mb-3" [formGroup]="accountForm" *ngIf="createAccount()">
-            <div class="col-12">
-              <formly-form [form]="accountForm" [fields]="accountFields" [model]="accountModel"></formly-form>
+          @if (createAccount()) {
+            <div class="row mb-3" [formGroup]="accountForm">
+              <div class="col-12">
+                <formly-form
+                  [form]="accountForm"
+                  [fields]="accountFields"
+                  [model]="accountModel"
+                ></formly-form>
+              </div>
             </div>
-          </div>
+          }
 
-          <!-- 2. Hàng Ảnh đại diện (Độc lập dưới cùng) -->
+          <!-- 2. Hàng Ảnh đại diện -->
           <div class="row align-items-center">
             <div class="col-12">
-              <label class="form-label mb-2">Ảnh đại diện</label>
+              <label class="form-label mb-2">{{ 'EMPLOYEE.AVATAR_LABEL' | translate }}</label>
               <div class="d-flex align-items-center gap-3">
                 <!-- Preview ảnh hình tròn -->
-                <img
-                  *ngIf="localAvatarUrl() || currentAvatarUrl()"
-                  [src]="localAvatarUrl() ? localAvatarUrl() : ('http://localhost:5000' + currentAvatarUrl())"
-                  width="70"
-                  height="70"
-                  style="object-fit: cover; border-radius: 50%; border: 2px solid var(--border-color); box-shadow: var(--shadow-sm);"
-                />
-                <div
-                  *ngIf="!localAvatarUrl() && !currentAvatarUrl()"
-                  class="d-flex align-items-center justify-content-center bg-light border text-muted"
-                  style="width: 70px; height: 70px; border-radius: 50%; font-size: 0.75rem;"
-                >
-                  Chưa có ảnh
-                </div>
+                @if (localAvatarUrl() || currentAvatarUrl()) {
+                  <img
+                    [src]="localAvatarUrl() ? localAvatarUrl() : baseUrl + currentAvatarUrl()"
+                    width="70"
+                    height="70"
+                    style="
+                      object-fit: cover;
+                      border-radius: 50%;
+                      border: 2px solid var(--border-color);
+                      box-shadow: var(--shadow-sm);
+                    "
+                  />
+                }
+                @if (!localAvatarUrl() && !currentAvatarUrl()) {
+                  <div
+                    class="d-flex align-items-center justify-content-center bg-light border text-muted"
+                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 0.75rem"
+                  >
+                    {{ 'EMPLOYEE.AVATAR_NO_PHOTO' | translate }}
+                  </div>
+                }
 
                 <!-- Input chọn file và chú thích -->
                 <div class="d-flex flex-column gap-1">
-                  <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" style="max-width: 350px;" />
-                  <span class="text-muted small">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 2MB.</span>
+                  <input
+                    type="file"
+                    class="form-control"
+                    accept="image/*"
+                    (change)="onFileSelected($event)"
+                    style="max-width: 350px"
+                  />
+                  <span class="text-muted small">{{ 'EMPLOYEE.AVATAR_HINT' | translate }}</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary me-2" [disabled]="isLoading()">Lưu</button>
-        <button type="button" class="btn btn-secondary" (click)="onCancel()">Hủy</button>
+        <p-button
+          type="submit"
+          [label]="'COMMON.SAVE' | translate"
+          [disabled]="isLoading()"
+          styleClass="me-2"
+        ></p-button>
+        <p-button
+          type="button"
+          [label]="'COMMON.CANCEL' | translate"
+          severity="secondary"
+          (click)="onCancel()"
+        ></p-button>
       </form>
     </div>
   </div>

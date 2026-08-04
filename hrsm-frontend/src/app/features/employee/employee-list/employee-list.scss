@@ -28,5 +28,11 @@
 }
 
 .sort-icon.active {
-  color: #a5b4fc;  /* Indigo-300 — visible on dark header */
+  color: #a5b4fc; /* Indigo-300 — visible on dark header */
+}
+
+/* Style for text-danger menu items inside PrimeNG overlay menu */
+:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-text,
+:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-icon {
+  color: var(--color-error, #be123c);
 }

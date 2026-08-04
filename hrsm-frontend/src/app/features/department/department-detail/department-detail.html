@@ -1,230 +1,394 @@
 <div class="page-fade">
-  <app-spinner *ngIf="isLoading()"></app-spinner>
-  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+  @if (isLoading()) {
+    <app-spinner></app-spinner>
+  }
+  @if (errorMessage()) {
+    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
 
-  <div *ngIf="department() as dept">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <a routerLink="/departments" class="btn btn-sm btn-outline-secondary">← Quay lại</a>
-      <a [routerLink]="['/departments/edit', dept._id]" class="btn btn-sm btn-primary">Sửa phòng ban</a>
-    </div>
-
-    <div class="card mb-3">
-      <div class="card-body">
-        <h4 class="mb-1">{{ dept.name }}</h4>
-        <p class="text-muted mb-0">{{ dept.description || 'Không có mô tả' }}</p>
+  @if (department(); as dept) {
+    <div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <p-button
+          routerLink="/departments"
+          [label]="'COMMON.BACK' | translate"
+          icon="pi pi-arrow-left"
+          [outlined]="true"
+          severity="secondary"
+          size="small"
+        ></p-button>
+        <p-button
+          [routerLink]="['/departments/edit', dept._id]"
+          [label]="'DEPARTMENT.EDIT_DEPT_BTN' | translate"
+          icon="pi pi-pencil"
+          size="small"
+        ></p-button>
       </div>
-    </div>
 
-    <div class="card">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Nhân viên thuộc phòng ban ({{ employees().length }})</h5>
-          <button (click)="openAddEmployeeModal()" class="btn btn-sm btn-outline-primary">
-            + Thêm nhân viên
-          </button>
+      <div class="card mb-3">
+        <div class="card-body">
+          <h4 class="mb-1">{{ getDepartmentName(dept.name) }}</h4>
+          <p class="text-muted mb-0">
+            {{
+              getDepartmentDesc(dept.name, dept.description) ||
+                ('COMMON.NO_DESCRIPTION' | translate)
+            }}
+          </p>
         </div>
-
-        <app-spinner *ngIf="isLoadingEmployees()"></app-spinner>
-
-        <table class="table table-sm mb-0" style="overflow: visible !important;"
-          *ngIf="!isLoadingEmployees() && employees().length > 0">
-          <thead>
-            <tr>
-              <th style="width: 50px;"></th>
-              <th>Họ tên</th>
-              <th>Email</th>
-              <th>Chức vụ</th>
-              <th>Trạng thái</th>
-              <th *ngIf="authService.isAdmin()" style="width: 120px;" class="text-center">Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (emp of employees(); track emp._id; let i = $index) {
-              <tr>
-                <td>
-                  <img *ngIf="emp.avatarUrl" [src]="'http://localhost:5000' + emp.avatarUrl" class="avatar-sm" />
-                  <div *ngIf="!emp.avatarUrl" class="avatar-initials">
-                    {{ getInitials(emp.firstName, emp.lastName) }}
-                  </div>
-                </td>
-                <td><a [routerLink]="['/employees', emp._id]" [queryParams]="{ departmentId: department()?._id }" class="text-decoration-none">{{ emp.firstName }} {{
-                    emp.lastName }}</a></td>
-                <td>{{ emp.email }}</td>
-                <td>{{ emp.position || '-' }}</td>
-                <td>
-                  <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'"
-                    [class.bg-secondary]="emp.status === 'INACTIVE'">
-                    {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
-                  </span>
-                </td>
-                <td class="action-column text-center" *ngIf="authService.isAdmin()">
-                  <div class="actions-dropdown-container" [class.dropup]="i >= employees().length - 2">
-                    <button class="btn-icon" (click)="toggleActionsMenu(emp._id!, $event)" title="Hành động">
-                      <i class="pi pi-ellipsis-v"></i>
-                    </button>
-                    <div class="actions-dropdown-menu" *ngIf="activeActionsMenuId() === emp._id">
-                      <a *ngIf="emp.status === 'ACTIVE'" [routerLink]="['/employees/edit', emp._id]"
-                        [queryParams]="{ departmentId: department()?._id }"
-                        class="dropdown-item">
-                        <i class="pi pi-pencil"></i> Sửa
-                      </a>
-                      <button *ngIf="emp.status === 'INACTIVE'" class="dropdown-item disabled-item" disabled
-                        title="Nhân viên đã ngừng hoạt động, không thể sửa">
-                        <i class="pi pi-pencil"></i> Sửa
-                      </button>
-                      <button class="dropdown-item text-primary" (click)="openTransferModal(emp); closeActionsMenu()">
-                        <i class="pi pi-send"></i> Chuyển phòng
-                      </button>
-                      <button *ngIf="emp.status === 'INACTIVE'" class="dropdown-item text-danger"
-                        (click)="onDelete(emp); closeActionsMenu()">
-                        <i class="pi pi-trash"></i> Xóa
-                      </button>
-                      <button *ngIf="emp.status === 'ACTIVE'" class="dropdown-item disabled-item" disabled
-                        title="Nhân viên đang hoạt động, không thể xóa">
-                        <i class="pi pi-trash"></i> Xóa
-                      </button>
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-
-        <p *ngIf="!isLoadingEmployees() && employees().length === 0" class="text-muted mb-0">
-          Chưa có nhân viên nào trong phòng ban này.
-        </p>
       </div>
-    </div>
 
-    <!-- Modal Chuyển phòng ban tùy chỉnh -->
-    <div class="modal-backdrop-custom" *ngIf="isTransferModalOpen()">
-      <div class="modal-box" style="min-width: 400px;" *ngIf="selectedEmployeeForTransfer() as emp">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Chuyển phòng ban</h5>
-          <button type="button" class="btn-close" (click)="closeTransferModal()"></button>
-        </div>
-
-        <div class="mb-4">
-          <p class="mb-2">Chọn phòng ban mới cho nhân viên <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>:</p>
-          <div class="mb-3">
-            <label class="form-label small text-muted">Phòng ban hiện tại: {{ dept.name }}</label>
-            <app-custom-select [options]="transferOptions()" placeholder="-- Chọn phòng ban mới --"
-              [ngModel]="selectedTargetDepartmentId()"
-              (ngModelChange)="selectedTargetDepartmentId.set($event)"></app-custom-select>
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">
+              {{ 'DEPARTMENT.DETAIL_EMPLOYEES_TITLE' | translate: { count: employees().length } }}
+            </h5>
+            <p-button
+              (click)="openAddEmployeeModal()"
+              [label]="'DEPARTMENT.ADD_EMPLOYEE_BTN' | translate"
+              icon="pi pi-plus"
+              [outlined]="true"
+              size="small"
+            ></p-button>
           </div>
-        </div>
 
-        <div class="d-flex justify-content-end gap-2">
-          <button type="button" class="btn btn-secondary" (click)="closeTransferModal()">Hủy</button>
-          <button type="button" class="btn btn-primary" [disabled]="!selectedTargetDepartmentId()"
-            (click)="confirmTransferDepartment(selectedTargetDepartmentId())">
-            Xác nhận chuyển
-          </button>
+          @if (isLoadingEmployees()) {
+            <app-spinner></app-spinner>
+          }
+
+          @if (!isLoadingEmployees() && employees().length > 0) {
+            <p-table
+              [columns]="cols"
+              [value]="employees()"
+              styleClass="p-datatable-sm p-datatable-hoverable"
+            >
+              <ng-template #header let-columns>
+                <tr>
+                  <th style="width: 50px"></th>
+                  @for (col of columns; track col.field) {
+                    <th>{{ col.header | translate }}</th>
+                  }
+                  @if (authService.isAdmin()) {
+                    <th style="width: 120px" class="text-center">
+                      {{ 'DEPARTMENT.COL_ACTIONS_EMP' | translate }}
+                    </th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template #body let-emp let-columns="columns">
+                <tr>
+                  <td>
+                    @if (emp.avatarUrl) {
+                      <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
+                    } @else {
+                      <div class="avatar-initials">
+                        {{ getInitials(emp.firstName, emp.lastName) }}
+                      </div>
+                    }
+                  </td>
+                  @for (col of columns; track col.field) {
+                    <td>
+                      @switch (col.field) {
+                        @case ('fullName') {
+                          <a
+                            [routerLink]="['/employees', emp._id]"
+                            [queryParams]="{ departmentId: department()?._id }"
+                            class="text-decoration-none"
+                          >
+                            {{ emp.firstName }} {{ emp.lastName }}
+                          </a>
+                        }
+                        @case ('status') {
+                          <span
+                            class="badge"
+                            [class.badge-success]="emp.status === 'ACTIVE'"
+                            [class.badge-secondary]="emp.status === 'INACTIVE'"
+                          >
+                            {{
+                              emp.status === 'ACTIVE'
+                                ? ('COMMON.ACTIVE' | translate)
+                                : ('COMMON.INACTIVE' | translate)
+                            }}
+                          </span>
+                        }
+                        @default {
+                          {{
+                            col.field === 'position'
+                              ? (getPositionTranslation(emp[col.field]) | translate)
+                              : emp[col.field]
+                          }}
+                        }
+                      }
+                    </td>
+                  }
+                  @if (authService.isAdmin()) {
+                    <td class="action-column text-center">
+                      <p-button
+                        icon="pi pi-ellipsis-v"
+                        [text]="true"
+                        severity="secondary"
+                        size="small"
+                        styleClass="action-btn-circle"
+                        (click)="menuItems = getEmployeeMenuItems(emp); menu.toggle($event)"
+                        [title]="'COMMON.ACTIONS' | translate"
+                      ></p-button>
+                    </td>
+                  }
+                </tr>
+              </ng-template>
+            </p-table>
+          }
+
+          @if (!isLoadingEmployees() && employees().length === 0) {
+            <p class="text-muted mb-0">
+              {{ 'DEPARTMENT.EMPTY_EMPLOYEES' | translate }}
+            </p>
+          }
         </div>
       </div>
-    </div>
 
-    <!-- Modal Thêm nhân viên (Tuyển mới hoặc Chuyển từ phòng ban khác) -->
-    <div class="modal-backdrop-custom" *ngIf="isAddEmployeeModalOpen()">
-      <div class="modal-box" style="min-width: 500px; max-width: 95%;">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">Thêm nhân viên vào phòng ban</h5>
-          <button type="button" class="btn-close" (click)="closeAddEmployeeModal()"></button>
-        </div>
-
-        <!-- BƯỚC 1: CHỌN PHƯƠNG THỨC -->
-        <div *ngIf="activeSubTab() === 'choose'" class="py-2">
-          <p class="text-muted small mb-3">Hãy chọn cách bạn muốn thêm nhân viên vào phòng ban <strong>{{ dept.name
-              }}</strong>:</p>
-
-          <div class="row g-3">
-            <div class="col-md-6">
-              <a [routerLink]="['/employees/new']" [queryParams]="{ departmentId: dept._id }"
-                (click)="closeAddEmployeeModal()"
-                class="card h-100 text-center text-decoration-none p-3 border hover-card-action">
-                <div class="fs-2 text-primary mb-2">
-                  <i class="pi pi-user-plus"></i>
-                </div>
-                <h6 class="fw-semibold text-main mb-1">Tạo nhân viên mới</h6>
-                <p class="text-muted small mb-0">Mở form tạo mới hồ sơ và tự động gán vào phòng ban {{ dept.name }}</p>
-              </a>
+      <!-- PrimeNG Dialog: Chuyển phòng ban -->
+      <p-dialog
+        [header]="'DEPARTMENT.TRANSFER_DIALOG_TITLE' | translate"
+        [visible]="isTransferModalOpen()"
+        (onHide)="closeTransferModal()"
+        [modal]="true"
+        [style]="{ width: '420px' }"
+        [resizable]="false"
+        [draggable]="false"
+        appendTo="body"
+      >
+        @if (selectedEmployeeForTransfer(); as emp) {
+          <div class="pt-2">
+            <p class="mb-2">
+              {{ 'DEPARTMENT.TRANSFER_SELECT_NEW_DEPT' | translate }}
+              <strong>{{ emp.firstName }} {{ emp.lastName }}</strong
+              >:
+            </p>
+            <div class="mb-3">
+              <label class="form-label small text-muted"
+                >{{ 'DEPARTMENT.TRANSFER_CURRENT_DEPT' | translate }}
+                {{ department()?.name }}</label
+              >
+              <app-custom-select
+                [options]="transferOptions()"
+                [placeholder]="'DEPARTMENT.TRANSFER_PLACEHOLDER' | translate"
+                [ngModel]="selectedTargetDepartmentId()"
+                (ngModelChange)="selectedTargetDepartmentId.set($event)"
+              >
+              </app-custom-select>
             </div>
+          </div>
+        }
+        <ng-template #footer>
+          <p-button
+            type="button"
+            [label]="'COMMON.CANCEL' | translate"
+            severity="secondary"
+            (click)="closeTransferModal()"
+          ></p-button>
+          <p-button
+            type="button"
+            [label]="'DEPARTMENT.TRANSFER_CONFIRM_BTN' | translate"
+            [disabled]="!selectedTargetDepartmentId()"
+            (click)="confirmTransferDepartment(selectedTargetDepartmentId())"
+            styleClass="ms-2"
+          ></p-button>
+        </ng-template>
+      </p-dialog>
 
-            <div class="col-md-6">
-              <div (click)="activeSubTab.set('transfer')" class="card h-100 text-center p-3 border hover-card-action"
-                style="cursor: pointer;">
-                <div class="fs-2 text-success mb-2">
-                  <i class="pi pi-users"></i>
+      <!-- PrimeNG Dialog: Thêm nhân viên vào phòng ban -->
+      <p-dialog
+        [header]="'DEPARTMENT.ADD_EMPLOYEE_DIALOG_TITLE' | translate"
+        [visible]="isAddEmployeeModalOpen()"
+        (onHide)="closeAddEmployeeModal()"
+        [modal]="true"
+        [style]="{ width: '520px' }"
+        [resizable]="false"
+        [draggable]="false"
+        appendTo="body"
+      >
+        <!-- BƯỚC 1: CHỌN PHƯƠNG THỨC -->
+        @if (activeSubTab() === 'choose') {
+          <div class="py-2">
+            <p class="text-muted small mb-3">
+              {{ 'DEPARTMENT.ADD_METHOD_TITLE' | translate }}
+              <strong>{{ department()?.name }}</strong
+              >:
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <a
+                  [routerLink]="['/employees/new']"
+                  [queryParams]="{ departmentId: department()?._id }"
+                  (click)="closeAddEmployeeModal()"
+                  class="card h-100 text-center text-decoration-none p-3 border hover-card-action"
+                >
+                  <div class="fs-2 text-primary mb-2">
+                    <i class="pi pi-user-plus"></i>
+                  </div>
+                  <h6 class="fw-semibold text-main mb-1">
+                    {{ 'DEPARTMENT.ADD_METHOD_NEW_TITLE' | translate }}
+                  </h6>
+                  <p class="text-muted small mb-0">
+                    {{ 'DEPARTMENT.ADD_METHOD_NEW_DESC' | translate }}
+                    {{ getDepartmentName(department()?.name) }}
+                  </p>
+                </a>
+              </div>
+
+              <div class="col-md-6">
+                <div
+                  (click)="activeSubTab.set('transfer')"
+                  class="card h-100 text-center p-3 border hover-card-action"
+                  style="cursor: pointer"
+                >
+                  <div class="fs-2 text-success mb-2">
+                    <i class="pi pi-users"></i>
+                  </div>
+                  <h6 class="fw-semibold text-main mb-1">
+                    {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate }}
+                  </h6>
+                  <p class="text-muted small mb-0">
+                    {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_DESC' | translate }}
+                    {{ getDepartmentName(department()?.name) }}
+                  </p>
                 </div>
-                <h6 class="fw-semibold text-main mb-1">Chuyển nhân viên từ phòng ban khác</h6>
-                <p class="text-muted small mb-0">Chuyển một nhân sự từ phòng ban khác sang phòng ban {{ dept.name }}</p>
               </div>
             </div>
-          </div>
 
-          <div class="d-flex justify-content-end mt-4">
-            <button type="button" class="btn btn-secondary" (click)="closeAddEmployeeModal()">Đóng</button>
+            <div class="d-flex justify-content-end mt-4">
+              <p-button
+                type="button"
+                [label]="'COMMON.CLOSE' | translate"
+                severity="secondary"
+                (click)="closeAddEmployeeModal()"
+              ></p-button>
+            </div>
           </div>
-        </div>
+        }
 
         <!-- BƯỚC 2: CHỌN NHÂN VIÊN HIỆN CÓ ĐỂ CHUYỂN PHÒNG -->
-        <div *ngIf="activeSubTab() === 'transfer'" class="py-2">
-          <div class="d-flex align-items-center gap-2 mb-3">
-            <button type="button" class="btn-icon p-1" (click)="goBackToChooseSubTab()" title="Quay lại">
-              <i class="pi pi-arrow-left"></i>
-            </button>
-            <span class="fw-semibold text-main">Chuyển nhân viên từ phòng ban khác</span>
-          </div>
-
-          <p class="text-muted small mb-3">Nhập tên nhân viên hiện đang hoạt động ở các phòng ban khác để chuyển sang
-            <strong>{{ dept.name }}</strong>:</p>
-
-          <div class="mb-3">
-            <label class="form-label small text-muted">Tìm kiếm nhân viên:</label>
-            <div class="input-group">
-              <input type="text" class="form-control"
-                placeholder="Nhập tên nhân viên cần tìm..."
-                [(ngModel)]="searchOtherEmployeeText" (keydown.enter)="triggerSearchOtherEmployees()" />
-              <button class="btn btn-outline-secondary" type="button" (click)="triggerSearchOtherEmployees()" title="Tìm kiếm">
-                <i class="pi pi-search"></i>
-              </button>
+        @if (activeSubTab() === 'transfer') {
+          <div class="py-2">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <p-button
+                type="button"
+                icon="pi pi-arrow-left"
+                [text]="true"
+                severity="secondary"
+                size="small"
+                (click)="goBackToChooseSubTab()"
+                [title]="'COMMON.BACK' | translate"
+              ></p-button>
+              <span class="fw-semibold text-main">{{
+                'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate
+              }}</span>
             </div>
-          </div>
 
-          <div class="mb-4">
-            <label class="form-label small text-muted">Kết quả tìm kiếm:</label>
-            <div class="list-group scrollable-list-container" style="max-height: 200px; overflow-y: auto;" *ngIf="searchedOtherEmployees().length > 0">
-              @for (emp of searchedOtherEmployees(); track emp._id) {
-                <button type="button" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  [class.active]="selectedEmployeeToTransferInId() === emp._id"
-                  (click)="selectedEmployeeToTransferInId.set(emp._id!)">
-                  <div>
-                    <strong class="d-block">{{ emp.firstName }} {{ emp.lastName }}</strong>
-                    <span class="small" [class.text-white]="selectedEmployeeToTransferInId() === emp._id" [class.text-muted]="selectedEmployeeToTransferInId() !== emp._id">
-                      Phòng ban: {{ getDepartmentName(emp.department) }} | Chức vụ: {{ emp.position || 'Không có' }}
-                    </span>
-                  </div>
-                  <span class="badge bg-primary" *ngIf="selectedEmployeeToTransferInId() === emp._id">Đã chọn</span>
-                </button>
+            <p class="text-muted small mb-3">
+              {{ 'DEPARTMENT.TRANSFER_IN_PROMPT' | translate }}
+              <strong>{{ getDepartmentName(department()?.name) }}</strong
+              >:
+            </p>
+
+            <div class="mb-3">
+              <label class="form-label small text-muted">{{
+                'DEPARTMENT.SEARCH_EMP_LABEL' | translate
+              }}</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  [placeholder]="'DEPARTMENT.SEARCH_EMP_PLACEHOLDER' | translate"
+                  [(ngModel)]="searchOtherEmployeeText"
+                  (keydown.enter)="triggerSearchOtherEmployees()"
+                />
+                <p-button
+                  icon="pi pi-search"
+                  [outlined]="true"
+                  severity="secondary"
+                  (click)="triggerSearchOtherEmployees()"
+                  [title]="'COMMON.SEARCH' | translate"
+                ></p-button>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label small text-muted">{{
+                'DEPARTMENT.SEARCH_RESULTS' | translate
+              }}</label>
+              @if (searchedOtherEmployees().length > 0) {
+                <div
+                  class="list-group scrollable-list-container"
+                  style="max-height: 200px; overflow-y: auto"
+                >
+                  @for (emp of searchedOtherEmployees(); track emp._id) {
+                    <p-button
+                      type="button"
+                      [styleClass]="
+                        'list-group-item-btn' +
+                        (selectedEmployeeToTransferInId() === emp._id ? ' active' : '')
+                      "
+                      (onClick)="selectedEmployeeToTransferInId.set(emp._id!)"
+                    >
+                      <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="text-start">
+                          <strong class="d-block">{{ emp.firstName }} {{ emp.lastName }}</strong>
+                          <span
+                            class="small text-muted"
+                            [class.text-light-active]="selectedEmployeeToTransferInId() === emp._id"
+                          >
+                            {{
+                              'DEPARTMENT.EMP_INFO'
+                                | translate
+                                  : {
+                                      dept: getDepartmentName(emp.department),
+                                      position:
+                                        (getPositionTranslation(emp.position) | translate) ||
+                                        ('DEPARTMENT.NO_POSITION' | translate),
+                                    }
+                            }}
+                          </span>
+                        </div>
+                        @if (selectedEmployeeToTransferInId() === emp._id) {
+                          <span class="badge bg-white text-primary">{{
+                            'DEPARTMENT.SELECTED_BADGE' | translate
+                          }}</span>
+                        }
+                      </div>
+                    </p-button>
+                  }
+                </div>
+              }
+              @if (searchedOtherEmployees().length === 0) {
+                <div class="text-muted small text-center py-3 border rounded">
+                  {{ 'DEPARTMENT.SEARCH_RESULTS_EMPTY' | translate }}
+                </div>
               }
             </div>
-            <div class="text-muted small text-center py-3 border rounded" *ngIf="searchedOtherEmployees().length === 0">
-              Không tìm thấy nhân viên nào hoặc chưa bắt đầu tìm kiếm.
+
+            <div class="d-flex justify-content-end gap-2">
+              <p-button
+                type="button"
+                [label]="'COMMON.CANCEL' | translate"
+                severity="secondary"
+                (click)="goBackToChooseSubTab()"
+              ></p-button>
+              <p-button
+                type="button"
+                [label]="'DEPARTMENT.CONFIRM_TRANSFER_IN_BTN' | translate"
+                [disabled]="!selectedEmployeeToTransferInId()"
+                (click)="confirmTransferIn()"
+              ></p-button>
             </div>
           </div>
+        }
+      </p-dialog>
 
-          <div class="d-flex justify-content-end gap-2">
-            <button type="button" class="btn btn-secondary" (click)="goBackToChooseSubTab()">Hủy</button>
-            <button type="button" class="btn btn-primary" [disabled]="!selectedEmployeeToTransferInId()"
-              (click)="confirmTransferIn()">
-              Xác nhận chuyển vào
-            </button>
-          </div>
-        </div>
-
-      </div>
+      <!-- PrimeNG Menu Overlay dùng chung cho hành động trên bảng nhân viên -->
+      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
     </div>
-
-  </div>
+  }
 </div>

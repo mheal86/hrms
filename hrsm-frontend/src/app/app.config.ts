@@ -11,15 +11,19 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { provideFormlyCore } from '@ngx-formly/core';
 import { withFormlyBootstrap } from '@ngx-formly/bootstrap';
 import { FormlyFieldCustomSelect } from './shared/custom-select/custom-select-type';
-
 import { routes } from './app.routes';
 import { authInterceptorInterceptor } from './core/auth-interceptor-interceptor';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
+import { TitleStrategy } from '@angular/router';
+import { CustomTitleStrategy } from './core/custom-title-strategy';
 
 registerLocaleData(localeVi);
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
+    { provide: TitleStrategy, useClass: CustomTitleStrategy },
     provideHttpClient(withInterceptors([authInterceptorInterceptor])),
     { provide: LOCALE_ID, useValue: 'vi' },
     provideAnimationsAsync(),
@@ -28,20 +32,23 @@ export const appConfig: ApplicationConfig = {
         preset: Aura,
         options: {
           darkModeSelector: '.dark-theme',
-        }
-      }
+        },
+      },
     }),
     MessageService,
     ConfirmationService,
+    provideTranslateService({
+      fallbackLang: 'vi',
+      loader: provideTranslateHttpLoader({
+        prefix: '/i18n/',
+        suffix: '.json',
+      }),
+    }),
     provideFormlyCore({
-      validationMessages: [
-        { name: 'required', message: 'Trường này là bắt buộc' },
-        { name: 'email', message: 'Email không hợp lệ' },
-      ],
       types: [
         { name: 'custom-select', component: FormlyFieldCustomSelect, wrappers: ['form-field'] },
       ],
     }),
-    provideFormlyCore(withFormlyBootstrap())
+    provideFormlyCore(withFormlyBootstrap()),
   ],
 };

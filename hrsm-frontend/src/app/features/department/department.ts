@@ -2,16 +2,21 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { Department as DepartmentModel, DepartmentPaginatedResponse } from './department-model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class Department {
-  private apiUrl = 'http://localhost:5000/api/departments';
+  private apiUrl = `${environment.apiUrl}/departments`;
 
   constructor(private http: HttpClient) {}
 
-  getAll(search: string = '', page: number = 1, limit: number = 10): Observable<DepartmentPaginatedResponse> {
+  getAll(
+    search: string = '',
+    page: number = 1,
+    limit: number = 10,
+  ): Observable<DepartmentPaginatedResponse> {
     let params = new HttpParams().set('page', page).set('limit', limit);
     if (search) {
       params = params.set('search', search);
@@ -30,11 +35,11 @@ export class Department {
     return this.http.get<DepartmentModel>(`${this.apiUrl}/${id}`);
   }
 
-  create(department: DepartmentModel): Observable<DepartmentModel> {
+  create(department: Partial<DepartmentModel>): Observable<DepartmentModel> {
     return this.http.post<DepartmentModel>(this.apiUrl, department);
   }
 
-  update(id: string, department: DepartmentModel): Observable<DepartmentModel> {
+  update(id: string, department: Partial<DepartmentModel>): Observable<DepartmentModel> {
     return this.http.put<DepartmentModel>(`${this.apiUrl}/${id}`, department);
   }
 

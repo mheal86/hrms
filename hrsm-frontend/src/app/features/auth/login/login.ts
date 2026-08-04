@@ -4,12 +4,16 @@ import { Router } from '@angular/router';
 import { Auth } from '../../../core/auth';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
+import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import { Password } from 'primeng/password';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, Button, InputText, Password, TranslatePipe],
   templateUrl: './login.html',
-  styleUrl: './login.css',
+  styleUrl: './login.scss',
 })
 export class Login implements OnDestroy {
   loginForm: FormGroup;
@@ -18,7 +22,12 @@ export class Login implements OnDestroy {
   showPassword = signal(false);
   private destroy$ = new Subject<void>();
 
-  constructor(private fb: FormBuilder, private authService: Auth, private router: Router) {
+  constructor(
+    private fb: FormBuilder,
+    private authService: Auth,
+    private router: Router,
+    private translate: TranslateService,
+  ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required],
@@ -50,7 +59,16 @@ export class Login implements OnDestroy {
         },
         error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set(err.error?.message || 'Đăng nhập thất bại');
+          const rawMessage = err.error?.message;
+          let translatedMessageKey = 'AUTH.ERROR_FAILED';
+
+          if (rawMessage === 'Invalid username or password') {
+            translatedMessageKey = 'AUTH.ERROR_INVALID';
+          } else if (rawMessage === 'Username and password are required') {
+            translatedMessageKey = 'AUTH.ERROR_REQUIRED';
+          }
+
+          this.errorMessage.set(this.translate.instant(translatedMessageKey));
         },
       });
   }

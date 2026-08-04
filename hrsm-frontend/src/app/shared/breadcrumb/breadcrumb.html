@@ -1,1 +1,3 @@
-<p-breadcrumb [model]="items()" *ngIf="items().length > 0"></p-breadcrumb>
+@if (items().length > 0) {
+  <p-breadcrumb [model]="items()"></p-breadcrumb>
+}

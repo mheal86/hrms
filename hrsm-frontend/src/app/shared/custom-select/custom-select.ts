@@ -1,11 +1,13 @@
-import { Component, Input, forwardRef, ElementRef } from '@angular/core';
+import { Component, Input, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 
+export type SelectValue = string | number | boolean | undefined;
+
 export interface SelectOption {
   label: string;
-  value: string | number | boolean | undefined;
+  value: SelectValue;
 }
 
 @Component({
@@ -15,26 +17,26 @@ export interface SelectOption {
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => CustomSelectComponent),
-      multi: true
-    }
+      multi: true,
+    },
   ],
   templateUrl: './custom-select.html',
-  styleUrl: './custom-select.css'
+  styleUrl: './custom-select.scss',
 })
 export class CustomSelectComponent implements ControlValueAccessor {
-  @Input() options: SelectOption[] = [];// Danh sách các lựa chọn được truyền vào
+  @Input() options: SelectOption[] = []; // Danh sách các lựa chọn được truyền vào
   @Input() placeholder: string = 'Chọn...'; // Chữ mờ hiển thị khi chưa chọn gì
   @Input() isInvalid: boolean = false; // Biến xác định select này đang bị lỗi để hiện viền đỏ
 
-  val: string | number | boolean | undefined | null = null; // Giá trị hiện tại của select (có thể là string, number, boolean, undefined hoặc null)
+  val: SelectValue | null = null; // Giá trị hiện tại của select
   disabled: boolean = false; // Trạng thái bật/tắt của select (false = bật, true = tắt)
 
-  private onChange: (val: string | number | boolean | undefined | null) => void = () => { }; // Hàm callback khi giá trị thay đổi
-  private onTouched: () => void = () => { }; // Hàm callback khi select được chạm vào
+  private onChange: (val: SelectValue | null) => void = () => {}; // Hàm callback khi giá trị thay đổi
+  private onTouched: () => void = () => {}; // Hàm callback khi select được chạm vào
 
-  constructor(private elementRef: ElementRef) { }
+  constructor() {}
 
-  onSelectChange(event: any) {
+  onSelectChange(event: { value: SelectValue | null }) {
     this.val = event.value;
     this.onChange(this.val);
   }
@@ -43,11 +45,11 @@ export class CustomSelectComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  writeValue(value: string | number | boolean | undefined | null) {
+  writeValue(value: SelectValue | null) {
     this.val = value;
   }
 
-  registerOnChange(fn: (val: string | number | boolean | undefined | null) => void) {
+  registerOnChange(fn: (val: SelectValue | null) => void) {
     this.onChange = fn;
   }
 

@@ -11,17 +11,21 @@ import { Notification } from '../../../core/notification';
 import { Subject, takeUntil } from 'rxjs';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { SelectOption } from '../../../shared/custom-select/custom-select';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Button } from 'primeng/button';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-employee-form',
-  imports: [CommonModule, ReactiveFormsModule, Spinner, FormlyModule],
+  imports: [CommonModule, ReactiveFormsModule, Spinner, FormlyModule, TranslatePipe, Button],
   templateUrl: './employee-form.html',
-  styleUrl: './employee-form.css',
+  styleUrl: './employee-form.scss',
 })
 export class EmployeeForm implements OnInit, OnDestroy {
+  baseUrl = environment.baseUrl;
   form = new FormGroup({});
   model: any = {};
-  fields: FormlyFieldConfig[] = [];
+  employeeFields: FormlyFieldConfig[] = [];
 
   accountForm = new FormGroup({});
   accountModel: any = {};
@@ -33,25 +37,68 @@ export class EmployeeForm implements OnInit, OnDestroy {
   isLoading = signal(false);
   departments = signal<DepartmentModel[]>([]);
 
-  positions = ['Nhân viên', 'Trưởng nhóm', 'Trưởng phòng', 'Phó phòng', 'Phó giám đốc', 'Giám đốc', 'Thực tập sinh'];
-
-  genderOptions: SelectOption[] = [
-    { label: 'Nam', value: 'MALE' },
-    { label: 'Nữ', value: 'FEMALE' },
-    { label: 'Khác', value: 'OTHER' }
+  positions = [
+    'Nhân viên',
+    'Trưởng nhóm',
+    'Trưởng phòng',
+    'Phó phòng',
+    'Phó giám đốc',
+    'Giám đốc',
+    'Thực tập sinh',
   ];
 
-  statusOptions: SelectOption[] = [
-    { label: 'Đang hoạt động', value: 'ACTIVE' },
-    { label: 'Ngừng hoạt động', value: 'INACTIVE' }
-  ];
+  get genderOptions(): SelectOption[] {
+    return [
+      { label: this.translate.instant('EMPLOYEE.GENDER_MALE'), value: 'MALE' },
+      { label: this.translate.instant('EMPLOYEE.GENDER_FEMALE'), value: 'FEMALE' },
+      { label: this.translate.instant('EMPLOYEE.GENDER_OTHER'), value: 'OTHER' },
+    ];
+  }
+
+  get statusOptions(): SelectOption[] {
+    return [
+      { label: this.translate.instant('COMMON.ACTIVE'), value: 'ACTIVE' },
+      { label: this.translate.instant('COMMON.INACTIVE'), value: 'INACTIVE' },
+    ];
+  }
 
   get positionOptions(): SelectOption[] {
-    return this.positions.map(p => ({ label: p, value: p }));
+    const keyMap: { [key: string]: string } = {
+      'Nhân viên': 'FORM.POSITION_STAFF',
+      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
+      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
+      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
+      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
+      'Giám đốc': 'FORM.POSITION_GD',
+      'Thực tập sinh': 'FORM.POSITION_INTERN',
+    };
+    return this.positions.map((p) => ({
+      label: this.translate.instant(keyMap[p] || p),
+      value: p,
+    }));
   }
 
   get departmentOptions(): SelectOption[] {
-    return this.departments().map(d => ({ label: d.name, value: d._id }));
+    const mapping: { [key: string]: string } = {
+      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
+      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
+      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
+      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
+      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
+      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
+      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
+      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
+      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
+      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
+      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
+      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
+      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
+    };
+    return this.departments().map((d) => {
+      const translationKey = mapping[d.name];
+      const label = translationKey ? this.translate.instant(translationKey) : d.name;
+      return { label, value: d._id };
+    });
   }
 
   selectedFile: File | null = null;
@@ -68,10 +115,15 @@ export class EmployeeForm implements OnInit, OnDestroy {
     private userService: User,
     private notificationService: Notification,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
+    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initFields();
+    });
+
     this.initFields();
     this.loadDepartments();
 
@@ -82,14 +134,12 @@ export class EmployeeForm implements OnInit, OnDestroy {
     } else {
       this.createAccount.set(true);
 
-      this.route.queryParams
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(params => {
-          const deptId = params['departmentId'];
-          if (deptId) {
-            this.model = { ...this.model, department: deptId };
-          }
-        });
+      this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+        const deptId = params['departmentId'];
+        if (deptId) {
+          this.model = { ...this.model, department: deptId };
+        }
+      });
     }
   }
 
@@ -99,7 +149,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
   }
 
   initFields() {
-    this.fields = [
+    this.employeeFields = [
       {
         fieldGroupClassName: 'row mb-2',
         fieldGroup: [
@@ -108,7 +158,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'firstName',
             type: 'input',
             props: {
-              label: 'Họ',
+              label: this.translate.instant('FORM.FIRST_NAME'),
               required: true,
               disabled: this.isEditMode(),
             },
@@ -118,7 +168,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'lastName',
             type: 'input',
             props: {
-              label: 'Tên',
+              label: this.translate.instant('FORM.LAST_NAME'),
               required: true,
               disabled: this.isEditMode(),
             },
@@ -128,9 +178,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'gender',
             type: 'custom-select',
             props: {
-              label: 'Giới tính',
+              label: this.translate.instant('FORM.GENDER'),
               required: true,
-              placeholder: 'Chọn giới tính',
+              placeholder: this.translate.instant('FORM.GENDER_PLACEHOLDER'),
               options: this.genderOptions,
               disabled: this.isEditMode(),
             },
@@ -140,7 +190,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'dateOfBirth',
             type: 'input',
             props: {
-              label: 'Ngày sinh',
+              label: this.translate.instant('FORM.DOB'),
               type: 'date',
               required: true,
               disabled: this.isEditMode(),
@@ -148,7 +198,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
             validators: {
               futureDate: {
                 expression: (c: AbstractControl) => !c.value || new Date(c.value) <= new Date(),
-                message: 'Ngày sinh không được ở tương lai',
               },
               ageRange: {
                 expression: (c: AbstractControl) => {
@@ -162,18 +211,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
                   }
                   return age >= 18 && age <= 65;
                 },
-                message: (error: any, field: FormlyFieldConfig) => {
-                  if (!field.formControl?.value) return '';
-                  const birthDate = new Date(field.formControl.value);
-                  const today = new Date();
-                  let age = today.getFullYear() - birthDate.getFullYear();
-                  const monthDiff = today.getMonth() - birthDate.getMonth();
-                  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                  }
-                  if (age < 18) return 'Nhân viên phải từ 18 tuổi trở lên';
-                  return 'Nhân viên không được quá 65 tuổi';
-                }
               },
             },
           },
@@ -187,7 +224,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'email',
             type: 'input',
             props: {
-              label: 'Email',
+              label: this.translate.instant('FORM.EMAIL'),
               type: 'email',
               required: true,
               disabled: this.isEditMode(),
@@ -203,7 +240,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
                   const localPart = parts[0];
                   return localPart.length >= 3 && /[a-zA-Z]/.test(localPart);
                 },
-                message: 'Email không hợp lệ (cần ít nhất 3 ký tự ở phần tên và chứa chữ cái)',
               },
             },
           },
@@ -212,8 +248,8 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'phone',
             type: 'input',
             props: {
-              label: 'Số điện thoại',
-              placeholder: 'VD: 0912345678',
+              label: this.translate.instant('FORM.PHONE'),
+              placeholder: this.translate.instant('FORM.PHONE_PLACEHOLDER'),
               maxLength: 10,
             },
             hooks: {
@@ -231,7 +267,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
             validators: {
               phone: {
                 expression: (c: AbstractControl) => !c.value || /^0\d{9}$/.test(c.value),
-                message: 'Số điện thoại phải bắt đầu bằng số 0 và có 10 chữ số',
               },
             },
           },
@@ -245,7 +280,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'address',
             type: 'input',
             props: {
-              label: 'Địa chỉ',
+              label: this.translate.instant('FORM.ADDRESS'),
             },
             validators: {
               address: {
@@ -255,7 +290,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
                   const letterCount = (value.match(/[a-zA-ZÀ-ỹ]/g) || []).length;
                   return letterCount >= 3;
                 },
-                message: 'Địa chỉ không hợp lệ (cần ít nhất 3 ký tự chữ)',
               },
             },
           },
@@ -269,9 +303,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'position',
             type: 'custom-select',
             props: {
-              label: 'Chức vụ',
+              label: this.translate.instant('FORM.POSITION'),
               required: true,
-              placeholder: 'Chọn chức vụ',
+              placeholder: this.translate.instant('FORM.POSITION_PLACEHOLDER'),
               options: this.positionOptions,
             },
           },
@@ -280,9 +314,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'department',
             type: 'custom-select',
             props: {
-              label: 'Phòng ban',
+              label: this.translate.instant('FORM.DEPARTMENT'),
               required: true,
-              placeholder: 'Chọn phòng ban',
+              placeholder: this.translate.instant('FORM.DEPARTMENT_PLACEHOLDER'),
               options: this.departmentOptions,
             },
           },
@@ -296,8 +330,8 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'status',
             type: 'custom-select',
             props: {
-              label: 'Trạng thái',
-              placeholder: 'Chọn trạng thái',
+              label: this.translate.instant('FORM.STATUS'),
+              placeholder: this.translate.instant('FORM.STATUS_PLACEHOLDER'),
               options: this.statusOptions,
             },
             hideExpression: () => !this.isEditMode(),
@@ -315,7 +349,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             key: 'username',
             type: 'input',
             props: {
-              label: 'Username',
+              label: this.translate.instant('FORM.USERNAME'),
               required: true,
               disabled: this.isEditMode(),
             },
@@ -328,13 +362,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
                   const validRegex = /^[a-zA-Z0-9._-]+$/;
                   return validRegex.test(value);
                 },
-                message: (error: any, field: FormlyFieldConfig) => {
-                  const value = field.formControl?.value;
-                  if (value && /\s/.test(value)) {
-                    return 'Username không được chứa khoảng trắng';
-                  }
-                  return 'Username chỉ được chứa chữ, số, dấu chấm, gạch dưới, gạch ngang';
-                }
               },
             },
             asyncValidators: {
@@ -353,7 +380,6 @@ export class EmployeeForm implements OnInit, OnDestroy {
                       });
                   });
                 },
-                message: 'Tên tài khoản này đã tồn tại',
               },
             },
           },
@@ -363,21 +389,23 @@ export class EmployeeForm implements OnInit, OnDestroy {
             type: 'input',
             props: {
               type: 'password',
-              label: this.existingAccount() ? 'Password (để trống nếu giữ nguyên)' : 'Password',
+              label: this.existingAccount()
+                ? this.translate.instant('FORM.PASSWORD_EDIT')
+                : this.translate.instant('FORM.PASSWORD'),
               required: !this.existingAccount() && !this.isEditMode(),
-            }
+            },
           },
           {
             className: 'col-md-4',
             key: 'roleName',
             type: 'custom-select',
             props: {
-              label: 'Vai trò',
+              label: this.translate.instant('FORM.ROLE'),
               required: true,
-              placeholder: 'Chọn vai trò',
+              placeholder: this.translate.instant('FORM.ROLE_PLACEHOLDER'),
               options: [
-                { label: 'User', value: 'USER' },
-                { label: 'Admin', value: 'ADMIN' }
+                { label: this.translate.instant('FORM.ROLE_USER'), value: 'USER' },
+                { label: this.translate.instant('FORM.ROLE_ADMIN'), value: 'ADMIN' },
               ],
             },
           },
@@ -405,7 +433,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
   }
 
   updateDepartmentFieldOptions() {
-    const deptField = this.findFieldByKey(this.fields, 'department');
+    const deptField = this.findFieldByKey(this.employeeFields, 'department');
     if (deptField && deptField.props) {
       deptField.props.options = this.departmentOptions;
     }
@@ -429,7 +457,8 @@ export class EmployeeForm implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          const departmentId = typeof data.department === 'object' ? data.department._id : data.department;
+          const departmentId =
+            typeof data.department === 'object' ? data.department._id : data.department;
 
           this.model = {
             firstName: data.firstName,
@@ -481,7 +510,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
-      
+
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
@@ -493,13 +522,12 @@ export class EmployeeForm implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
+    this.form.markAllAsTouched();
+    if (this.createAccount()) {
+      this.accountForm.markAllAsTouched();
     }
 
-    if (this.createAccount() && this.accountForm.invalid) {
-      this.accountForm.markAllAsTouched();
+    if (this.form.invalid || (this.createAccount() && this.accountForm.invalid)) {
       return;
     }
 
@@ -525,7 +553,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
           error: (err) => {
             this.isLoading.set(false);
             this.errorMessage.set(err.error?.message || 'Không thể kiểm tra trùng lặp tài khoản');
-          }
+          },
         });
     } else {
       this.proceedSave(formValue);
@@ -545,12 +573,17 @@ export class EmployeeForm implements OnInit, OnDestroy {
           this.saveUserAccount(savedEmployee._id);
         } else {
           this.isLoading.set(false);
+          this.notificationService.success(
+            this.isEditMode()
+              ? this.translate.instant('EMPLOYEE.UPDATE_SUCCESS')
+              : this.translate.instant('EMPLOYEE.CREATE_SUCCESS'),
+          );
           this.navigateBack();
         }
       },
       error: (err) => {
         this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || 'Lưu thất bại');
+        this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.SAVE_ERROR'));
       },
     });
   }
@@ -565,12 +598,21 @@ export class EmployeeForm implements OnInit, OnDestroy {
             this.saveUserAccount(employeeId);
           } else {
             this.isLoading.set(false);
+            this.notificationService.success(
+              this.isEditMode()
+                ? this.translate.instant('EMPLOYEE.UPDATE_SUCCESS')
+                : this.translate.instant('EMPLOYEE.CREATE_SUCCESS'),
+            );
             this.navigateBack();
           }
         },
         error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set('Lưu thông tin thành công nhưng upload avatar thất bại: ' + (err.error?.message || ''));
+          this.errorMessage.set(
+            this.translate.instant('EMPLOYEE.AVATAR_UPLOAD_ERROR', {
+              error: err.error?.message || '',
+            }),
+          );
         },
       });
   }
@@ -600,12 +642,18 @@ export class EmployeeForm implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.isLoading.set(false);
-            this.notificationService.success('Cập nhật tài khoản thành công');
+            this.notificationService.success(
+              this.translate.instant('EMPLOYEE.UPDATE_ACCOUNT_SUCCESS'),
+            );
             this.navigateBack();
           },
           error: (err) => {
             this.isLoading.set(false);
-            this.notificationService.error('Lưu nhân viên thành công nhưng cập nhật tài khoản thất bại: ' + (err.error?.message || ''));
+            this.notificationService.error(
+              this.translate.instant('EMPLOYEE.UPDATE_ACCOUNT_ERROR', {
+                error: err.error?.message || '',
+              }),
+            );
             this.navigateBack();
           },
         });
@@ -616,12 +664,18 @@ export class EmployeeForm implements OnInit, OnDestroy {
         .subscribe({
           next: () => {
             this.isLoading.set(false);
-            this.notificationService.success('Tạo nhân viên và cấp tài khoản thành công');
+            this.notificationService.success(
+              this.translate.instant('EMPLOYEE.CREATE_ACCOUNT_SUCCESS'),
+            );
             this.navigateBack();
           },
           error: (err) => {
             this.isLoading.set(false);
-            this.notificationService.error('Tạo nhân viên thành công nhưng cấp tài khoản thất bại: ' + (err.error?.message || ''));
+            this.notificationService.error(
+              this.translate.instant('EMPLOYEE.CREATE_ACCOUNT_ERROR', {
+                error: err.error?.message || '',
+              }),
+            );
             this.navigateBack();
           },
         });

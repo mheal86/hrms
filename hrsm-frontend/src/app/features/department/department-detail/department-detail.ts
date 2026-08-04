@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Department } from '../department';
 import { Department as DepartmentModel } from '../department-model';
@@ -12,14 +12,42 @@ import { Notification } from '../../../core/notification';
 import { Confirm } from '../../../core/confirm';
 import { CustomSelectComponent, SelectOption } from '../../../shared/custom-select/custom-select';
 import { Subject, takeUntil } from 'rxjs';
+import { Menu } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { Dialog } from 'primeng/dialog';
+import { Button } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-department-detail',
-  imports: [CommonModule, RouterLink, Spinner, CustomSelectComponent, FormsModule],
+  imports: [
+    CommonModule,
+    RouterLink,
+    Spinner,
+    CustomSelectComponent,
+    FormsModule,
+    Menu,
+    Dialog,
+    Button,
+    TableModule,
+    TranslatePipe,
+  ],
   templateUrl: './department-detail.html',
-  styleUrl: './department-detail.css',
+  styleUrl: './department-detail.scss',
 })
 export class DepartmentDetail implements OnInit, OnDestroy {
+  baseUrl = environment.baseUrl;
+  @HostListener('document:keydown.escape', ['$event'])
+  handleEscape(event: Event) {
+    if (this.isTransferModalOpen()) {
+      this.closeTransferModal();
+    }
+    if (this.isAddEmployeeModalOpen()) {
+      this.closeAddEmployeeModal();
+    }
+  }
   department = signal<DepartmentModel | null>(null);
   employees = signal<EmployeeModel[]>([]);
   allDepartments = signal<DepartmentModel[]>([]);
@@ -27,19 +55,56 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   isLoadingEmployees = signal(false);
   errorMessage = signal('');
 
-  activeActionsMenuId = signal<string | null>(null);
+  menuItems: MenuItem[] = [];
+
+  getEmployeeMenuItems(emp: EmployeeModel): MenuItem[] {
+    return [
+      {
+        label: this.translate.instant('DEPARTMENT.MENU_EMP_EDIT'),
+        icon: 'pi pi-pencil',
+        disabled: emp.status === 'INACTIVE',
+        command: () => {
+          this.router.navigate(['/employees/edit', emp._id], {
+            queryParams: { departmentId: this.department()?._id },
+          });
+        },
+      },
+      {
+        label: this.translate.instant('DEPARTMENT.MENU_EMP_TRANSFER'),
+        icon: 'pi pi-send',
+        command: () => {
+          this.openTransferModal(emp);
+        },
+      },
+      {
+        label: this.translate.instant('DEPARTMENT.MENU_EMP_DELETE'),
+        icon: 'pi pi-trash',
+        disabled: emp.status === 'ACTIVE',
+        styleClass: 'text-danger',
+        command: () => {
+          this.onDelete(emp);
+        },
+      },
+    ];
+  }
+
   isTransferModalOpen = signal(false);
   selectedEmployeeForTransfer = signal<EmployeeModel | null>(null);
   selectedTargetDepartmentId = signal('');
   transferOptions = signal<SelectOption[]>([]);
 
-  // Thêm nhân viên từ phòng ban khác
   isAddEmployeeModalOpen = signal(false);
   selectedEmployeeToTransferInId = signal('');
   searchedOtherEmployees = signal<EmployeeModel[]>([]);
   otherEmployeesList: EmployeeModel[] = [];
   searchOtherEmployeeText = '';
   activeSubTab = signal<'choose' | 'transfer'>('choose');
+  cols = [
+    { field: 'fullName', header: 'DEPARTMENT.COL_FULL_NAME' },
+    { field: 'email', header: 'DEPARTMENT.COL_EMAIL' },
+    { field: 'position', header: 'DEPARTMENT.COL_POSITION' },
+    { field: 'status', header: 'DEPARTMENT.COL_STATUS' },
+  ];
 
   private destroy$ = new Subject<void>();
 
@@ -50,7 +115,9 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     private location: Location,
     public authService: Auth,
     private notificationService: Notification,
-    private confirmService: Confirm
+    private confirmService: Confirm,
+    private router: Router,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit() {
@@ -78,7 +145,9 @@ export class DepartmentDetail implements OnInit, OnDestroy {
           this.isLoading.set(false);
         },
         error: (err) => {
-          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
+          this.errorMessage.set(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
           this.isLoading.set(false);
         },
       });
@@ -92,7 +161,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
         next: (depts) => {
           this.allDepartments.set(depts);
         },
-        error: () => {}
+        error: () => {},
       });
   }
 
@@ -110,20 +179,6 @@ export class DepartmentDetail implements OnInit, OnDestroy {
           this.isLoadingEmployees.set(false);
         },
       });
-  }
-
-  toggleActionsMenu(id: string, event: Event) {
-    event.stopPropagation();
-    if (this.activeActionsMenuId() === id) {
-      this.activeActionsMenuId.set(null);
-    } else {
-      this.activeActionsMenuId.set(id);
-    }
-  }
-
-  @HostListener('document:click')
-  closeActionsMenu() {
-    this.activeActionsMenuId.set(null);
   }
 
   openTransferModal(emp: EmployeeModel) {
@@ -153,7 +208,10 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     if (!targetDept) return;
 
     const confirmed = await this.confirmService.ask(
-      `Bạn có chắc chắn muốn chuyển nhân viên "${emp.firstName} ${emp.lastName}" sang phòng ban "${targetDept.name}"?`
+      this.translate.instant('DEPARTMENT.TRANSFER_DEPT_CONFIRM', {
+        empName: `${emp.firstName} ${emp.lastName}`,
+        deptName: this.getDepartmentName(targetDept.name),
+      }),
     );
     if (!confirmed) return;
 
@@ -161,18 +219,20 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     this.closeTransferModal();
 
     this.employeeService
-      .update(emp._id, { department: targetDeptId } as any)
+      .update(emp._id, { department: targetDeptId })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.notificationService.success('Chuyển phòng ban thành công');
+          this.notificationService.success(this.translate.instant('DEPARTMENT.TRANSFER_SUCCESS'));
           const currentDeptId = this.department()?._id;
           if (currentDeptId) {
             this.loadEmployees(currentDeptId);
           }
         },
         error: (err) => {
-          this.notificationService.error(err.error?.message || 'Có lỗi xảy ra khi chuyển phòng ban');
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.TRANSFER_ERROR'),
+          );
           this.isLoadingEmployees.set(false);
         },
       });
@@ -182,7 +242,9 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     if (!emp._id) return;
 
     const confirmed = await this.confirmService.ask(
-      `Bạn có chắc chắn muốn xóa nhân viên "${emp.firstName} ${emp.lastName}"?`
+      this.translate.instant('EMPLOYEE.DELETE_CONFIRM', {
+        name: `${emp.firstName} ${emp.lastName}`,
+      }),
     );
     if (!confirmed) return;
 
@@ -191,14 +253,16 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.notificationService.success('Xóa nhân viên thành công');
+          this.notificationService.success(this.translate.instant('EMPLOYEE.DELETE_SUCCESS'));
           const currentDeptId = this.department()?._id;
           if (currentDeptId) {
             this.loadEmployees(currentDeptId);
           }
         },
         error: (err) => {
-          this.notificationService.error(err.error?.message || 'Xóa nhân viên thất bại');
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.DELETE_EMP_ERROR'),
+          );
         },
       });
   }
@@ -212,8 +276,44 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   }
 
   getDepartmentName(dept: any): string {
-    if (!dept) return 'Chưa phân phòng';
-    return typeof dept === 'object' ? (dept.name || 'Chưa phân phòng') : dept;
+    const fallback = this.translate.instant('EMPLOYEE.UNASSIGNED');
+    if (!dept) return fallback;
+    const name = typeof dept === 'object' ? dept.name || fallback : dept;
+    const mapping: { [key: string]: string } = {
+      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
+      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
+      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
+      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
+      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
+      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
+      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
+      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
+      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
+      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
+      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
+      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
+      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
+    };
+    const translationKey = mapping[name];
+    if (translationKey) {
+      const translated = this.translate.instant(translationKey);
+      return translated !== translationKey ? translated : name;
+    }
+    return name;
+  }
+
+  getPositionTranslation(position: any): string {
+    if (!position) return '';
+    const mapping: { [key: string]: string } = {
+      'Nhân viên': 'FORM.POSITION_STAFF',
+      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
+      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
+      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
+      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
+      'Giám đốc': 'FORM.POSITION_GD',
+      'Thực tập sinh': 'FORM.POSITION_INTERN',
+    };
+    return mapping[position] || position;
   }
 
   openAddEmployeeModal() {
@@ -239,13 +339,14 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          // Chỉ lấy nhân viên đang hoạt động và đang ở phòng ban khác
-          this.otherEmployeesList = res.data.filter(emp => {
-            const empDeptId = typeof emp.department === 'string' ? emp.department : emp.department?._id;
+          // Chá»‰ láº¥y nhÃ¢n viÃªn Ä‘ang hoáº¡t Ä‘á»™ng vÃ  Ä‘ang á»Ÿ phÃ²ng ban khÃ¡c
+          this.otherEmployeesList = res.data.filter((emp) => {
+            const empDeptId =
+              typeof emp.department === 'string' ? emp.department : emp.department?._id;
             return empDeptId !== currentDeptId;
           });
         },
-        error: () => {}
+        error: () => {},
       });
   }
 
@@ -255,10 +356,11 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       this.searchedOtherEmployees.set([]);
       return;
     }
-    const filtered = this.otherEmployeesList.filter(emp => {
+    const filtered = this.otherEmployeesList.filter((emp) => {
       const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
       const position = (emp.position || '').toLowerCase();
-      const deptName = typeof emp.department === 'string' ? '' : (emp.department?.name || '').toLowerCase();
+      const deptName =
+        typeof emp.department === 'string' ? '' : (emp.department?.name || '').toLowerCase();
       return fullName.includes(term) || position.includes(term) || deptName.includes(term);
     });
     this.searchedOtherEmployees.set(filtered);
@@ -276,14 +378,17 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     const currentDept = this.department();
     if (!empId || !currentDept || !currentDept._id) return;
 
-    const emp = this.otherEmployeesList.find(e => e._id === empId);
+    const emp = this.otherEmployeesList.find((e) => e._id === empId);
     if (!emp) return;
 
-    const oldDeptName = typeof emp.department === 'string' ? 'Không có phòng ban' : (emp.department?.name || 'Không có phòng ban');
+    const oldDeptName = this.getDepartmentName(emp.department);
 
-    // Hiện thông báo xác nhận đúng theo mẫu yêu cầu
+    // Hiển thông báo xác nhận đúng theo mẫu yêu cầu
     const confirmed = await this.confirmService.ask(
-      `Nhân viên này hiện đang thuộc phòng ban "${oldDeptName}". Bạn có chắc muốn chuyển sang phòng ban "${currentDept.name}" không?`
+      this.translate.instant('DEPARTMENT.TRANSFER_IN_CONFIRM', {
+        from: oldDeptName,
+        to: this.getDepartmentName(currentDept.name),
+      }),
     );
     if (!confirmed) return;
 
@@ -291,17 +396,45 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     this.closeAddEmployeeModal();
 
     this.employeeService
-      .update(emp._id!, { department: currentDept._id } as any)
+      .update(emp._id!, { department: currentDept._id })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.notificationService.success(`Chuyển nhân viên ${emp.firstName} ${emp.lastName} vào phòng ban thành công`);
+          this.notificationService.success(
+            this.translate.instant('DEPARTMENT.TRANSFER_IN_SUCCESS'),
+          );
           this.loadEmployees(currentDept._id!);
         },
         error: (err) => {
-          this.notificationService.error(err.error?.message || 'Có lỗi xảy ra khi chuyển nhân viên');
-        this.isLoadingEmployees.set(false);
-      }
-    });
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.TRANSFER_IN_ERROR'),
+          );
+          this.isLoadingEmployees.set(false);
+        },
+      });
+  }
+
+  getDepartmentDesc(name: any, description: any): string {
+    const mapping: { [key: string]: string } = {
+      'Phòng Nhân sự': 'DEPARTMENTS_DESC.HR',
+      'Phòng Công nghệ thông tin': 'DEPARTMENTS_DESC.TECH',
+      'Phòng Kế toán': 'DEPARTMENTS_DESC.FINANCE',
+      'Phòng Marketing': 'DEPARTMENTS_DESC.MARKETING',
+      'Phòng Kinh doanh': 'DEPARTMENTS_DESC.SALES',
+      'Phòng Hành chính': 'DEPARTMENTS_DESC.ADMIN',
+      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_DESC.RD',
+      'Phòng R&D': 'DEPARTMENTS_DESC.RD',
+      'Phòng Quản lý dự án': 'DEPARTMENTS_DESC.PROJECT',
+      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_DESC.CUSTOMER_SERVICE',
+      'Phòng Pháp chế': 'DEPARTMENTS_DESC.LEGAL',
+      'Phòng Thiết kế': 'DEPARTMENTS_DESC.DESIGN',
+      'Phòng Đào tạo': 'DEPARTMENTS_DESC.TRAINING',
+    };
+    const translationKey = mapping[name];
+    if (translationKey) {
+      const translated = this.translate.instant(translationKey);
+      return translated !== translationKey ? translated : description;
+    }
+    return description || '';
   }
 }

@@ -9,7 +9,7 @@ import { SidebarState } from '../../core/sidebar-state';
   selector: 'app-main-layout',
   imports: [RouterOutlet, Navbar, Sidebar, Breadcrumb],
   templateUrl: './main-layout.html',
-  styleUrl: './main-layout.css',
+  styleUrl: './main-layout.scss',
 })
 export class MainLayout {
   constructor(public sidebarState: SidebarState) {}

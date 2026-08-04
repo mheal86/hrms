@@ -1,115 +1,196 @@
 <div class="page-fade">
-  <app-spinner *ngIf="isLoading()"></app-spinner>
-  <div *ngIf="errorMessage()" class="alert alert-danger">{{ errorMessage() }}</div>
+  @if (isLoading()) {
+    <app-spinner></app-spinner>
+  }
+  @if (errorMessage()) {
+    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
 
-  <div *ngIf="employee() as emp" class="row">
-    <div class="col-md-4">
-      <div class="card text-center">
-        <div class="card-body">
-          <img *ngIf="emp.avatarUrl" [src]="'http://localhost:5000' + emp.avatarUrl" width="120" height="120"
-            style="object-fit: cover; border-radius: 50%;" />
-          <div *ngIf="!emp.avatarUrl" class="avatar-initials-lg">
-            {{ getInitials(emp.firstName, emp.lastName) }}
-          </div>
-          <h5 class="mt-3 mb-0">{{ emp.firstName }} {{ emp.lastName }}</h5>
-          <p class="text-muted">{{ emp.position || '-' }}</p>
-          <span class="badge" [class.bg-success]="emp.status === 'ACTIVE'"
-            [class.bg-secondary]="emp.status === 'INACTIVE'">
-            {{ emp.status === 'ACTIVE' ? 'Đang hoạt động' : 'Ngừng hoạt động' }}
-          </span>
+  @if (employee(); as emp) {
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card text-center">
+          <div class="card-body">
+            @if (emp.avatarUrl) {
+              <img
+                [src]="baseUrl + emp.avatarUrl"
+                width="120"
+                height="120"
+                style="object-fit: cover; border-radius: 50%"
+              />
+            }
+            @if (!emp.avatarUrl) {
+              <div class="avatar-initials-lg">
+                {{ getInitials(emp.firstName, emp.lastName) }}
+              </div>
+            }
+            <h5 class="mt-3 mb-0">{{ emp.firstName }} {{ emp.lastName }}</h5>
+            <p class="text-muted">
+              {{ (getPositionTranslation(emp.position) | translate) || '-' }}
+            </p>
+            <span
+              class="badge"
+              [class.badge-success]="emp.status === 'ACTIVE'"
+              [class.badge-secondary]="emp.status === 'INACTIVE'"
+            >
+              {{
+                emp.status === 'ACTIVE'
+                  ? ('COMMON.ACTIVE' | translate)
+                  : ('COMMON.INACTIVE' | translate)
+              }}
+            </span>
 
-          <div class="d-grid gap-2 mt-3">
-            <!-- Chỉ hiển thị nút Sửa khi nhân viên đang hoạt động -->
-            <a *ngIf="emp.status === 'ACTIVE'" [routerLink]="['/employees/edit', emp._id]"
-              [queryParams]="{ departmentId: departmentId() }"
-              class="btn btn-primary btn-sm">Sửa thông tin</a>
-            <div *ngIf="emp.status === 'INACTIVE'" class="alert alert-warning py-2 mb-1 small text-start">
-              <strong>⚠️ Nhân viên đã ngừng hoạt động.</strong><br />
-              Không thể chỉnh sửa thông tin.
+            <div class="d-grid gap-2 mt-3">
+              <!-- Chỉ hiển thị nút Sửa khi nhân viên đang hoạt động -->
+              @if (emp.status === 'ACTIVE') {
+                <p-button
+                  [routerLink]="['/employees/edit', emp._id]"
+                  [queryParams]="{ departmentId: departmentId() }"
+                  [label]="'EMPLOYEE.EDIT_INFO_BTN' | translate"
+                  icon="pi pi-pencil"
+                  size="small"
+                ></p-button>
+              }
+              @if (emp.status === 'INACTIVE') {
+                <div class="alert alert-warning py-2 mb-1 small text-start">
+                  <strong>{{ 'EMPLOYEE.INACTIVE_WARNING_TITLE' | translate }}</strong
+                  ><br />
+                  {{ 'EMPLOYEE.INACTIVE_WARNING_TEXT' | translate }}
+                </div>
+              }
+              <p-button
+                type="button"
+                (click)="goBack()"
+                [label]="'COMMON.BACK' | translate"
+                icon="pi pi-arrow-left"
+                [outlined]="true"
+                severity="secondary"
+                size="small"
+              ></p-button>
             </div>
-            <button type="button" (click)="goBack()" class="btn btn-outline-secondary btn-sm">Quay lại</button>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="mb-3">Thông tin chi tiết</h5>
-          <table class="table table-borderless mb-0">
-            <tr>
-              <td class="fw-bold" style="width: 180px;">Email</td>
-              <td>{{ emp.email }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Số điện thoại</td>
-              <td>{{ emp.phone || '-' }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Giới tính</td>
-              <td>{{ emp.gender === 'MALE' ? 'Nam' : emp.gender === 'FEMALE' ? 'Nữ' : emp.gender === 'OTHER' ? 'Khác' :
-                '-' }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Ngày sinh</td>
-              <td>{{ emp.dateOfBirth ? (emp.dateOfBirth | date: 'dd/MM/yyyy') : '-' }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Địa chỉ</td>
-              <td>{{ emp.address || '-' }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Phòng ban</td>
-              <td>{{ getDepartmentName(emp.department) }}</td>
-            </tr>
-            <tr>
-              <td class="fw-bold">Ngày vào làm</td>
-              <td>{{ emp.hireDate ? (emp.hireDate | date: 'dd/MM/yyyy') : '-' }}</td>
-            </tr>
-            <tr *ngIf="emp.status === 'INACTIVE'">
-              <td class="fw-bold text-danger">Ngày ngừng hoạt động</td>
-              <td class="text-danger">{{ emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-' }}</td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Bảng lịch sử chuyển phòng ban -->
-      <div class="card mt-3">
-        <div class="card-body">
-          <h5 class="mb-3">Lịch sử chuyển phòng ban</h5>
-          <app-spinner *ngIf="isLoadingHistory()"></app-spinner>
-
-          <div class="table-responsive" *ngIf="!isLoadingHistory() && history().length > 0">
-            <table class="table table-sm mb-0">
-              <thead>
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="mb-3">{{ 'EMPLOYEE.DETAIL_TITLE' | translate }}</h5>
+            <p-table
+              [value]="employee() ? [employee()] : []"
+              styleClass="p-datatable-sm detail-table"
+            >
+              <ng-template #body let-emp>
                 <tr>
-                  <th>Phòng ban cũ</th>
-                  <th>Phòng ban mới</th>
-                  <th>Ngày chuyển</th>
+                  <td class="fw-bold" style="width: 180px">
+                    {{ 'EMPLOYEE.FIELD_EMAIL' | translate }}
+                  </td>
+                  <td>{{ emp.email }}</td>
                 </tr>
-              </thead>
-              <tbody>
-                @for (h of history(); track h.transferDate) {
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_PHONE' | translate }}</td>
+                  <td>{{ emp.phone || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_GENDER' | translate }}</td>
+                  <td>
+                    {{
+                      emp.gender === 'MALE'
+                        ? ('EMPLOYEE.GENDER_MALE' | translate)
+                        : emp.gender === 'FEMALE'
+                          ? ('EMPLOYEE.GENDER_FEMALE' | translate)
+                          : emp.gender === 'OTHER'
+                            ? ('EMPLOYEE.GENDER_OTHER' | translate)
+                            : '-'
+                    }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_DOB' | translate }}</td>
+                  <td>{{ emp.dateOfBirth ? (emp.dateOfBirth | date: 'dd/MM/yyyy') : '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_ADDRESS' | translate }}</td>
+                  <td>{{ emp.address || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_DEPARTMENT' | translate }}</td>
+                  <td>{{ getDepartmentName(emp.department) }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'EMPLOYEE.FIELD_HIRE_DATE' | translate }}</td>
+                  <td>{{ emp.hireDate ? (emp.hireDate | date: 'dd/MM/yyyy') : '-' }}</td>
+                </tr>
+                @if (emp.status === 'INACTIVE') {
                   <tr>
-                    <td>
-                      <span *ngIf="h.fromDepartment">{{ h.fromDepartment.name }}</span>
-                      <span *ngIf="!h.fromDepartment" class="text-muted small">Ban đầu (Tuyển dụng)</span>
+                    <td class="fw-bold text-danger">
+                      {{ 'EMPLOYEE.FIELD_DEACTIVATED_DATE' | translate }}
                     </td>
-                    <td><strong>{{ h.toDepartment?.name || '-' }}</strong></td>
-                    <td>{{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="text-danger">
+                      {{ emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-' }}
+                    </td>
                   </tr>
                 }
-              </tbody>
-            </table>
+              </ng-template>
+            </p-table>
           </div>
+        </div>
 
-          <p *ngIf="!isLoadingHistory() && history().length === 0" class="text-muted mb-0">
-            Chưa có lịch sử chuyển phòng ban.
-          </p>
+        <!-- Bảng lịch sử chuyển phòng ban -->
+        <div class="card mt-3">
+          <div class="card-body">
+            <h5 class="mb-3">{{ 'EMPLOYEE.HISTORY_TITLE' | translate }}</h5>
+            @if (isLoadingHistory()) {
+              <app-spinner></app-spinner>
+            }
+
+            @if (!isLoadingHistory() && history().length > 0) {
+              <div class="table-responsive">
+                <p-table [columns]="historyCols" [value]="history()" styleClass="p-datatable-sm">
+                  <ng-template #header let-columns>
+                    <tr>
+                      @for (col of columns; track col.field) {
+                        <th>{{ col.header | translate }}</th>
+                      }
+                    </tr>
+                  </ng-template>
+                  <ng-template #body let-h let-columns="columns">
+                    <tr>
+                      @for (col of columns; track col.field) {
+                        <td>
+                          @switch (col.field) {
+                            @case ('fromDepartment') {
+                              @if (h.fromDepartment) {
+                                <span>{{ h.fromDepartment.name }}</span>
+                              } @else {
+                                <span class="text-muted small">{{
+                                  'EMPLOYEE.HISTORY_INITIAL' | translate
+                                }}</span>
+                              }
+                            }
+                            @case ('toDepartment') {
+                              <strong>{{ h.toDepartment?.name || '-' }}</strong>
+                            }
+                            @case ('transferDate') {
+                              {{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}
+                            }
+                          }
+                        </td>
+                      }
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            }
+
+            @if (!isLoadingHistory() && history().length === 0) {
+              <p class="text-muted mb-0">
+                {{ 'EMPLOYEE.HISTORY_EMPTY' | translate }}
+              </p>
+            }
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  }
 </div>

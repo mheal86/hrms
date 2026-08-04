@@ -1,11 +1,25 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+  AbstractControl,
+  ValidationErrors,
+} from '@angular/forms';
 import { Profile as ProfileService, ProfileData } from '../profile';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { Notification } from '../../../core/notification';
 import { Subject, takeUntil } from 'rxjs';
 import { Auth } from '../../../core/auth';
+import { Dialog } from 'primeng/dialog';
+import { Password } from 'primeng/password';
+import { FloatLabel } from 'primeng/floatlabel';
+import { Button } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment';
 
 function phoneValidator(control: AbstractControl): ValidationErrors | null {
   const value = control.value as string;
@@ -25,11 +39,22 @@ function addressValidator(control: AbstractControl): ValidationErrors | null {
 
 @Component({
   selector: 'app-profile',
-  imports: [CommonModule, ReactiveFormsModule, Spinner],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    Spinner,
+    Dialog,
+    Password,
+    FloatLabel,
+    Button,
+    TableModule,
+    TranslatePipe,
+  ],
   templateUrl: './profile.html',
-  styleUrl: './profile.css',
+  styleUrl: './profile.scss',
 })
 export class Profile implements OnInit, OnDestroy {
+  baseUrl = environment.baseUrl;
   profileData = signal<ProfileData | null>(null);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -56,7 +81,8 @@ export class Profile implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private profileService: ProfileService,
     private notificationService: Notification,
-    private authService: Auth
+    private authService: Auth,
+    private translate: TranslateService,
   ) {
     this.form = this.fb.group({
       phone: ['', phoneValidator],
@@ -135,12 +161,14 @@ export class Profile implements OnInit, OnDestroy {
         next: () => {
           this.isSaving.set(false);
           this.isEditMode.set(false);
-          this.notificationService.success('Cập nhật thành công');
+          this.notificationService.success(this.translate.instant('PROFILE.UPDATE_SUCCESS'));
           this.loadProfile();
         },
         error: (err) => {
           this.isSaving.set(false);
-          this.notificationService.error(err.error?.message || 'Cập nhật thất bại');
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('PROFILE.UPDATE_ERROR'),
+          );
         },
       });
   }
@@ -167,14 +195,20 @@ export class Profile implements OnInit, OnDestroy {
     this.showConfirmPassword.set(false);
   }
 
-  toggleCurrentPassword() { this.showCurrentPassword.update(v => !v); }
-  toggleNewPassword() { this.showNewPassword.update(v => !v); }
-  toggleConfirmPassword() { this.showConfirmPassword.update(v => !v); }
+  toggleCurrentPassword() {
+    this.showCurrentPassword.update((v) => !v);
+  }
+  toggleNewPassword() {
+    this.showNewPassword.update((v) => !v);
+  }
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update((v) => !v);
+  }
 
   onChangePassword() {
     this.passwordErrorMessage.set('');
     this.passwordFormSubmitted.set(true);
- 
+
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
@@ -183,7 +217,7 @@ export class Profile implements OnInit, OnDestroy {
     const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
 
     if (newPassword !== confirmPassword) {
-      this.passwordErrorMessage.set('Mật khẩu xác nhận không khớp');
+      this.passwordErrorMessage.set(this.translate.instant('PROFILE.CONFIRM_PASS_REQUIRED'));
       return;
     }
 
@@ -195,13 +229,15 @@ export class Profile implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.isChangingPassword.set(false);
-          this.notificationService.success('Đổi mật khẩu thành công. Vui lòng đăng nhập lại.');
+          this.notificationService.success(this.translate.instant('PROFILE.CHANGE_PASS_SUCCESS'));
           this.closePasswordModal();
           this.authService.logout();
         },
         error: (err) => {
           this.isChangingPassword.set(false);
-          this.passwordErrorMessage.set(err.error?.message || 'Đổi mật khẩu thất bại');
+          this.passwordErrorMessage.set(
+            err.error?.message || this.translate.instant('PROFILE.CHANGE_PASS_ERROR'),
+          );
         },
       });
   }
@@ -211,5 +247,89 @@ export class Profile implements OnInit, OnDestroy {
       return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
     }
     return username?.charAt(0)?.toUpperCase() || '?';
+  }
+
+  get newPasswordValue(): string {
+    return this.passwordForm.get('newPassword')?.value || '';
+  }
+
+  hasMinLength(): boolean {
+    return this.newPasswordValue.length >= 6;
+  }
+
+  hasUppercase(): boolean {
+    return /[A-Z]/.test(this.newPasswordValue);
+  }
+
+  hasLowercase(): boolean {
+    return /[a-z]/.test(this.newPasswordValue);
+  }
+
+  hasNumber(): boolean {
+    return /[0-9]/.test(this.newPasswordValue);
+  }
+
+  hasSpecialChar(): boolean {
+    return /[^A-Za-z0-9]/.test(this.newPasswordValue);
+  }
+
+  get strengthValue(): number {
+    let score = 0;
+    if (this.hasMinLength()) score += 20;
+    if (this.hasUppercase()) score += 20;
+    if (this.hasLowercase()) score += 20;
+    if (this.hasNumber()) score += 20;
+    if (this.hasSpecialChar()) score += 20;
+    return score;
+  }
+
+  get strengthColor(): string {
+    const val = this.strengthValue;
+    if (val <= 40) return '#ef4444';
+    if (val <= 80) return '#f59e0b';
+    return '#22c55e';
+  }
+
+  get strengthLabel(): string {
+    const val = this.strengthValue;
+    if (val <= 40) return this.translate.instant('PROFILE.STRENGTH_WEAK');
+    if (val <= 80) return this.translate.instant('PROFILE.STRENGTH_MEDIUM');
+    return this.translate.instant('PROFILE.STRENGTH_STRONG');
+  }
+
+  getDepartmentName(dept: any): string {
+    const fallback = this.translate.instant('COMMON.UNASSIGNED');
+    if (!dept) return fallback;
+    const name = typeof dept === 'object' ? dept.name || fallback : dept;
+    const mapping: { [key: string]: string } = {
+      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
+      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
+      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
+      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
+      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
+      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
+      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
+      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
+    };
+    const translationKey = mapping[name];
+    if (translationKey) {
+      const translated = this.translate.instant(translationKey);
+      return translated !== translationKey ? translated : name;
+    }
+    return name;
+  }
+
+  getPositionTranslation(position: any): string {
+    if (!position) return '';
+    const mapping: { [key: string]: string } = {
+      'Nhân viên': 'FORM.POSITION_STAFF',
+      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
+      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
+      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
+      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
+      'Giám đốc': 'FORM.POSITION_GD',
+      'Thực tập sinh': 'FORM.POSITION_INTERN',
+    };
+    return mapping[position] || position;
   }
 }

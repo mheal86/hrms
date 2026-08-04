@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface ProfileData {
   _id: string;
@@ -30,7 +31,7 @@ export interface UpdateProfilePayload {
   providedIn: 'root',
 })
 export class Profile {
-  private apiUrl = 'http://localhost:5000/api/profile';
+  private apiUrl = `${environment.apiUrl}/profile`;
 
   constructor(private http: HttpClient) {}
 
@@ -38,11 +39,11 @@ export class Profile {
     return this.http.get<ProfileData>(this.apiUrl);
   }
 
-  updateProfile(data: UpdateProfilePayload): Observable<any> {
+  updateProfile(data: UpdateProfilePayload): Observable<unknown> {
     return this.http.put(this.apiUrl, data);
   }
 
-  changePassword(currentPassword: string, newPassword: string): Observable<any> {
-  return this.http.put(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
+  changePassword(currentPassword: string, newPassword: string): Observable<unknown> {
+    return this.http.put(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
   }
 }

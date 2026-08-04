@@ -7,6 +7,6 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
   selector: 'app-root',
   imports: [RouterOutlet, Toast, ConfirmDialog],
   templateUrl: './app.html',
-  styleUrl: './app.css',
+  styleUrl: './app.scss',
 })
 export class App {}

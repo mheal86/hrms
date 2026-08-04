@@ -1,29 +1,63 @@
-<div class="sidebar-backdrop d-md-none" *ngIf="sidebarState.isOpen()" (click)="sidebarState.close()"></div>
+@if (sidebarState.isOpen()) {
+  <div class="sidebar-backdrop d-md-none" (click)="sidebarState.close()"></div>
+}
 
-<aside class="app-sidebar" [class.sidebar-open]="sidebarState.isOpen()" [class.collapsed]="sidebarState.isDesktopCollapsed()">
+<aside
+  class="app-sidebar"
+  [class.sidebar-open]="sidebarState.isOpen()"
+  [class.collapsed]="sidebarState.isDesktopCollapsed()"
+>
   <ul class="nav flex-column p-3">
     <li class="nav-item">
-      <a class="nav-link" routerLink="/dashboard" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Trang chủ">
+      <a
+        class="nav-link"
+        routerLink="/dashboard"
+        routerLinkActive="active fw-bold"
+        (click)="sidebarState.close()"
+        [title]="'SIDEBAR.DASHBOARD' | translate"
+      >
         <i class="pi pi-home nav-icon"></i>
-        <span class="nav-text">Trang chủ</span>
+        <span class="nav-text">{{ 'SIDEBAR.DASHBOARD' | translate }}</span>
       </a>
     </li>
-    <li class="nav-item" *ngIf="authService.isAdmin()">
-      <a class="nav-link" routerLink="/departments" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Phòng ban">
-        <i class="pi pi-building nav-icon"></i>
-        <span class="nav-text">Phòng ban</span>
-      </a>
-    </li>
-    <li class="nav-item" *ngIf="authService.isAdmin()">
-      <a class="nav-link" routerLink="/employees" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Nhân viên">
-        <i class="pi pi-users nav-icon"></i>
-        <span class="nav-text">Nhân viên</span>
-      </a>
-    </li>
+    @if (authService.isAdmin()) {
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/departments"
+          routerLinkActive="active fw-bold"
+          (click)="sidebarState.close()"
+          [title]="'SIDEBAR.DEPARTMENTS' | translate"
+        >
+          <i class="pi pi-building nav-icon"></i>
+          <span class="nav-text">{{ 'SIDEBAR.DEPARTMENTS' | translate }}</span>
+        </a>
+      </li>
+    }
+    @if (authService.isAdmin()) {
+      <li class="nav-item">
+        <a
+          class="nav-link"
+          routerLink="/employees"
+          routerLinkActive="active fw-bold"
+          (click)="sidebarState.close()"
+          [title]="'SIDEBAR.EMPLOYEES' | translate"
+        >
+          <i class="pi pi-users nav-icon"></i>
+          <span class="nav-text">{{ 'SIDEBAR.EMPLOYEES' | translate }}</span>
+        </a>
+      </li>
+    }
     <li class="nav-item">
-      <a class="nav-link" routerLink="/profile" routerLinkActive="active fw-bold" (click)="sidebarState.close()" title="Hồ sơ cá nhân">
+      <a
+        class="nav-link"
+        routerLink="/profile"
+        routerLinkActive="active fw-bold"
+        (click)="sidebarState.close()"
+        [title]="'SIDEBAR.PROFILE' | translate"
+      >
         <i class="pi pi-user nav-icon"></i>
-        <span class="nav-text">Hồ sơ cá nhân</span>
+        <span class="nav-text">{{ 'SIDEBAR.PROFILE' | translate }}</span>
       </a>
     </li>
   </ul>

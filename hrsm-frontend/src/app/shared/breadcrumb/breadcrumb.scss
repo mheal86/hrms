@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+:host ::ng-deep .p-breadcrumb {
+  background: transparent;
+  border: none;
+  padding: 0 0 15px 0; /* matching padding for standard layout */
+}
+
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-item-link {
+  color: var(--color-primary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-item-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+/* Active last item */
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-item:last-child .p-breadcrumb-item-link,
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-item:last-child span {
+  color: var(--text-main);
+  font-weight: 800;
+  pointer-events: none;
+}
+
+:host ::ng-deep .p-breadcrumb .p-breadcrumb-separator {
+  color: var(--text-muted);
+  margin: 0 8px;
+}
