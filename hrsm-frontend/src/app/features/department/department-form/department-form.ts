@@ -23,7 +23,7 @@ function departmentNameValidator(control: AbstractControl): ValidationErrors | n
   if (trimmed.length === 0) {
     return { required: true };
   }
-  // Cho phÃ©p chá»¯ tiáº¿ng Viá»‡t, sá»‘, dáº¥u cÃ¡ch, dáº¥u ngoáº·c (), dáº¥u cháº¥m ., dáº¥u gáº¡ch ngang -
+  // Cho phép chữ tiếng Việt, số, dấu cách, dấu ngoặc (), dấu chấm ., dấu gạch ngang -
   const regex = /^[\p{L}0-9\s().-]+$/u;
   if (!regex.test(value)) {
     return { specialChars: true };

@@ -339,7 +339,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
-          // Chá»‰ láº¥y nhÃ¢n viÃªn Ä‘ang hoáº¡t Ä‘á»™ng vÃ  Ä‘ang á»Ÿ phÃ²ng ban khÃ¡c
+          // Chỉ lấy nhân viên đang hoạt động và đang ở phòng ban khác
           this.otherEmployeesList = res.data.filter((emp) => {
             const empDeptId =
               typeof emp.department === 'string' ? emp.department : emp.department?._id;
