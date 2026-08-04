@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "hrsm-frontend": {
+    "hrms-frontend": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -62,10 +62,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "hrsm-frontend:build:production"
+              "buildTarget": "hrms-frontend:build:production"
             },
             "development": {
-              "buildTarget": "hrsm-frontend:build:development"
+              "buildTarget": "hrms-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
