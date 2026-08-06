@@ -1,0 +1,19 @@
+# Backend
+hrms-backend/node_modules/
+hrms-backend/uploads/
+hrms-backend/environment/
+hrms-backend/.env
+
+# Frontend
+hrms-frontend/node_modules/
+hrms-frontend/dist/
+hrms-frontend/.angular/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Gemini Agent
+.agents/

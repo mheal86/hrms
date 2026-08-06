@@ -1,24 +1,28 @@
-import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
-import { Employee } from '../employee';
-import { Employee as EmployeeModel } from '../employee-model';
-import { Auth } from '../../../core/auth';
-import { Notification } from '../../../core/notification';
-import { Confirm } from '../../../core/confirm';
+import { Subject, takeUntil, finalize } from 'rxjs';
+import { Employee } from '../../../core/services/employee.service';
+import { Employee as EmployeeModel, EmployeeStatus } from '../../../core/models/employee-model';
+import { Auth } from '../../../core/services/auth';
+import { Notification } from '../../../core/services/notification';
+import { Confirm } from '../../../core/services/confirm';
 import { TableSkeleton } from '../../../shared/table-skeleton/table-skeleton';
-import { Department } from '../../department/department';
-import { Department as DepartmentModel } from '../../department/department-model';
+import { Department } from '../../../core/services/department.service';
+import { Department as DepartmentModel } from '../../../core/models/department-model';
 import { Paginator } from 'primeng/paginator';
-import { CustomSelectComponent, SelectOption } from '../../../shared/custom-select/custom-select';
+import { CustomSelectComponent } from '../../../shared/custom-select/custom-select';
+import { SelectOption } from '../../../core/models/select-option-model';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
+import { LanguageService } from '../../../core/services/language.service';
+import { getInitials } from '../../../core/utils/employee-utils';
 
 @Component({
   selector: 'app-employee-list',
@@ -30,6 +34,7 @@ import { environment } from '../../../../environments/environment';
     Paginator,
     CustomSelectComponent,
     Button,
+    InputText,
     TableModule,
     Menu,
     TranslatePipe,
@@ -38,6 +43,14 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './employee-list.scss',
 })
 export class EmployeeList implements OnInit, OnDestroy {
+  employeeService = inject(Employee);
+  authService = inject(Auth);
+  notificationService = inject(Notification);
+  confirmService = inject(Confirm);
+  departmentService = inject(Department);
+  translate = inject(TranslateService);
+  languageService = inject(LanguageService);
+
   baseUrl = environment.baseUrl;
   employees = signal<EmployeeModel[]>([]);
   isLoading = signal(false);
@@ -57,34 +70,18 @@ export class EmployeeList implements OnInit, OnDestroy {
   get statusOptions(): SelectOption[] {
     return [
       { label: this.translate.instant('EMPLOYEE.ALL_STATUS'), value: '' },
-      { label: this.translate.instant('EMPLOYEE.STATUS_ACTIVE'), value: 'ACTIVE' },
-      { label: this.translate.instant('EMPLOYEE.STATUS_INACTIVE'), value: 'INACTIVE' },
+      { label: this.translate.instant('EMPLOYEE.STATUS_ACTIVE'), value: EmployeeStatus.ACTIVE },
+      { label: this.translate.instant('EMPLOYEE.STATUS_INACTIVE'), value: EmployeeStatus.INACTIVE },
     ];
   }
 
   get departmentOptions(): SelectOption[] {
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
-      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
-    };
     return [
       { label: this.translate.instant('EMPLOYEE.ALL_DEPARTMENTS'), value: '' },
-      ...this.departments().map((d) => {
-        const translationKey = mapping[d.name];
-        const label = translationKey ? this.translate.instant(translationKey) : d.name;
-        return { label, value: d._id };
-      }),
+      ...this.departments().map((d) => ({
+        label: this.languageService.getDepartmentName(d.name),
+        value: d._id || '',
+      })),
     ];
   }
   currentPage = signal(1);
@@ -95,32 +92,9 @@ export class EmployeeList implements OnInit, OnDestroy {
   sortField = 'createdAt';
   sortOrder: 'asc' | 'desc' = 'desc';
 
-  activeActionsMenuId = signal<string | null>(null);
 
-  toggleActionsMenu(id: string, event: Event) {
-    event.stopPropagation();
-    if (this.activeActionsMenuId() === id) {
-      this.activeActionsMenuId.set(null);
-    } else {
-      this.activeActionsMenuId.set(id);
-    }
-  }
 
-  @HostListener('document:click')
-  closeActionsMenu() {
-    this.activeActionsMenuId.set(null);
-  }
-
-  private destroy$ = new Subject<void>();
-
-  constructor(
-    private employeeService: Employee,
-    public authService: Auth,
-    private notificationService: Notification,
-    private confirmService: Confirm,
-    private departmentService: Department,
-    private translate: TranslateService,
-  ) {}
+  destroy$ = new Subject<void>();
 
   ngOnInit() {
     this.loadDepartmentsForFilter();
@@ -138,6 +112,11 @@ export class EmployeeList implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => this.departments.set(data),
+        error: (err) => {
+          this.errorMessage.set(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
+        },
       });
   }
 
@@ -153,19 +132,20 @@ export class EmployeeList implements OnInit, OnDestroy {
         this.departmentFilter,
         this.statusFilter,
       )
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
       .subscribe({
         next: (res) => {
           this.employees.set(res.data);
           this.totalPages.set(res.pagination.totalPages);
           this.total.set(res.pagination.total);
-          this.isLoading.set(false);
         },
         error: (err) => {
           this.errorMessage.set(
             err.error?.message || this.translate.instant('EMPLOYEE.LOAD_ERROR'),
           );
-          this.isLoading.set(false);
         },
       });
   }
@@ -221,7 +201,7 @@ export class EmployeeList implements OnInit, OnDestroy {
   onToggleStatus(emp: EmployeeModel) {
     if (!emp._id) return;
 
-    const newStatus = emp.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const newStatus = emp.status === EmployeeStatus.ACTIVE ? EmployeeStatus.INACTIVE : EmployeeStatus.ACTIVE;
 
     this.employeeService
       .update(emp._id, { ...emp, status: newStatus })
@@ -240,11 +220,6 @@ export class EmployeeList implements OnInit, OnDestroy {
       });
   }
 
-  getSortIcon(field: string): string {
-    if (this.sortField !== field) return '↕';
-    return this.sortOrder === 'asc' ? '↑' : '↓';
-  }
-
   menuItems: MenuItem[] = [];
 
   getEmployeeMenuItems(emp: EmployeeModel): MenuItem[] {
@@ -257,61 +232,18 @@ export class EmployeeList implements OnInit, OnDestroy {
       {
         label: this.translate.instant('EMPLOYEE.MENU_EDIT'),
         icon: 'pi pi-pencil',
-        disabled: emp.status === 'INACTIVE',
+        disabled: emp.status === EmployeeStatus.INACTIVE,
         routerLink: ['/employees/edit', emp._id],
       },
       {
         label: this.translate.instant('EMPLOYEE.MENU_DELETE'),
         icon: 'pi pi-trash',
-        disabled: emp.status === 'ACTIVE',
+        disabled: emp.status === EmployeeStatus.ACTIVE,
         styleClass: 'text-danger',
         command: () => this.onDelete(emp),
       },
     ];
   }
 
-  getDepartmentName(dept: any): string {
-    const fallback = this.translate.instant('EMPLOYEE.UNASSIGNED');
-    if (!dept) return fallback;
-    const name = typeof dept === 'object' ? dept.name || fallback : dept;
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
-      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
-    };
-    const translationKey = mapping[name];
-    if (translationKey) {
-      const translated = this.translate.instant(translationKey);
-      return translated !== translationKey ? translated : name;
-    }
-    return name;
-  }
-
-  getPositionTranslation(position: any): string {
-    if (!position) return '';
-    const mapping: { [key: string]: string } = {
-      'Nhân viên': 'FORM.POSITION_STAFF',
-      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
-      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
-      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
-      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
-      'Giám đốc': 'FORM.POSITION_GD',
-      'Thực tập sinh': 'FORM.POSITION_INTERN',
-    };
-    return mapping[position] || position;
-  }
-
-  getInitials(firstName: string, lastName: string): string {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  }
+  getInitials = getInitials;
 }

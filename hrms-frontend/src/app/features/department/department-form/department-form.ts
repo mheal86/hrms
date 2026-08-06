@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -8,10 +8,10 @@ import {
   ValidationErrors,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Department } from '../department';
-import { Department as DepartmentModel } from '../department-model';
+import { Department } from '../../../core/services/department.service';
+import { Department as DepartmentModel } from '../../../core/models/department-model';
 import { Spinner } from '../../../shared/spinner/spinner';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { FormlyModule, FormlyFieldConfig } from '@ngx-formly/core';
 import { Button } from 'primeng/button';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -38,34 +38,32 @@ function departmentNameValidator(control: AbstractControl): ValidationErrors | n
   styleUrl: './department-form.scss',
 })
 export class DepartmentForm implements OnInit, OnDestroy {
-  form: FormGroup;
+  fb = inject(FormBuilder);
+  departmentService = inject(Department);
+  route = inject(ActivatedRoute);
+  router = inject(Router);
+  location = inject(Location);
+  translate = inject(TranslateService);
+
+  form: FormGroup = this.fb.group({});
   model: Partial<DepartmentModel> = {};
   fields: FormlyFieldConfig[] = [];
 
   isEditMode = signal(false);
-  departmentId: string | null = null;
+  departmentId?: string;
   errorMessage = signal('');
   isLoading = signal(false);
-  private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private departmentService: Department,
-    private route: ActivatedRoute,
-    private router: Router,
-    private location: Location,
-    private translate: TranslateService,
-  ) {
-    this.form = this.fb.group({});
-  }
+  destroy$ = new Subject<void>();
 
   ngOnInit() {
-    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.initFields();
-    });
+    merge(
+      of(null),
+      this.translate.onLangChange
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.initFields());
 
-    this.initFields();
-    this.departmentId = this.route.snapshot.paramMap.get('id');
+    this.departmentId = this.route.snapshot.paramMap.get('id') ?? undefined;
 
     if (this.departmentId) {
       this.isEditMode.set(true);
@@ -117,20 +115,21 @@ export class DepartmentForm implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.departmentService
       .getById(id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
       .subscribe({
         next: (data) => {
           this.model = {
             name: data.name,
             description: data.description,
           };
-          this.isLoading.set(false);
         },
         error: (err) => {
           this.errorMessage.set(
             err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
           );
-          this.isLoading.set(false);
         },
       });
   }
@@ -148,16 +147,19 @@ export class DepartmentForm implements OnInit, OnDestroy {
       ? this.departmentService.update(this.departmentId!, formValue)
       : this.departmentService.create(formValue);
 
-    request.pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
-        this.isLoading.set(false);
-        this.router.navigate(['/departments']);
-      },
-      error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.SAVE_ERROR'));
-      },
-    });
+    request
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/departments']);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.SAVE_ERROR'));
+        },
+      });
   }
 
   onCancel() {

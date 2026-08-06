@@ -1,190 +1,212 @@
+@use 'sass:list';
+
+// ─── Variables ───────────────────────────────────────────────
+$avatar-size-sm: 32px;
+$border-radius-circle: 50%;
+$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+$chart-height: 240px;
+$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ─── Mixins ──────────────────────────────────────────────────
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin avatar-initials($size, $font-size) {
+  width: $size;
+  height: $size;
+  border-radius: $border-radius-circle;
+  @include flex-center;
+  background: $avatar-gradient;
+  font-size: $font-size;
+  font-weight: 600;
+}
+
+@mixin soft-icon-bg($bg-light, $color, $bg-dark: null) {
+  background-color: $bg-light;
+  svg { stroke: $color; }
+  i   { color: $color; }
+
+  @if $bg-dark {
+    .dark-theme & {
+      background-color: $bg-dark;
+      svg { stroke: $color; }
+    }
+  }
+}
+
+@mixin scrollable-panel($max-height) {
+  max-height: $max-height;
+  overflow-y: auto;
+}
+
+// ─── Stat Card ───────────────────────────────────────────────
 .stat-card {
   transition:
     transform 0.25s ease,
     box-shadow 0.25s ease;
   cursor: default;
   animation: fadeInCard 0.4s ease-out backwards;
+
+  .card-title {
+    font-size: 0.78rem;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card-hover);
+  }
 }
 
-.stat-card:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-card-hover);
+// ─── Card animation delays ───────────────────────────────────
+@for $i from 1 through 4 {
+  .col-md-3:nth-child(#{$i}) .stat-card {
+    animation-delay: #{$i * 0.05}s;
+  }
 }
 
+@keyframes fadeInCard {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ─── Stat Icon ───────────────────────────────────────────────
 .stat-icon {
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  @include flex-center;
   flex-shrink: 0;
+
+  i {
+    font-size: 1.25rem;
+  }
 }
 
-/* ─── Soft icon backgrounds — Light Mode ─── */
-.bg-primary-soft {
-  background-color: var(--color-primary-subtle);
-}
-.bg-primary-soft svg {
-  stroke: var(--color-primary);
+// ─── Soft Icon Backgrounds ───────────────────────────────────
+$soft-icon-themes: (
+  "primary": (var(--color-primary-subtle), var(--color-primary), rgba(79, 70, 229, 0.2)),
+  "success": (var(--color-success-bg), var(--color-success), null),
+  "info": (var(--color-info-bg), var(--color-info), null),
+  "warning": (var(--color-warning-bg), var(--color-warning), null)
+);
+
+@each $name, $colors in $soft-icon-themes {
+  .bg-#{$name}-soft {
+    @include soft-icon-bg(list.nth($colors, 1), list.nth($colors, 2), list.nth($colors, 3));
+  }
 }
 
-.bg-success-soft {
-  background-color: var(--color-success-bg);
-}
-.bg-success-soft svg {
-  stroke: var(--color-success);
-}
-
-.bg-info-soft {
-  background-color: var(--color-info-bg);
-}
-.bg-info-soft svg {
-  stroke: var(--color-info);
-}
-
-.bg-warning-soft {
-  background-color: var(--color-warning-bg);
-}
-.bg-warning-soft svg {
-  stroke: var(--color-warning);
-}
-
-/* ─── Soft icon backgrounds — Dark Mode ─── */
-.dark-theme .bg-primary-soft {
-  background-color: rgba(79, 70, 229, 0.2);
-}
-.dark-theme .bg-primary-soft svg {
-  stroke: var(--color-primary);
-}
-
-.dark-theme .bg-success-soft {
-  background-color: var(--color-success-bg);
-}
-.dark-theme .bg-success-soft svg {
-  stroke: var(--color-success);
-}
-
-.dark-theme .bg-info-soft {
-  background-color: var(--color-info-bg);
-}
-.dark-theme .bg-info-soft svg {
-  stroke: var(--color-info);
-}
-
-.dark-theme .bg-warning-soft {
-  background-color: var(--color-warning-bg);
-}
-.dark-theme .bg-warning-soft svg {
-  stroke: var(--color-warning);
-}
-
-/* ─── Avatar small ─── */
+// ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  width: $avatar-size-sm;
+  height: $avatar-size-sm;
+  border-radius: $border-radius-circle;
   object-fit: cover;
 }
 
 .avatar-initials {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+  @include avatar-initials($avatar-size-sm, 12px);
   color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
 }
 
-/* ─── Card animation delays ─── */
-.col-md-3:nth-child(1) .stat-card {
-  animation-delay: 0.05s;
-}
-.col-md-3:nth-child(2) .stat-card {
-  animation-delay: 0.1s;
-}
-.col-md-3:nth-child(3) .stat-card {
-  animation-delay: 0.15s;
-}
-.col-md-3:nth-child(4) .stat-card {
-  animation-delay: 0.2s;
-}
-
-@keyframes fadeInCard {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+// ─── Scrollable Containers ───────────────────────────────────
+%scrollbar-style {
+  &::-webkit-scrollbar       { width: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 4px;
+    &:hover { background-color: var(--text-muted); }
   }
 }
 
-/* Custom Scrollbar for table container */
-.scrollable-table-container::-webkit-scrollbar {
-  width: 6px;
+.scrollable-table-container,
+.legend-scroll-container {
+  @extend %scrollbar-style;
 }
 
-.scrollable-table-container::-webkit-scrollbar-track {
-  background: transparent;
+.legend-scroll-container   { @include scrollable-panel($chart-height); }
+.dashboard-table-container { @include scrollable-panel($chart-height); position: relative; }
+
+.scrollable-table-container {
+  padding: 3px;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    z-index: 10;
+    box-shadow: inset 0 -1px 0 var(--table-border);
+  }
 }
 
-.scrollable-table-container::-webkit-scrollbar-thumb {
-  background-color: var(--border-color);
-  border-radius: 4px;
-}
-
-.scrollable-table-container::-webkit-scrollbar-thumb:hover {
-  background-color: var(--text-muted);
-}
-
-.scrollable-table-container thead th {
-  position: sticky;
-  top: 0;
-  background-color: var(--table-header-bg);
-  color: var(--table-header-text);
-  z-index: 10;
-  box-shadow: inset 0 -1px 0 var(--table-border);
-}
-
-/* ─── Chart container height ─── */
+// ─── Chart Container ─────────────────────────────────────────
 .chart-container {
-  min-height: 240px;
-  height: 240px;
+  position: relative;
+  min-height: $chart-height;
+  height: $chart-height;
 }
 
-/* ─── Entry animations for Chart Card ─── */
 .chart-card {
   animation: fadeInChartCard 0.4s ease-out backwards;
 }
 
 @keyframes fadeInChartCard {
-  from {
-    opacity: 0;
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ─── PrimeNG Overrides ───────────────────────────────────────
+:host ::ng-deep {
+  .scrollable-table-container .p-datatable {
+    border-color: var(--border-strong);
   }
-  to {
-    opacity: 1;
+
+  .p-chart {
+    display: block;
+    min-height: 220px;
+    max-height: 220px;
+    min-width: 100%;
+    max-width: 100%;
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 
-/* Custom sizing to prevent PrimeNG Chart from overflowing container */
-/* Avoid important by using display override and min/max dimensions */
-body :host ::ng-deep .p-chart {
-  display: block;
-  min-height: 220px;
-  max-height: 220px;
-  min-width: 100%;
-  max-width: 100%;
+// ─── Legend Items ─────────────────────────────────────────────
+.legend-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--divider);
+  transition: background-color 0.15s ease;
+  border-radius: 6px;
+
+  &:hover {
+    background-color: var(--surface-hover);
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
-/* Override inline styles injected dynamically by Chart.js using min/max height and width */
-body :host ::ng-deep .p-chart canvas {
-  min-height: 220px;
-  max-height: 220px;
-  min-width: 100%;
-  max-width: 100%;
+
+.legend-label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
 }
+
+.legend-value {
+  color: var(--text-main);
+  font-size: 0.875rem;
+}
+

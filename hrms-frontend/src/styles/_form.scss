@@ -1,0 +1,174 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.form-control,
+.form-select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid var(--input-border);
+  border-radius: $radius-lg; // 8px
+  transition:
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:focus {
+    border-color: var(--input-focus-border);
+    box-shadow: 0 0 0 4px var(--input-focus-ring);
+    background-color: var(--input-bg);
+    outline: none;
+  }
+
+  &:hover:not(:focus):not(:disabled) {
+    border-color: var(--border-strong);
+  }
+
+  &:disabled {
+    background-color: var(--input-disabled-bg);
+    color: var(--input-disabled-text);
+    border-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 1;
+  }
+
+  &.is-invalid {
+    border-color: var(--input-error-border);
+    background-color: var(--color-error-bg);
+
+    &:focus {
+      box-shadow: 0 0 0 3px var(--input-error-focus-ring);
+    }
+  }
+
+  .dark-theme & {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      color: var(--input-disabled-text);
+    }
+  }
+}
+
+.form-control {
+  padding: #{$space-md} #{$space-xl}; // 10px 14px
+}
+
+.form-select {
+  padding: 10px 36px 10px 14px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: var(--select-arrow);
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 12px;
+}
+
+input[type='file'].form-control {
+  padding: #{$space-sm} #{$space-lg}; // 8px 12px
+  cursor: pointer;
+
+  &::file-selector-button {
+    background-color: var(--input-disabled-bg);
+    color: var(--text-secondary);
+    border: none;
+    border-radius: $radius-sm; // 6px
+    padding: 4px 12px;
+    font-weight: 500;
+    margin-right: #{$space-sm};
+    transition: #{$transition-normal};
+
+    &:hover {
+      background-color: var(--border-color);
+    }
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 6px;
+  font-size: $font-normal; // 0.875rem
+}
+
+.invalid-feedback {
+  color: var(--color-error);
+  font-size: $font-md; // 0.8rem
+  font-weight: 500;
+}
+
+/* ─── Date Input ─── */
+input[type='date'] {
+  position: relative;
+  padding-left: 38px;
+
+  &::-webkit-calendar-picker-indicator {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    transition:
+      filter #{$transition-slow},
+      opacity #{$transition-normal};
+    opacity: 0.6;
+
+    &:hover {
+      opacity: 1;
+    }
+
+    .dark-theme & {
+      filter: invert(1) brightness(1.8);
+    }
+  }
+}
+
+/* ─── Password Toggle Wrapper ─── */
+.password-wrapper {
+  position: relative;
+  display: block;
+
+  .form-control {
+    padding-right: 44px;
+
+    &.is-invalid {
+      background-position: right 36px center;
+      padding-right: 64px;
+    }
+  }
+
+  .password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    border-radius: $radius-xs; // 4px
+    transition: color #{$transition-normal};
+    z-index: 5;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+
+    svg {
+      display: block;
+      pointer-events: none;
+    }
+  }
+
+  input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+}

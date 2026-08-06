@@ -17,20 +17,49 @@ exports.getSummary = async (req, res) => {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
 
+    // Last month boundaries
+    const lastMonthStart = new Date(currentYear, currentMonth - 1, 1, 0, 0, 0, 0);
     const lastMonthEnd = new Date(currentYear, currentMonth, 0, 23, 59, 59, 999);
+
+    // This month boundaries
+    const thisMonthStart = new Date(currentYear, currentMonth, 1, 0, 0, 0, 0);
     const thisMonthEnd = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
 
     const allDepts = await Department.find();
 
     const activeEmployeesByDept = await Employee.aggregate([
       {
-        $match: { status: 'ACTIVE' },
+        $match: { status: 'ACTIVE' }
       },
       {
         $project: {
           department: 1,
-          isLastMonth: { $cond: [{ $lte: ['$hireDate', lastMonthEnd] }, 1, 0] },
-          isThisMonth: { $cond: [{ $lte: ['$hireDate', thisMonthEnd] }, 1, 0] },
+          isLastMonth: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ['$hireDate', null] },
+                  { $gte: ['$hireDate', lastMonthStart] },
+                  { $lte: ['$hireDate', lastMonthEnd] }
+                ]
+              },
+              1,
+              0
+            ]
+          },
+          isThisMonth: {
+            $cond: [
+              {
+                $and: [
+                  { $ne: ['$hireDate', null] },
+                  { $gte: ['$hireDate', thisMonthStart] },
+                  { $lte: ['$hireDate', thisMonthEnd] }
+                ]
+              },
+              1,
+              0
+            ]
+          }
         },
       },
       {
@@ -38,6 +67,7 @@ exports.getSummary = async (req, res) => {
           _id: '$department',
           lastMonthCount: { $sum: '$isLastMonth' },
           thisMonthCount: { $sum: '$isThisMonth' },
+          totalCount: { $sum: 1 },
         },
       },
     ]);
@@ -48,21 +78,24 @@ exports.getSummary = async (req, res) => {
         countMap[item._id.toString()] = {
           lastMonthCount: item.lastMonthCount,
           thisMonthCount: item.thisMonthCount,
+          totalCount: item.totalCount,
         };
       } else {
         countMap['unassigned'] = {
           lastMonthCount: item.lastMonthCount,
           thisMonthCount: item.thisMonthCount,
+          totalCount: item.totalCount,
         };
       }
     });
 
     const employeesByDepartment = allDepts.map((dept) => {
-      const counts = countMap[dept._id.toString()] || { lastMonthCount: 0, thisMonthCount: 0 };
+      const counts = countMap[dept._id.toString()] || { lastMonthCount: 0, thisMonthCount: 0, totalCount: 0 };
       return {
         departmentName: dept.name,
         lastMonthCount: counts.lastMonthCount,
         thisMonthCount: counts.thisMonthCount,
+        totalCount: counts.totalCount,
       };
     });
 
@@ -71,10 +104,11 @@ exports.getSummary = async (req, res) => {
         departmentName: 'Chưa phân phòng',
         lastMonthCount: countMap['unassigned'].lastMonthCount,
         thisMonthCount: countMap['unassigned'].thisMonthCount,
+        totalCount: countMap['unassigned'].totalCount,
       });
     }
 
-    employeesByDepartment.sort((a, b) => b.thisMonthCount - a.thisMonthCount);
+    employeesByDepartment.sort((a, b) => b.totalCount - a.totalCount);
 
     res.status(200).json({
       totalEmployees,

@@ -1,0 +1,55 @@
+@use "variables" as *;
+
+// Flex layout builder
+@mixin flex-layout($justify: flex-start, $align: stretch, $direction: row, $gap: null) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  @if $gap {
+    gap: $gap;
+  }
+}
+
+// Center-flex shortcut
+@mixin flex-center($gap: null) {
+  @include flex-layout(center, center, row, $gap);
+}
+
+// Responsive mobile breakpoint (max-width: 767.98px)
+@mixin mobile {
+  @media (max-width: 767.98px) {
+    @content;
+  }
+}
+
+// Responsive tablet and up breakpoint (min-width: 768px)
+@mixin tablet-up {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+// Custom scrollbar styling helper
+@mixin custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: $radius-xs;
+
+    &:hover {
+      background-color: var(--text-muted);
+    }
+  }
+}

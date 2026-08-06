@@ -1,9 +1,9 @@
-import { Component, OnDestroy, signal } from '@angular/core';
+import { Component, OnDestroy, signal, inject } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Auth } from '../../../core/auth';
+import { Auth } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { Password } from 'primeng/password';
@@ -16,23 +16,19 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   styleUrl: './login.scss',
 })
 export class Login implements OnDestroy {
-  loginForm: FormGroup;
+  fb = inject(FormBuilder);
+  authService = inject(Auth);
+  router = inject(Router);
+  translate = inject(TranslateService);
+
+  loginForm: FormGroup = this.fb.group({
+    username: ['', Validators.required],
+    password: ['', Validators.required],
+  });
   errorMessage = signal('');
   isLoading = signal(false);
   showPassword = signal(false);
-  private destroy$ = new Subject<void>();
-
-  constructor(
-    private fb: FormBuilder,
-    private authService: Auth,
-    private router: Router,
-    private translate: TranslateService,
-  ) {
-    this.loginForm = this.fb.group({
-      username: ['', Validators.required],
-      password: ['', Validators.required],
-    });
-  }
+  destroy$ = new Subject<void>();
 
   togglePasswordVisibility() {
     this.showPassword.update((v) => !v);
@@ -51,14 +47,15 @@ export class Login implements OnDestroy {
 
     this.authService
       .login(username, password)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
       .subscribe({
         next: () => {
-          this.isLoading.set(false);
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {
-          this.isLoading.set(false);
           const rawMessage = err.error?.message;
           let translatedMessageKey = 'AUTH.ERROR_FAILED';
 

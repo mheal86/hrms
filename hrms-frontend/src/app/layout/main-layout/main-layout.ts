@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Navbar } from '../navbar/navbar';
 import { Sidebar } from '../sidebar/sidebar';
 import { Breadcrumb } from '../../shared/breadcrumb/breadcrumb';
-import { SidebarState } from '../../core/sidebar-state';
+import { SidebarState } from '../../core/services/sidebar-state';
 
 @Component({
   selector: 'app-main-layout',
@@ -12,5 +12,5 @@ import { SidebarState } from '../../core/sidebar-state';
   styleUrl: './main-layout.scss',
 })
 export class MainLayout {
-  constructor(public sidebarState: SidebarState) {}
+  sidebarState = inject(SidebarState);
 }

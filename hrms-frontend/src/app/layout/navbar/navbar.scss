@@ -1,166 +1,82 @@
-:host {
-  display: block;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1030;
-}
+// ─── Variables ───────────────────────────────────────────────
+$navbar-height: 56px;
+$nav-btn-size: 36px;
+$nav-btn-radius: 8px;
+$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+$icon-font-lg: 1.2rem;
+$icon-font-sm: 1rem;
 
-/* ─── Header / Navbar ─── */
-.app-navbar {
-  background: var(--bg-sidebar);
-  /* Deep Indigo — consistent with sidebar */
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-  height: 56px;
-  transition: background-color 0.3s ease;
-}
-
-.navbar-brand {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-}
-
-.navbar-brand span {
-  color: #818cf8;
-  /* Indigo-400 accent on brand */
-}
-
-/* Hamburger */
-:host ::ng-deep .app-navbar .hamburger-btn.p-button,
-:host ::ng-deep .app-navbar .hamburger-btn .p-button {
-  background: transparent;
-  border: none;
-  color: #a5b4fc;
-  padding: 6px;
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-:host ::ng-deep .app-navbar .hamburger-btn.p-button:hover,
-:host ::ng-deep .app-navbar .hamburger-btn:hover .p-button {
-  color: #ffffff;
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-/* PrimeNG Desktop Toggler Customization */
-:host ::ng-deep .app-navbar .sidebar-trigger-btn.p-button,
-:host ::ng-deep .app-navbar .sidebar-trigger-btn .p-button {
-  color: #a5b4fc;
-  background: transparent;
-  border: none;
-  transition: all 0.2s ease;
-  padding: 6px;
-  width: 36px;
-  height: 36px;
+// ─── Mixins ──────────────────────────────────────────────────
+@mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
 }
 
-:host ::ng-deep .app-navbar .sidebar-trigger-btn.p-button:hover,
-:host ::ng-deep .app-navbar .sidebar-trigger-btn:hover .p-button {
-  color: #ffffff;
-  background-color: transparent; /* Only icon, transparent background */
+@mixin nav-icon-btn($size: $nav-btn-size) {
+  @include flex-center;
+  display: inline-flex;
+  width: $size;
+  height: $size;
+  padding: 6px;
+  border-radius: $nav-btn-radius;
+  background: transparent;
+  border: none;
+  transition: all 0.2s ease;
 }
 
-/* User info text */
+// ─── Host ────────────────────────────────────────────────────
+:host {
+  display: block;
+  position: fixed;
+  inset: 0 0 auto 0;
+  width: 100%;
+  z-index: 999;
+
+// ─── Navbar ──────────────────────────────────────────────────
+.app-navbar {
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+  height: $navbar-height;
+  transition: background-color 0.3s ease;
+}
+
+// ─── Brand ───────────────────────────────────────────────────
+.navbar-brand {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 800;
+  color: var(--nav-text-active);
+  letter-spacing: -0.02em;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+
+  span {
+    color: var(--nav-brand-accent);
+  }
+}
+
+// ─── User Info ───────────────────────────────────────────────
 .navbar-user-text {
-  color: #e0e7ff;
-  /* Indigo-100 */
+  color: var(--nav-text-hover);
   font-weight: 500;
   font-size: 0.9rem;
 }
 
 .navbar-user-role {
-  color: #a5b4fc;
-  /* Indigo-300 */
+  color: var(--nav-text-muted);
   font-size: 0.78rem;
 }
 
-/* Logout button */
-:host ::ng-deep .app-navbar .logout-btn.p-button,
-:host ::ng-deep .app-navbar .logout-btn .p-button {
-  border: 1px solid #ef4444;
-  color: #ffffff;
-  background-color: #ef4444;
-  padding: 8px;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  transition: all 0.25s ease-in-out;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:host ::ng-deep .app-navbar .logout-btn.p-button:hover,
-:host ::ng-deep .app-navbar .logout-btn:hover .p-button {
-  background: #dc2626; /* Darker red on hover */
-  border-color: #dc2626;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
-  transform: translateY(-1.5px);
-}
-
-/* Theme toggle button wrapper/host styling */
-:host ::ng-deep .app-navbar p-button.theme-toggle-btn,
-:host ::ng-deep .app-navbar .theme-toggle-btn.p-button {
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Theme toggle inner button styling */
-:host ::ng-deep .app-navbar .theme-toggle-btn .p-button {
-  background: transparent;
-  border: none;
-  color: #a5b4fc;
-  padding: 0;
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-:host ::ng-deep .app-navbar .theme-toggle-btn.p-button:hover,
-:host ::ng-deep .app-navbar .theme-toggle-btn:hover .p-button {
-  background-color: transparent; /* Only icon, transparent background */
-  color: #ffffff;
-  transform: rotate(20deg);
-}
-
-:host ::ng-deep .app-navbar .theme-toggle-btn.p-button:active,
-:host ::ng-deep .app-navbar .theme-toggle-btn:active .p-button {
-  transform: scale(0.9) rotate(20deg);
-}
-
-/* Icon animation */
+// ─── Theme Icons ─────────────────────────────────────────────
 .sun-icon,
 .moon-icon {
+  font-size: $icon-font-lg;
   animation: rotateIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logout-icon {
+  font-size: $icon-font-sm;
 }
 
 @keyframes rotateIn {
@@ -168,44 +84,15 @@
     transform: rotate(-60deg) scale(0.7);
     opacity: 0;
   }
-
   to {
     transform: rotate(0) scale(1);
     opacity: 1;
   }
 }
 
-/* ─── Language Switcher ─── */
+// ─── Language Switcher ───────────────────────────────────────
 .lang-switcher-wrapper {
   position: relative;
-}
-
-:host ::ng-deep .app-navbar .lang-select.p-select.p-component {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  height: 34px;
-  min-width: 140px;
-  color: #e2e8f0;
-  transition: all 0.2s ease;
-}
-
-:host ::ng-deep .app-navbar .lang-select.p-select.p-component:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-:host ::ng-deep .app-navbar .lang-select .p-select-label {
-  color: #e2e8f0;
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 0 0.5rem;
-  line-height: 34px;
-}
-
-:host ::ng-deep .app-navbar .lang-select .p-select-dropdown {
-  color: #a5b4fc;
-  width: 28px;
 }
 
 .lang-option {
@@ -213,4 +100,106 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+// ─── PrimeNG Overrides ───────────────────────────────────────
+  ::ng-deep {
+  .app-navbar {
+    // Hamburger & Sidebar Trigger share same shape
+    .hamburger-btn.p-button,
+    .hamburger-btn .p-button,
+    .sidebar-trigger-btn.p-button,
+    .sidebar-trigger-btn .p-button {
+      @include nav-icon-btn;
+      color: var(--nav-text-muted);
+
+      &:hover {
+        color: var(--nav-text-active);
+        background-color: var(--nav-item-hover-bg);
+      }
+    }
+
+    // Sidebar trigger has transparent hover bg
+    .sidebar-trigger-btn.p-button:hover,
+    .sidebar-trigger-btn:hover .p-button {
+      background-color: transparent;
+    }
+
+    // Logout button
+    .logout-btn.p-button,
+    .logout-btn .p-button {
+      @include flex-center;
+      display: inline-flex;
+      width: $nav-btn-size;
+      height: $nav-btn-size;
+      padding: 8px;
+      border-radius: $nav-btn-radius;
+      border: 1px solid var(--nav-danger);
+      color: var(--nav-text-active);
+      background-color: var(--nav-danger);
+      transition: all 0.25s ease-in-out;
+
+      &:hover {
+        background: var(--nav-danger-hover);
+        border-color: var(--nav-danger-hover);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+        transform: translateY(-1.5px);
+      }
+    }
+
+    // Theme toggle
+    .theme-toggle-btn.p-button,
+    .theme-toggle-btn.p-button.p-button-secondary {
+      @include flex-center;
+      display: inline-flex;
+      width: $nav-btn-size;
+      height: $nav-btn-size;
+      padding: 0;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      color: var(--nav-text-muted);
+      transition: all 0.3s $easing-spring;
+
+      &:hover {
+        background-color: var(--nav-item-hover-bg);
+        color: var(--nav-text-active);
+        transform: rotate(20deg);
+      }
+
+      &:active {
+        transform: scale(0.9) rotate(20deg);
+      }
+    }
+
+    // Language dropdown
+    .lang-select.p-select.p-component {
+      background: var(--nav-bg-glass);
+      border: 1px solid var(--nav-border-light);
+      border-radius: $nav-btn-radius;
+      height: 34px;
+      min-width: 110px;
+      color: var(--nav-text-slate);
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: var(--nav-bg-glass-hover);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      .p-select-label {
+        color: var(--nav-text-slate);
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 0 0.5rem;
+        line-height: 34px;
+      }
+
+      .p-select-dropdown {
+        color: var(--nav-text-muted);
+        width: 28px;
+      }
+    }
+  }
+}
 }

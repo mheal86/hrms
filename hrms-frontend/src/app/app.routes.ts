@@ -7,37 +7,44 @@ import { DepartmentForm } from './features/department/department-form/department
 import { EmployeeList } from './features/employee/employee-list/employee-list';
 import { EmployeeForm } from './features/employee/employee-form/employee-form';
 import { Profile } from './features/profile/profile/profile';
-import { authGuard } from './core/auth-guard-guard';
+import { authGuard } from './core/guards/auth-guard-guard';
+import { adminGuard } from './core/guards/admin-guard';
 import { NotFound } from './features/not-found/not-found';
+import { Forbidden } from './features/forbidden/forbidden';
 import { EmployeeDetail } from './features/employee/employee-detail/employee-detail';
 import { DepartmentDetail } from './features/department/department-detail/department-detail';
 
 export const routes: Routes = [
   { path: 'login', component: Login, title: 'ROUTE_TITLE.LOGIN' },
+  { path: '403', component: Forbidden, title: 'ROUTE_TITLE.FORBIDDEN' },
   {
     path: '',
     component: MainLayout,
     canActivate: [authGuard],
     children: [
+      // ─── Routes cho mọi User (đã đăng nhập) ───
       { path: 'dashboard', component: Dashboard, title: 'ROUTE_TITLE.DASHBOARD' },
-      { path: 'departments', component: DepartmentList, title: 'ROUTE_TITLE.DEPARTMENTS' },
-      { path: 'departments/new', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_ADD' },
-      {
-        path: 'departments/edit/:id',
-        component: DepartmentForm,
-        title: 'ROUTE_TITLE.DEPARTMENT_EDIT',
-      },
-      {
-        path: 'departments/:id',
-        component: DepartmentDetail,
-        title: 'ROUTE_TITLE.DEPARTMENT_DETAIL',
-      },
-      { path: 'employees', component: EmployeeList, title: 'ROUTE_TITLE.EMPLOYEES' },
-      { path: 'employees/new', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_ADD' },
-      { path: 'employees/edit/:id', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_EDIT' },
-      { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
       { path: 'profile', component: Profile, title: 'ROUTE_TITLE.PROFILE' },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+      // ─── Routes dành riêng cho Admin (Bảo vệ toàn bộ group) ───
+      {
+        path: '',
+        canActivate: [adminGuard],
+        children: [
+          // Departments (Thứ tự: tĩnh đứng trước động để tránh tranh chấp param)
+          { path: 'departments', component: DepartmentList, title: 'ROUTE_TITLE.DEPARTMENTS' },
+          { path: 'departments/new', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_ADD' },
+          { path: 'departments/edit/:id', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_EDIT' },
+          { path: 'departments/:id', component: DepartmentDetail, title: 'ROUTE_TITLE.DEPARTMENT_DETAIL' },
+
+          // Employees (Thứ tự: tĩnh đứng trước động để tránh tranh chấp param)
+          { path: 'employees', component: EmployeeList, title: 'ROUTE_TITLE.EMPLOYEES' },
+          { path: 'employees/new', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_ADD' },
+          { path: 'employees/edit/:id', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_EDIT' },
+          { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
+        ],
+      },
     ],
   },
   { path: '**', component: NotFound, title: 'ROUTE_TITLE.NOT_FOUND' },

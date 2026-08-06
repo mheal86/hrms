@@ -27,10 +27,10 @@
 
       <div class="card mb-3">
         <div class="card-body">
-          <h4 class="mb-1">{{ getDepartmentName(dept.name) }}</h4>
+          <h4 class="mb-1">{{ languageService.getDepartmentName(dept.name) }}</h4>
           <p class="text-muted mb-0">
             {{
-              getDepartmentDesc(dept.name, dept.description) ||
+              languageService.getDepartmentDesc(dept.name, dept.description) ||
                 ('COMMON.NO_DESCRIPTION' | translate)
             }}
           </p>
@@ -114,7 +114,7 @@
                         @default {
                           {{
                             col.field === 'position'
-                              ? (getPositionTranslation(emp[col.field]) | translate)
+                              ? (languageService.getPositionTranslation(emp[col.field]) | translate)
                               : emp[col.field]
                           }}
                         }
@@ -168,7 +168,7 @@
             <div class="mb-3">
               <label class="form-label small text-muted"
                 >{{ 'DEPARTMENT.TRANSFER_CURRENT_DEPT' | translate }}
-                {{ department()?.name }}</label
+                {{ languageService.getDepartmentName(department()?.name) }}</label
               >
               <app-custom-select
                 [options]="transferOptions()"
@@ -233,7 +233,7 @@
                   </h6>
                   <p class="text-muted small mb-0">
                     {{ 'DEPARTMENT.ADD_METHOD_NEW_DESC' | translate }}
-                    {{ getDepartmentName(department()?.name) }}
+                    {{ languageService.getDepartmentName(department()?.name) }}
                   </p>
                 </a>
               </div>
@@ -242,7 +242,6 @@
                 <div
                   (click)="activeSubTab.set('transfer')"
                   class="card h-100 text-center p-3 border hover-card-action"
-                  style="cursor: pointer"
                 >
                   <div class="fs-2 text-success mb-2">
                     <i class="pi pi-users"></i>
@@ -252,7 +251,7 @@
                   </h6>
                   <p class="text-muted small mb-0">
                     {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_DESC' | translate }}
-                    {{ getDepartmentName(department()?.name) }}
+                    {{ languageService.getDepartmentName(department()?.name) }}
                   </p>
                 </div>
               </div>
@@ -278,8 +277,8 @@
                 icon="pi pi-arrow-left"
                 [text]="true"
                 severity="secondary"
-                size="small"
-                (click)="goBackToChooseSubTab()"
+                (onClick)="goBackToChooseSubTab()"
+                styleClass="back-btn-custom"
                 [title]="'COMMON.BACK' | translate"
               ></p-button>
               <span class="fw-semibold text-main">{{
@@ -289,7 +288,7 @@
 
             <p class="text-muted small mb-3">
               {{ 'DEPARTMENT.TRANSFER_IN_PROMPT' | translate }}
-              <strong>{{ getDepartmentName(department()?.name) }}</strong
+              <strong>{{ languageService.getDepartmentName(department()?.name) }}</strong
               >:
             </p>
 
@@ -299,6 +298,7 @@
               }}</label>
               <div class="input-group">
                 <input
+                  pInputText
                   type="text"
                   class="form-control"
                   [placeholder]="'DEPARTMENT.SEARCH_EMP_PLACEHOLDER' | translate"
@@ -321,8 +321,7 @@
               }}</label>
               @if (searchedOtherEmployees().length > 0) {
                 <div
-                  class="list-group scrollable-list-container"
-                  style="max-height: 200px; overflow-y: auto"
+                  class="list-group scrollable-list-container custom-scrollbar"
                 >
                   @for (emp of searchedOtherEmployees(); track emp._id) {
                     <p-button
@@ -344,10 +343,10 @@
                               'DEPARTMENT.EMP_INFO'
                                 | translate
                                   : {
-                                      dept: getDepartmentName(emp.department),
+                                      dept: languageService.getDepartmentName(emp.department),
                                       position:
-                                        (getPositionTranslation(emp.position) | translate) ||
-                                        ('DEPARTMENT.NO_POSITION' | translate),
+                                        (languageService.getPositionTranslation(emp.position)
+                                          | translate) || ('DEPARTMENT.NO_POSITION' | translate),
                                     }
                             }}
                           </span>

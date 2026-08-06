@@ -8,86 +8,30 @@
 
   @if (summary(); as data) {
     <div class="row g-2">
-      <div class="col-md-4">
-        <div class="card stat-card">
-          <div class="card-body d-flex align-items-center gap-3 p-3">
-            <div class="stat-icon bg-primary-soft">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#1e3a5f"
-                stroke-width="2"
-              >
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            </div>
-            <div>
-              <h6 class="card-title text-muted mb-1" style="font-size: 0.78rem">
-                {{ 'DASHBOARD.EMPLOYEES_CARD' | translate }}
-              </h6>
-              <p class="fs-4 fw-bold mb-0">
-                {{ displayActiveEmployees() }}
-                <span class="fs-6 text-muted fw-normal">/ {{ displayTotalEmployees() }}</span>
-              </p>
+      @for (card of statCards; track card.label) {
+        <div class="col-md-4">
+          <div class="card stat-card">
+            <div class="card-body d-flex align-items-center gap-3 p-3">
+               <div class="stat-icon" [ngClass]="card.iconClass">
+                <i [class]="card.icon"></i>
+              </div>
+              <div>
+                <h6 class="card-title text-muted mb-1">
+                  {{ card.label | translate }}
+                </h6>
+                <p class="fs-4 fw-bold mb-0">
+                  @if (card.hasSubValue) {
+                    {{ card.active }}
+                    <span class="fs-6 text-muted fw-normal">/ {{ card.total }}</span>
+                  } @else {
+                    {{ card.value }}
+                  }
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="card stat-card">
-          <div class="card-body d-flex align-items-center gap-3 p-3">
-            <div class="stat-icon bg-info-soft">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#0891b2"
-                stroke-width="2"
-              >
-                <path d="M3 21h18M5 21V7l8-4v18M13 9h6v12" />
-              </svg>
-            </div>
-            <div>
-              <h6 class="card-title text-muted mb-1" style="font-size: 0.78rem">
-                {{ 'DASHBOARD.DEPARTMENTS_CARD' | translate }}
-              </h6>
-              <p class="fs-4 fw-bold mb-0">{{ displayTotalDepartments() }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4">
-        <div class="card stat-card">
-          <div class="card-body d-flex align-items-center gap-3 p-3">
-            <div class="stat-icon bg-warning-soft">
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#d97706"
-                stroke-width="2"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M20 21a8 8 0 0 0-16 0" />
-              </svg>
-            </div>
-            <div>
-              <h6 class="card-title text-muted mb-1" style="font-size: 0.78rem">
-                {{ 'DASHBOARD.ACCOUNTS_CARD' | translate }}
-              </h6>
-              <p class="fs-4 fw-bold mb-0">{{ displayTotalUsers() }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      }
 
       <div class="col-lg-7 mt-3">
         <div class="card h-100 chart-card">
@@ -96,10 +40,7 @@
             <div class="row align-items-center flex-grow-1">
               <!-- Left side: Doughnut Chart -->
               <div class="col-sm-6">
-                <div
-                  class="chart-container"
-                  style="position: relative; min-height: 240px; height: 240px"
-                >
+                <div class="chart-container">
                   <p-chart
                     type="doughnut"
                     [data]="chartData()"
@@ -110,39 +51,29 @@
                   ></p-chart>
                 </div>
               </div>
-              <!-- Right side: Scrollable Custom Legend Table -->
+              <!-- Right side: Scrollable Custom Legend List -->
               <div class="col-sm-6 mt-3 mt-sm-0">
-                <div
-                  class="table-responsive legend-scroll-container"
-                  style="max-height: 240px; overflow-y: auto"
-                >
-                  <table
-                    class="table table-sm table-borderless align-middle mb-0"
-                    style="font-size: 0.85rem"
-                  >
-                    <tbody>
-                      @for (
-                        item of data.employeesByDepartment;
-                        track item.departmentName;
-                        let i = $index
-                      ) {
-                        <tr>
-                          <td>
-                            <span
-                              class="d-inline-block rounded-circle me-2"
-                              [style.width.px]="10"
-                              [style.height.px]="10"
-                              [style.background-color]="chartColors()[i]"
-                            ></span>
-                            {{ getDepartmentName(item.departmentName) }}
-                          </td>
-                          <td class="text-end fw-semibold" style="width: 50px">
-                            {{ item.thisMonthCount }}
-                          </td>
-                        </tr>
-                      }
-                    </tbody>
-                  </table>
+                <div class="legend-scroll-container pe-2">
+                  <div class="d-flex flex-column gap-1">
+                    @for (
+                      item of data.employeesByDepartment;
+                      track item.departmentName;
+                      let i = $index
+                    ) {
+                      <div class="legend-item">
+                        <div class="d-flex align-items-center gap-2">
+                          <span
+                            class="d-inline-block rounded-circle flex-shrink-0"
+                            [style.width.px]="10"
+                            [style.height.px]="10"
+                            [style.background-color]="chartColors()[i]"
+                          ></span>
+                          <span class="legend-label">{{ languageService.getDepartmentName(item.departmentName) }}</span>
+                        </div>
+                        <span class="legend-value fw-semibold">{{ item.totalCount }}</span>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
@@ -155,8 +86,7 @@
           <div class="card-body d-flex flex-column p-3">
             <h6 class="mb-2 fw-semibold">{{ 'DASHBOARD.TABLE_TITLE' | translate }}</h6>
             <div
-              class="table-responsive scrollable-table-container flex-grow-1"
-              style="max-height: 240px; overflow-y: auto; position: relative"
+              class="table-responsive scrollable-table-container dashboard-table-container flex-grow-1"
             >
               <p-table
                 [columns]="cols"
@@ -166,17 +96,17 @@
                 <ng-template #header let-columns>
                   <tr>
                     @for (col of columns; track col.field) {
-                      <th>{{ col.header | translate }}</th>
+                      <th [class.text-center]="col.field !== 'departmentName'">{{ col.header | translate }}</th>
                     }
                   </tr>
                 </ng-template>
                 <ng-template #body let-item let-columns="columns">
                   <tr>
                     @for (col of columns; track col.field) {
-                      <td>
+                      <td [class.text-center]="col.field !== 'departmentName'">
                         {{
                           col.field === 'departmentName'
-                            ? getDepartmentName(item[col.field])
+                            ? languageService.getDepartmentName(item[col.field])
                             : item[col.field]
                         }}
                       </td>
@@ -244,7 +174,7 @@
                               </a>
                             }
                             @case ('department') {
-                              {{ getDepartmentName(emp.department) }}
+                              {{ languageService.getDepartmentName(emp.department) }}
                             }
                             @case ('status') {
                               <span

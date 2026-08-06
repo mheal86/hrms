@@ -1,5 +1,15 @@
 /* Style for text-danger menu items inside PrimeNG overlay menu */
-:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-text,
-:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-icon {
-  color: var(--color-error, #be123c);
+:host ::ng-deep {
+  .text-danger {
+    .p-menuitem-link {
+      .p-menuitem-text,
+      .p-menuitem-icon {
+        color: var(--color-error);
+      }
+    }
+  }
+}
+
+.search-input-group {
+  max-width: 320px;
 }

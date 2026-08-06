@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Skeleton } from 'primeng/skeleton';
+import { TableModule } from 'primeng/table';
 
 @Component({
   selector: 'app-table-skeleton',
-  imports: [CommonModule, Skeleton],
+  imports: [CommonModule, Skeleton, TableModule],
   templateUrl: './table-skeleton.html',
   styleUrl: './table-skeleton.scss',
 })

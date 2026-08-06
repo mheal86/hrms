@@ -1,36 +1,44 @@
-/* ─── Employee Form ─── */
+// ─── Variables ───────────────────────────────────────────────
+$accent-indigo-border: rgba(79, 70, 229, 0.2);
+$accent-indigo-bg: rgba(79, 70, 229, 0.1);
+$accent-indigo-border-dark: rgba(129, 140, 248, 0.25);
+$border-radius-input: 4px;
+$transition-fast: 0.15s ease;
+
+// ─── Account Section ─────────────────────────────────────────
 .account-section {
   background-color: var(--color-primary-subtle);
-  border: 1px solid rgba(79, 70, 229, 0.2);
+  border: 1px solid $accent-indigo-border;
   border-radius: 10px;
   transition:
     background-color 0.3s ease,
     border-color 0.3s ease;
+
+  .dark-theme & {
+    background-color: $accent-indigo-bg;
+    border-color: $accent-indigo-border-dark;
+  }
 }
 
-.dark-theme .account-section {
-  background-color: rgba(79, 70, 229, 0.1);
-  border-color: rgba(129, 140, 248, 0.25);
-}
-
+// ─── Account Checkbox ────────────────────────────────────────
 .account-checkbox {
   width: 1.2em;
   height: 1.2em;
   cursor: pointer;
   border: 2px solid var(--input-border);
   background-color: var(--input-bg);
-  border-radius: 4px;
-  transition: all 0.15s ease;
-}
+  border-radius: $border-radius-input;
+  transition: all $transition-fast;
 
-.account-checkbox:checked {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-}
+  &:checked {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+  }
 
-.account-checkbox:focus {
-  box-shadow: 0 0 0 3px var(--input-focus-ring);
-  border-color: var(--input-focus-border);
+  &:focus {
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
+    border-color: var(--input-focus-border);
+  }
 }
 
 .form-check-label {
@@ -38,4 +46,29 @@
   padding-left: 4px;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+.section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.avatar-preview-img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar-preview-placeholder {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+
+.file-input-wrapper {
+  max-width: 350px;
 }

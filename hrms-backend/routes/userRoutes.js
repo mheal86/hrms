@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
-const { verifyToken, requireAdmin } = require('../middleware/authMiddleware');
+const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
 
-router.get('/', verifyToken, requireAdmin, userController.getAll);
-router.get('/check-username', verifyToken, requireAdmin, userController.checkUsername);
-router.post('/', verifyToken, requireAdmin, userController.create);
-router.get('/by-employee/:employeeId', verifyToken, requireAdmin, userController.getByEmployeeId);
-router.put('/:id', verifyToken, requireAdmin, userController.update);
+router.get('/', verifyToken, verifyAdmin, userController.getAll);
+router.get('/check-username', verifyToken, verifyAdmin, userController.checkUsername);
+router.post('/', verifyToken, verifyAdmin, userController.create);
+router.get('/by-employee/:employeeId', verifyToken, verifyAdmin, userController.getByEmployeeId);
+router.put('/:id', verifyToken, verifyAdmin, userController.update);
 
 module.exports = router;

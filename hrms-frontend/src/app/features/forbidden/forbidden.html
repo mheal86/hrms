@@ -1,0 +1,10 @@
+<div class="forbidden-wrapper">
+  <div class="forbidden-code">403</div>
+  <h1 class="forbidden-title">{{ 'FORBIDDEN.TITLE' | translate }}</h1>
+  <p class="forbidden-message">{{ 'FORBIDDEN.MESSAGE' | translate }}</p>
+  <p-button
+    routerLink="/dashboard"
+    [label]="'FORBIDDEN.GO_HOME' | translate"
+    icon="pi pi-home"
+  ></p-button>
+</div>

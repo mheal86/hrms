@@ -1,31 +1,48 @@
-/* ─── Login Page ─── */
-.login-wrapper {
-  min-height: 100vh;
+// ─── Variables ───────────────────────────────────────────────
+$login-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f0e2a 100%);
+$icon-indigo-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
+$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ─── Mixin ───────────────────────────────────────────────────
+@mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Indigo gradient background — brand identity from first impression */
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f0e2a 100%);
+}
+
+@mixin theme-transition {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}
+
+// ─── Login Wrapper ───────────────────────────────────────────
+.login-wrapper {
+  @include flex-center;
+  min-height: 100vh;
+  background: $login-gradient;
   padding: 20px;
   position: relative;
   overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(79, 70, 229, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+  }
 }
 
-/* Subtle pattern overlay */
-.login-wrapper::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background:
-    radial-gradient(ellipse at 60% 40%, rgba(79, 70, 229, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse at 20% 80%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-}
-
+// ─── Login Card ──────────────────────────────────────────────
 .login-card {
+  @include theme-transition;
   background: var(--bg-secondary);
   color: var(--text-main);
   padding: 44px 40px;
@@ -38,11 +55,21 @@
   max-width: 400px;
   position: relative;
   z-index: 1;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
-  animation: loginCardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: loginCardIn 0.4s $easing-spring;
+
+  .login-icon {
+    @include flex-center;
+    width: 64px;
+    height: 64px;
+    background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-light) 100%);
+    border-radius: 16px;
+    margin: 0 auto;
+    box-shadow: $icon-indigo-shadow;
+
+    i {
+      font-size: 1.75rem;
+    }
+  }
 }
 
 @keyframes loginCardIn {
@@ -54,17 +81,4 @@
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-}
-
-/* Login icon */
-.login-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #3730a3 0%, #4f46e5 100%);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
 }

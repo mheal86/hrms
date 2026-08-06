@@ -8,57 +8,21 @@
   [class.collapsed]="sidebarState.isDesktopCollapsed()"
 >
   <ul class="nav flex-column p-3">
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        routerLink="/dashboard"
-        routerLinkActive="active fw-bold"
-        (click)="sidebarState.close()"
-        [title]="'SIDEBAR.DASHBOARD' | translate"
-      >
-        <i class="pi pi-home nav-icon"></i>
-        <span class="nav-text">{{ 'SIDEBAR.DASHBOARD' | translate }}</span>
-      </a>
-    </li>
-    @if (authService.isAdmin()) {
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          routerLink="/departments"
-          routerLinkActive="active fw-bold"
-          (click)="sidebarState.close()"
-          [title]="'SIDEBAR.DEPARTMENTS' | translate"
-        >
-          <i class="pi pi-building nav-icon"></i>
-          <span class="nav-text">{{ 'SIDEBAR.DEPARTMENTS' | translate }}</span>
-        </a>
-      </li>
+    @for (item of menuItems; track item.link) {
+      @if (!item.adminOnly || authService.isAdmin()) {
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            [routerLink]="item.link"
+            routerLinkActive="active fw-bold"
+            (click)="sidebarState.close()"
+            [title]="item.label | translate"
+          >
+            <i [class]="item.icon + ' nav-icon'"></i>
+            <span class="nav-text">{{ item.label | translate }}</span>
+          </a>
+        </li>
+      }
     }
-    @if (authService.isAdmin()) {
-      <li class="nav-item">
-        <a
-          class="nav-link"
-          routerLink="/employees"
-          routerLinkActive="active fw-bold"
-          (click)="sidebarState.close()"
-          [title]="'SIDEBAR.EMPLOYEES' | translate"
-        >
-          <i class="pi pi-users nav-icon"></i>
-          <span class="nav-text">{{ 'SIDEBAR.EMPLOYEES' | translate }}</span>
-        </a>
-      </li>
-    }
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        routerLink="/profile"
-        routerLinkActive="active fw-bold"
-        (click)="sidebarState.close()"
-        [title]="'SIDEBAR.PROFILE' | translate"
-      >
-        <i class="pi pi-user nav-icon"></i>
-        <span class="nav-text">{{ 'SIDEBAR.PROFILE' | translate }}</span>
-      </a>
-    </li>
   </ul>
 </aside>

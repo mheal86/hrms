@@ -1,0 +1,13 @@
+<p-datepicker
+  [(ngModel)]="val"
+  (ngModelChange)="onModelChange($event)"
+  (onBlur)="onDateBlur()"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [invalid]="isInvalid"
+  [showIcon]="true"
+  [iconDisplay]="'input'"
+  [dateFormat]="'dd/mm/yy'"
+  [appendTo]="'body'"
+  styleClass="w-full custom-datepicker-element"
+></p-datepicker>

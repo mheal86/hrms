@@ -32,10 +32,13 @@ exports.verifyToken = async (req, res, next) => {
   }
 };
 
-// Kiểm tra role có phải Admin không
-exports.requireAdmin = (req, res, next) => {
-  if (req.user.role !== 'ADMIN') {
-    return res.status(403).json({ message: 'Admin access required' });
+// Chặn truy cập nếu user không phải Admin
+exports.verifyAdmin = (req, res, next) => {
+  if (req.user?.role !== 'ADMIN') {
+    return res.status(403).json({ message: 'Forbidden: Admin access required' });
   }
   next();
 };
+
+// Alias tương thích ngược
+exports.requireAdmin = exports.verifyAdmin;

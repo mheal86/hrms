@@ -1,0 +1,99 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.table {
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: $radius-xxl; // 12px
+
+  thead {
+    tr:first-child {
+      th:first-child {
+        border-top-left-radius: 11px;
+      }
+
+      th:last-child {
+        border-top-right-radius: 11px;
+      }
+    }
+
+    th {
+      background-color: var(--table-header-bg);
+      color: var(--table-header-text);
+      font-weight: 600;
+      border: none;
+      border-right: 1px solid var(--border-color);
+      padding: #{$space-md} #{$space-xxl};
+      text-transform: uppercase;
+      font-size: $font-xs; // 0.72rem
+      letter-spacing: 0.06em;
+      vertical-align: middle;
+      white-space: nowrap;
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+
+  tbody {
+    tr:last-child {
+      td:first-child {
+        border-bottom-left-radius: 11px;
+      }
+
+      td:last-child {
+        border-bottom-right-radius: 11px;
+      }
+    }
+
+    td {
+      padding: #{$space-md} #{$space-xxl};
+      vertical-align: middle;
+      border-bottom: 1px solid var(--table-border);
+      border-right: 1px solid var(--border-color);
+
+      &:last-child {
+        border-right: none;
+      }
+    }
+
+    tr {
+      transition: background-color 0.15s ease;
+
+      &:nth-child(even) {
+        background-color: var(--table-row-even);
+      }
+
+      &.selected {
+        background-color: var(--table-row-selected);
+      }
+    }
+  }
+}
+
+.table-hover tbody tr:hover {
+  background-color: var(--table-row-hover);
+  cursor: default;
+}
+
+.scrollable-table-container {
+  /* 56px navbar + 32px main padding + 48px filter toolbar + 52px pagination + 16px buffer */
+  max-height: calc(100vh - 56px - 32px - 48px - 52px - 16px);
+  min-height: 160px;
+  overflow-y: auto;
+  position: relative;
+  @include custom-scrollbar;
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    z-index: $z-sticky; // 9
+    box-shadow: inset 0 -1px 0 var(--table-border);
+  }
+}

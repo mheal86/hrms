@@ -19,15 +19,14 @@
         <div class="mb-4 p-3 account-section">
           <!-- Hộp kiểm sửa tài khoản (chỉ hiện ở chế độ sửa) -->
           @if (isEditMode()) {
-            <div class="form-check mb-3">
-              <input
-                type="checkbox"
-                class="form-check-input account-checkbox"
-                id="createAccountCheck"
-                [checked]="createAccount()"
-                (change)="toggleCreateAccount()"
-              />
-              <label class="form-check-label fw-semibold text-main" for="createAccountCheck">
+            <div class="form-check mb-3 d-flex align-items-center gap-2">
+              <p-checkbox
+                [binary]="true"
+                inputId="createAccountCheck"
+                [ngModel]="createAccount()"
+                (onChange)="toggleCreateAccount()"
+              ></p-checkbox>
+              <label class="form-check-label fw-semibold text-main mb-0 cursor-pointer" for="createAccountCheck">
                 {{
                   existingAccount()
                     ? ('EMPLOYEE.EDIT_ACCOUNT_LABEL' | translate)
@@ -40,7 +39,7 @@
           <!-- Tiêu đề khi thêm mới (bắt buộc tạo tài khoản) -->
           @if (!isEditMode()) {
             <div class="mb-3">
-              <h5 class="mb-1 text-main" style="font-size: 1.05rem; font-weight: 600">
+              <h5 class="mb-1 text-main section-title">
                 {{ 'EMPLOYEE.ACCOUNT_SECTION_TITLE' | translate }}
               </h5>
               <p class="text-muted small mb-0">
@@ -71,20 +70,12 @@
                 @if (localAvatarUrl() || currentAvatarUrl()) {
                   <img
                     [src]="localAvatarUrl() ? localAvatarUrl() : baseUrl + currentAvatarUrl()"
-                    width="70"
-                    height="70"
-                    style="
-                      object-fit: cover;
-                      border-radius: 50%;
-                      border: 2px solid var(--border-color);
-                      box-shadow: var(--shadow-sm);
-                    "
+                    class="avatar-preview-img"
                   />
                 }
                 @if (!localAvatarUrl() && !currentAvatarUrl()) {
                   <div
-                    class="d-flex align-items-center justify-content-center bg-light border text-muted"
-                    style="width: 70px; height: 70px; border-radius: 50%; font-size: 0.75rem"
+                    class="d-flex align-items-center justify-content-center bg-light border text-muted avatar-preview-placeholder"
                   >
                     {{ 'EMPLOYEE.AVATAR_NO_PHOTO' | translate }}
                   </div>
@@ -93,11 +84,11 @@
                 <!-- Input chọn file và chú thích -->
                 <div class="d-flex flex-column gap-1">
                   <input
+                    pInputText
                     type="file"
-                    class="form-control"
+                    class="form-control file-input-wrapper"
                     accept="image/*"
                     (change)="onFileSelected($event)"
-                    style="max-width: 350px"
                   />
                   <span class="text-muted small">{{ 'EMPLOYEE.AVATAR_HINT' | translate }}</span>
                 </div>

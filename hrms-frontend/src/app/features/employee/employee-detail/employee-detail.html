@@ -14,9 +14,7 @@
             @if (emp.avatarUrl) {
               <img
                 [src]="baseUrl + emp.avatarUrl"
-                width="120"
-                height="120"
-                style="object-fit: cover; border-radius: 50%"
+                class="avatar-img"
               />
             }
             @if (!emp.avatarUrl) {
@@ -26,7 +24,7 @@
             }
             <h5 class="mt-3 mb-0">{{ emp.firstName }} {{ emp.lastName }}</h5>
             <p class="text-muted">
-              {{ (getPositionTranslation(emp.position) | translate) || '-' }}
+              {{ (languageService.getPositionTranslation(emp.position) | translate) || '-' }}
             </p>
             <span
               class="badge"
@@ -49,12 +47,12 @@
                   [label]="'EMPLOYEE.EDIT_INFO_BTN' | translate"
                   icon="pi pi-pencil"
                   size="small"
+                  styleClass="w-full"
                 ></p-button>
               }
               @if (emp.status === 'INACTIVE') {
                 <div class="alert alert-warning py-2 mb-1 small text-start">
-                  <strong>{{ 'EMPLOYEE.INACTIVE_WARNING_TITLE' | translate }}</strong
-                  ><br />
+                  <strong>{{ 'EMPLOYEE.INACTIVE_WARNING_TITLE' | translate }}</strong><br />
                   {{ 'EMPLOYEE.INACTIVE_WARNING_TEXT' | translate }}
                 </div>
               }
@@ -66,6 +64,7 @@
                 [outlined]="true"
                 severity="secondary"
                 size="small"
+                styleClass="w-full"
               ></p-button>
             </div>
           </div>
@@ -115,7 +114,7 @@
                 </tr>
                 <tr>
                   <td class="fw-bold">{{ 'EMPLOYEE.FIELD_DEPARTMENT' | translate }}</td>
-                  <td>{{ getDepartmentName(emp.department) }}</td>
+                  <td>{{ languageService.getDepartmentName(emp.department) }}</td>
                 </tr>
                 <tr>
                   <td class="fw-bold">{{ 'EMPLOYEE.FIELD_HIRE_DATE' | translate }}</td>
@@ -143,7 +142,6 @@
             @if (isLoadingHistory()) {
               <app-spinner></app-spinner>
             }
-
             @if (!isLoadingHistory() && history().length > 0) {
               <div class="table-responsive">
                 <p-table [columns]="historyCols" [value]="history()" styleClass="p-datatable-sm">
@@ -161,15 +159,19 @@
                           @switch (col.field) {
                             @case ('fromDepartment') {
                               @if (h.fromDepartment) {
-                                <span>{{ h.fromDepartment.name }}</span>
+                                <span>{{
+                                  languageService.getDepartmentName(h.fromDepartment)
+                                }}</span>
                               } @else {
                                 <span class="text-muted small">{{
                                   'EMPLOYEE.HISTORY_INITIAL' | translate
                                 }}</span>
-                              }
+                              } 
                             }
                             @case ('toDepartment') {
-                              <strong>{{ h.toDepartment?.name || '-' }}</strong>
+                              <strong>{{
+                                languageService.getDepartmentName(h.toDepartment)
+                              }}</strong>
                             }
                             @case ('transferDate') {
                               {{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}

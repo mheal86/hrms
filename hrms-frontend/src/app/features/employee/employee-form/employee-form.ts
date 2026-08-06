@@ -1,38 +1,63 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, AbstractControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormGroup, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Employee } from '../employee';
-import { Department } from '../../department/department';
-import { Department as DepartmentModel } from '../../department/department-model';
+import { Employee } from '../../../core/services/employee.service';
+import { Employee as EmployeeModel, EmployeeStatus } from '../../../core/models/employee-model';
+import { Department } from '../../../core/services/department.service';
+import { Department as DepartmentModel } from '../../../core/models/department-model';
 import { Spinner } from '../../../shared/spinner/spinner';
-import { User, UserAccountData } from '../../../core/user';
-import { Notification } from '../../../core/notification';
-import { Subject, takeUntil } from 'rxjs';
+import { User } from '../../../core/services/user';
+import { UserAccountData } from '../../../core/models/user-model';
+import { Notification } from '../../../core/services/notification';
+import { Subject, takeUntil, finalize, of, switchMap, catchError, map, merge } from 'rxjs';
+import { LanguageService } from '../../../core/services/language.service';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { SelectOption } from '../../../shared/custom-select/custom-select';
+import { SelectOption } from '../../../core/models/select-option-model';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Button } from 'primeng/button';
+import { Checkbox } from 'primeng/checkbox';
+import { InputText } from 'primeng/inputtext';
 import { environment } from '../../../../environments/environment';
+import { validatePhone, validateAddress, validateGmail, setupNumericInputHook } from '../../../core/utils/validators';
 
 @Component({
   selector: 'app-employee-form',
-  imports: [CommonModule, ReactiveFormsModule, Spinner, FormlyModule, TranslatePipe, Button],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    Spinner,
+    FormlyModule,
+    TranslatePipe,
+    Button,
+    Checkbox,
+    InputText,
+  ],
   templateUrl: './employee-form.html',
   styleUrl: './employee-form.scss',
 })
 export class EmployeeForm implements OnInit, OnDestroy {
+  employeeService = inject(Employee);
+  departmentService = inject(Department);
+  userService = inject(User);
+  notificationService = inject(Notification);
+  route = inject(ActivatedRoute);
+  router = inject(Router);
+  translate = inject(TranslateService);
+  languageService = inject(LanguageService);
+
   baseUrl = environment.baseUrl;
   form = new FormGroup({});
-  model: any = {};
+  model: Omit<Partial<EmployeeModel>, 'dateOfBirth'> & { dateOfBirth?: Date | null } = {};
   employeeFields: FormlyFieldConfig[] = [];
 
   accountForm = new FormGroup({});
-  accountModel: any = {};
+  accountModel: Record<string, string | undefined> = {};
   accountFields: FormlyFieldConfig[] = [];
 
   isEditMode = signal(false);
-  employeeId: string | null = null;
+  employeeId?: string;
   errorMessage = signal('');
   isLoading = signal(false);
   departments = signal<DepartmentModel[]>([]);
@@ -57,77 +82,46 @@ export class EmployeeForm implements OnInit, OnDestroy {
 
   get statusOptions(): SelectOption[] {
     return [
-      { label: this.translate.instant('COMMON.ACTIVE'), value: 'ACTIVE' },
-      { label: this.translate.instant('COMMON.INACTIVE'), value: 'INACTIVE' },
+      { label: this.translate.instant('COMMON.ACTIVE'), value: EmployeeStatus.ACTIVE },
+      { label: this.translate.instant('COMMON.INACTIVE'), value: EmployeeStatus.INACTIVE },
     ];
   }
 
   get positionOptions(): SelectOption[] {
-    const keyMap: { [key: string]: string } = {
-      'Nhân viên': 'FORM.POSITION_STAFF',
-      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
-      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
-      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
-      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
-      'Giám đốc': 'FORM.POSITION_GD',
-      'Thực tập sinh': 'FORM.POSITION_INTERN',
-    };
     return this.positions.map((p) => ({
-      label: this.translate.instant(keyMap[p] || p),
+      label: this.translate.instant(this.languageService.getPositionTranslation(p)),
       value: p,
     }));
   }
 
   get departmentOptions(): SelectOption[] {
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
-      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
-    };
-    return this.departments().map((d) => {
-      const translationKey = mapping[d.name];
-      const label = translationKey ? this.translate.instant(translationKey) : d.name;
-      return { label, value: d._id };
-    });
+    return this.departments().map((d) => ({
+      label: this.languageService.getDepartmentName(d.name),
+      value: d._id || '',
+    }));
   }
 
-  selectedFile: File | null = null;
+  selectedFile?: File;
   currentAvatarUrl = signal('');
   localAvatarUrl = signal('');
 
   createAccount = signal(false);
-  existingAccount = signal<UserAccountData | null>(null);
-  private destroy$ = new Subject<void>();
+  existingAccount = signal<UserAccountData | undefined>(undefined);
+  destroy$ = new Subject<void>();
 
-  constructor(
-    private employeeService: Employee,
-    private departmentService: Department,
-    private userService: User,
-    private notificationService: Notification,
-    private route: ActivatedRoute,
-    private router: Router,
-    private translate: TranslateService,
-  ) {}
+
 
   ngOnInit() {
-    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.initFields();
-    });
+    merge(
+      of(null),
+      this.translate.onLangChange
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.initFields());
 
-    this.initFields();
     this.loadDepartments();
 
-    this.employeeId = this.route.snapshot.paramMap.get('id');
+    this.employeeId = this.route.snapshot.paramMap.get('id') ?? undefined;
     if (this.employeeId) {
       this.isEditMode.set(true);
       this.loadEmployee(this.employeeId);
@@ -160,7 +154,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             props: {
               label: this.translate.instant('FORM.FIRST_NAME'),
               required: true,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
           },
           {
@@ -170,7 +166,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             props: {
               label: this.translate.instant('FORM.LAST_NAME'),
               required: true,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
           },
           {
@@ -182,18 +180,21 @@ export class EmployeeForm implements OnInit, OnDestroy {
               required: true,
               placeholder: this.translate.instant('FORM.GENDER_PLACEHOLDER'),
               options: this.genderOptions,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
           },
           {
             className: 'col-md-3',
             key: 'dateOfBirth',
-            type: 'input',
+            type: 'custom-datepicker',
             props: {
               label: this.translate.instant('FORM.DOB'),
-              type: 'date',
               required: true,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
             validators: {
               futureDate: {
@@ -227,19 +228,13 @@ export class EmployeeForm implements OnInit, OnDestroy {
               label: this.translate.instant('FORM.EMAIL'),
               type: 'email',
               required: true,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
             validators: {
               gmail: {
-                expression: (c: AbstractControl) => {
-                  const value = c.value as string;
-                  if (!value) return true;
-                  const emailRegex = /^[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                  if (!emailRegex.test(value)) return false;
-                  const parts = value.split('@');
-                  const localPart = parts[0];
-                  return localPart.length >= 3 && /[a-zA-Z]/.test(localPart);
-                },
+                expression: (c: AbstractControl) => validateGmail(c.value),
               },
             },
           },
@@ -253,20 +248,11 @@ export class EmployeeForm implements OnInit, OnDestroy {
               maxLength: 10,
             },
             hooks: {
-              onInit: (field) => {
-                field.formControl?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((val) => {
-                  if (val) {
-                    const cleaned = val.replace(/[^0-9]/g, '').slice(0, 10);
-                    if (cleaned !== val) {
-                      field.formControl?.setValue(cleaned, { emitEvent: false });
-                    }
-                  }
-                });
-              },
+              onInit: setupNumericInputHook(this.destroy$),
             },
             validators: {
               phone: {
-                expression: (c: AbstractControl) => !c.value || /^0\d{9}$/.test(c.value),
+                expression: (c: AbstractControl) => validatePhone(c.value),
               },
             },
           },
@@ -284,12 +270,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             },
             validators: {
               address: {
-                expression: (c: AbstractControl) => {
-                  const value = c.value as string;
-                  if (!value) return true;
-                  const letterCount = (value.match(/[a-zA-ZÀ-ỹ]/g) || []).length;
-                  return letterCount >= 3;
-                },
+                expression: (c: AbstractControl) => validateAddress(c.value),
               },
             },
           },
@@ -351,7 +332,9 @@ export class EmployeeForm implements OnInit, OnDestroy {
             props: {
               label: this.translate.instant('FORM.USERNAME'),
               required: true,
-              disabled: this.isEditMode(),
+            },
+            expressions: {
+              'props.disabled': () => this.isEditMode(),
             },
             validators: {
               username: {
@@ -389,10 +372,12 @@ export class EmployeeForm implements OnInit, OnDestroy {
             type: 'input',
             props: {
               type: 'password',
-              label: this.existingAccount()
+            },
+            expressions: {
+              'props.label': () => this.existingAccount()
                 ? this.translate.instant('FORM.PASSWORD_EDIT')
                 : this.translate.instant('FORM.PASSWORD'),
-              required: !this.existingAccount() && !this.isEditMode(),
+              'props.required': () => !this.existingAccount() && !this.isEditMode(),
             },
           },
           {
@@ -428,7 +413,11 @@ export class EmployeeForm implements OnInit, OnDestroy {
           this.departments.set(data);
           this.updateDepartmentFieldOptions();
         },
-        error: (err) => console.error('Không tải được danh sách phòng ban', err),
+        error: (err) => {
+          this.errorMessage.set(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
+        },
       });
   }
 
@@ -439,7 +428,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
     }
   }
 
-  private findFieldByKey(fields: FormlyFieldConfig[], key: string): FormlyFieldConfig | null {
+  findFieldByKey(fields: FormlyFieldConfig[], key: string): FormlyFieldConfig | null {
     for (const f of fields) {
       if (f.key === key) return f;
       if (f.fieldGroup) {
@@ -454,35 +443,34 @@ export class EmployeeForm implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.employeeService
       .getById(id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
       .subscribe({
         next: (data) => {
           const departmentId =
             typeof data.department === 'object' ? data.department._id : data.department;
-
           this.model = {
             firstName: data.firstName,
             lastName: data.lastName,
             email: data.email,
             phone: data.phone,
             gender: data.gender,
-            dateOfBirth: data.dateOfBirth ? data.dateOfBirth.substring(0, 10) : '',
+            dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : null,
             address: data.address,
             position: data.position,
             department: departmentId,
-            status: data.status || 'ACTIVE',
+            status: data.status || EmployeeStatus.ACTIVE,
           };
 
-          this.initFields();
           this.updateDepartmentFieldOptions();
 
           this.currentAvatarUrl.set(data.avatarUrl || '');
-          this.isLoading.set(false);
           this.checkExistingAccount(id);
         },
         error: (err) => {
-          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
-          this.isLoading.set(false);
+          this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.LOAD_ERROR'));
         },
       });
   }
@@ -494,9 +482,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
       .subscribe({
         next: (user) => {
           this.existingAccount.set(user);
-          this.initFields();
           this.updateDepartmentFieldOptions();
-
           this.accountModel = {
             username: user.username,
             roleName: user.role.name,
@@ -509,8 +495,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-
+      this.selectedFile = input.files[0] ?? undefined;
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
@@ -530,155 +515,140 @@ export class EmployeeForm implements OnInit, OnDestroy {
     if (this.form.invalid || (this.createAccount() && this.accountForm.invalid)) {
       return;
     }
-
+    
     this.isLoading.set(true);
-    const formValue = this.form.getRawValue();
+    this.errorMessage.set('');
 
-    if (this.createAccount() && !this.isEditMode()) {
-      const username = (this.accountForm.value as any).username;
-      this.userService
-        .checkUsername(username)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (res) => {
+    const rawValue = this.form.getRawValue() as Record<string, unknown>;
+    const formValue: Partial<EmployeeModel> = {
+      ...rawValue,
+      dateOfBirth: rawValue['dateOfBirth'] instanceof Date
+        ? (rawValue['dateOfBirth'] as Date).toISOString().substring(0, 10)
+        : (rawValue['dateOfBirth'] as string | undefined),
+    };
+
+    const username = (this.accountForm.get('username')?.value ?? '') as string;
+
+    const checkUsername$ = (this.createAccount() && !this.isEditMode())
+      ? this.userService.checkUsername(username).pipe(
+          switchMap(res => {
             if (res.exists) {
-              this.isLoading.set(false);
-              const usernameControl = this.accountForm.get('username');
-              usernameControl?.setErrors({ duplicateUsername: true });
-              usernameControl?.markAsTouched();
-              return;
+              throw { isValidationError: true, controlName: 'username', error: { duplicateUsername: true } };
             }
-            this.proceedSave(formValue);
-          },
-          error: (err) => {
-            this.isLoading.set(false);
-            this.errorMessage.set(err.error?.message || 'Không thể kiểm tra trùng lặp tài khoản');
-          },
-        });
-    } else {
-      this.proceedSave(formValue);
-    }
-  }
+            return of(null);
+          }),
+          catchError(err => {
+            if (err.isValidationError) throw err;
+            throw { type: 'check_username', originalError: err };
+          })
+        )
+      : of(null);
 
-  private proceedSave(formValue: any) {
-    const request = this.isEditMode()
-      ? this.employeeService.update(this.employeeId!, formValue)
-      : this.employeeService.create(formValue);
-
-    request.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (savedEmployee) => {
+    checkUsername$.pipe(
+      switchMap(() => {
+        const saveRequest = this.isEditMode()
+          ? this.employeeService.update(this.employeeId!, formValue)
+          : this.employeeService.create(formValue as EmployeeModel);
+        return saveRequest.pipe(
+          catchError(err => {
+            throw { type: 'save_employee', originalError: err };
+          })
+        );
+      }),
+      switchMap((savedEmployee) => {
         if (this.selectedFile && savedEmployee._id) {
-          this.uploadAvatar(savedEmployee._id);
-        } else if (this.createAccount() && savedEmployee._id) {
-          this.saveUserAccount(savedEmployee._id);
-        } else {
-          this.isLoading.set(false);
-          this.notificationService.success(
-            this.isEditMode()
-              ? this.translate.instant('EMPLOYEE.UPDATE_SUCCESS')
-              : this.translate.instant('EMPLOYEE.CREATE_SUCCESS'),
+          return this.employeeService.uploadAvatar(savedEmployee._id, this.selectedFile).pipe(
+            map(() => savedEmployee),
+            catchError(err => {
+              throw { type: 'upload_avatar', originalError: err };
+            })
           );
-          this.navigateBack();
         }
+        return of(savedEmployee);
+      }),
+      switchMap((savedEmployee) => {
+        if (this.createAccount() && savedEmployee._id) {
+          const { username: accUsername, password: accPassword, roleName: accRoleName } = this.accountForm.getRawValue() as Record<string, string>;
+          const existing = this.existingAccount();
+          if (existing) {
+            const payload: { username: string; roleName: string; newPassword?: string } = {
+              username: accUsername,
+              roleName: accRoleName,
+            };
+            if (accPassword) {
+              payload.newPassword = accPassword;
+            }
+            return this.userService.update(existing._id, payload).pipe(
+              map(() => ({ action: 'update_account', isEdit: this.isEditMode() })),
+              catchError(err => {
+                throw { type: 'save_account', originalError: err };
+              })
+            );
+          } else {
+            return this.userService.create({ username: accUsername, password: accPassword, roleName: accRoleName, employeeId: savedEmployee._id }).pipe(
+              map(() => ({ action: 'create_account', isEdit: this.isEditMode() })),
+              catchError(err => {
+                throw { type: 'save_account', originalError: err };
+              })
+            );
+          }
+        }
+        return of({ action: 'none', isEdit: this.isEditMode() });
+      }),
+      takeUntil(this.destroy$),
+      finalize(() => this.isLoading.set(false))
+    ).subscribe({
+      next: (result) => {
+        if (result.action === 'create_account') {
+          this.notificationService.success(this.translate.instant('EMPLOYEE.CREATE_ACCOUNT_SUCCESS'));
+        } else if (result.action === 'update_account') {
+          this.notificationService.success(this.translate.instant('EMPLOYEE.UPDATE_ACCOUNT_SUCCESS'));
+        } else {
+          this.notificationService.success(
+            result.isEdit
+              ? this.translate.instant('EMPLOYEE.UPDATE_SUCCESS')
+              : this.translate.instant('EMPLOYEE.CREATE_SUCCESS')
+          );
+        }
+        this.navigateBack();
       },
       error: (err) => {
-        this.isLoading.set(false);
-        this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.SAVE_ERROR'));
-      },
+        if (err && err.isValidationError) {
+          const control = this.accountForm.get(err.controlName);
+          control?.setErrors(err.error);
+          control?.markAsTouched();
+          return;
+        }
+
+        const originalError = err?.originalError || err;
+        const msg = originalError?.error?.message || '';
+
+        if (err?.type === 'check_username') {
+          this.errorMessage.set(msg || this.translate.instant('VALIDATION.USERNAME_CHECK_ERROR'));
+        } else if (err?.type === 'upload_avatar') {
+          this.errorMessage.set(this.translate.instant('EMPLOYEE.AVATAR_UPLOAD_ERROR', { error: msg }));
+        } else if (err?.type === 'save_account') {
+          const isEdit = this.isEditMode();
+          this.notificationService.error(
+            this.translate.instant(
+              isEdit ? 'EMPLOYEE.UPDATE_ACCOUNT_ERROR' : 'EMPLOYEE.CREATE_ACCOUNT_ERROR',
+              { error: msg }
+            )
+          );
+          this.navigateBack();
+        } else {
+          this.errorMessage.set(msg || this.translate.instant('EMPLOYEE.SAVE_ERROR'));
+        }
+      }
     });
   }
 
-  private uploadAvatar(employeeId: string) {
-    this.employeeService
-      .uploadAvatar(employeeId, this.selectedFile!)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          if (this.createAccount()) {
-            this.saveUserAccount(employeeId);
-          } else {
-            this.isLoading.set(false);
-            this.notificationService.success(
-              this.isEditMode()
-                ? this.translate.instant('EMPLOYEE.UPDATE_SUCCESS')
-                : this.translate.instant('EMPLOYEE.CREATE_SUCCESS'),
-            );
-            this.navigateBack();
-          }
-        },
-        error: (err) => {
-          this.isLoading.set(false);
-          this.errorMessage.set(
-            this.translate.instant('EMPLOYEE.AVATAR_UPLOAD_ERROR', {
-              error: err.error?.message || '',
-            }),
-          );
-        },
-      });
-  }
-
-  private navigateBack() {
+  navigateBack() {
     const deptId = this.route.snapshot.queryParamMap.get('departmentId');
     if (deptId) {
       this.router.navigate(['/departments', deptId]);
     } else {
       this.router.navigate(['/employees']);
-    }
-  }
-
-  private saveUserAccount(employeeId: string) {
-    const { username, password, roleName } = this.accountForm.getRawValue() as any;
-    const existing = this.existingAccount();
-
-    if (existing) {
-      const payload: any = { username, roleName };
-      if (password) {
-        payload.newPassword = password;
-      }
-
-      this.userService
-        .update(existing._id, payload)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.notificationService.success(
-              this.translate.instant('EMPLOYEE.UPDATE_ACCOUNT_SUCCESS'),
-            );
-            this.navigateBack();
-          },
-          error: (err) => {
-            this.isLoading.set(false);
-            this.notificationService.error(
-              this.translate.instant('EMPLOYEE.UPDATE_ACCOUNT_ERROR', {
-                error: err.error?.message || '',
-              }),
-            );
-            this.navigateBack();
-          },
-        });
-    } else {
-      this.userService
-        .create({ username, password, roleName, employeeId })
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: () => {
-            this.isLoading.set(false);
-            this.notificationService.success(
-              this.translate.instant('EMPLOYEE.CREATE_ACCOUNT_SUCCESS'),
-            );
-            this.navigateBack();
-          },
-          error: (err) => {
-            this.isLoading.set(false);
-            this.notificationService.error(
-              this.translate.instant('EMPLOYEE.CREATE_ACCOUNT_ERROR', {
-                error: err.error?.message || '',
-              }),
-            );
-            this.navigateBack();
-          },
-        });
     }
   }
 

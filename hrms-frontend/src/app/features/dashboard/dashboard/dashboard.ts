@@ -1,18 +1,21 @@
 import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Dashboard as DashboardService, DashboardSummary } from '../dashboard';
-import { Employee } from '../../employee/employee';
-import { Employee as EmployeeModel } from '../../employee/employee-model';
+import { Dashboard as DashboardService } from '../../../core/services/dashboard.service';
+import { DashboardSummary } from '../../../core/models/dashboard-model';
+import { Employee } from '../../../core/services/employee.service';
+import { Employee as EmployeeModel } from '../../../core/models/employee-model';
 import { Chart, registerables, ChartData, ChartOptions, Plugin } from 'chart.js';
 import { Spinner } from '../../../shared/spinner/spinner';
-import { Auth } from '../../../core/auth';
-import { Subject, takeUntil } from 'rxjs';
+import { Auth } from '../../../core/services/auth';
+import { finalize, Subject, takeUntil } from 'rxjs';
 import { UIChart } from 'primeng/chart';
 import { Button } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
+import { LanguageService } from '../../../core/services/language.service';
+import { getInitials } from '../../../core/utils/employee-utils';
 
 Chart.register(...registerables);
 
@@ -24,7 +27,7 @@ Chart.register(...registerables);
 })
 export class Dashboard implements OnInit, OnDestroy {
   baseUrl = environment.baseUrl;
-  summary = signal<DashboardSummary | null>(null);
+  summary = signal<DashboardSummary | undefined>(undefined);
   isLoading = signal(false);
   errorMessage = signal('');
   cols = [
@@ -47,18 +50,46 @@ export class Dashboard implements OnInit, OnDestroy {
   displayTotalDepartments = signal(0);
   displayTotalUsers = signal(0);
 
-  chartData = signal<ChartData<'doughnut'> | null>(null);
-  chartOptions = signal<ChartOptions<'doughnut'> | null>(null);
+  get statCards() {
+    return [
+      {
+        icon: 'pi pi-users',
+        iconClass: 'bg-primary-soft',
+        label: 'DASHBOARD.EMPLOYEES_CARD',
+        active: this.displayActiveEmployees(),
+        total: this.displayTotalEmployees(),
+        hasSubValue: true,
+      },
+      {
+        icon: 'pi pi-building',
+        iconClass: 'bg-info-soft',
+        label: 'DASHBOARD.DEPARTMENTS_CARD',
+        value: this.displayTotalDepartments(),
+        hasSubValue: false,
+      },
+      {
+        icon: 'pi pi-user',
+        iconClass: 'bg-warning-soft',
+        label: 'DASHBOARD.ACCOUNTS_CARD',
+        value: this.displayTotalUsers(),
+        hasSubValue: false,
+      },
+    ];
+  }
+
+  chartData = signal<ChartData<'doughnut'> | undefined>(undefined);
+  chartOptions = signal<ChartOptions<'doughnut'> | undefined>(undefined);
   chartColors = signal<string[]>([]);
   chartPlugins: Plugin[] = [];
 
-  private destroy$ = new Subject<void>();
+  destroy$ = new Subject<void>();
 
   constructor(
-    private dashboardService: DashboardService,
-    private employeeService: Employee,
+    public dashboardService: DashboardService,
+    public employeeService: Employee,
     public authService: Auth,
-    private translate: TranslateService,
+    public translate: TranslateService,
+    public languageService: LanguageService,
   ) {}
 
   ngOnInit() {
@@ -82,26 +113,26 @@ export class Dashboard implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.dashboardService
       .getSummary()
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false)),
+      )
       .subscribe({
         next: (data) => {
           this.summary.set(data);
-          this.isLoading.set(false);
           this.updateChart(data);
-
           this.animateCountUp(this.displayTotalEmployees, data.totalEmployees);
           this.animateCountUp(this.displayActiveEmployees, data.activeEmployees);
           this.animateCountUp(this.displayTotalDepartments, data.totalDepartments);
           this.animateCountUp(this.displayTotalUsers, data.totalUsers);
         },
         error: (err) => {
-          this.errorMessage.set(err.error?.message || 'Không tải được dữ liệu');
-          this.isLoading.set(false);
+          this.errorMessage.set(err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'));
         },
       });
   }
 
-  private animateCountUp(target: ReturnType<typeof signal<number>>, endValue: number) {
+  animateCountUp(target: ReturnType<typeof signal<number>>, endValue: number) {
     const duration = 800; // ms
     const startTime = performance.now();
 
@@ -122,54 +153,24 @@ export class Dashboard implements OnInit, OnDestroy {
     };
 
     requestAnimationFrame(step);
-  }
-
-  loadRecentEmployees() {
+  }  loadRecentEmployees() {
     this.isLoadingRecent.set(true);
     this.employeeService
       .getAll(1, 5, '', 'createdAt', 'desc')
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoadingRecent.set(false)),
+      )
       .subscribe({
         next: (res) => {
           this.recentEmployees.set(res.data);
-          this.isLoadingRecent.set(false);
         },
-        error: () => {
-          this.isLoadingRecent.set(false);
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.LOAD_ERROR'));
         },
       });
   }
-
-  getInitials(firstName: string, lastName: string): string {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  }
-
-  getDepartmentName(dept: any): string {
-    const fallback = this.translate.instant('COMMON.UNASSIGNED');
-    if (!dept) return fallback;
-    const name = typeof dept === 'object' ? dept.name || fallback : dept;
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
-      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
-    };
-    const translationKey = mapping[name];
-    if (translationKey) {
-      const translated = this.translate.instant(translationKey);
-      return translated !== translationKey ? translated : name;
-    }
-    return name;
-  }
+  getInitials = getInitials;
 
   @HostListener('window:themeChanged')
   onThemeChanged() {
@@ -179,10 +180,9 @@ export class Dashboard implements OnInit, OnDestroy {
     }
   }
 
-  private updateChart(data: DashboardSummary) {
+  updateChart(data: DashboardSummary) {
     const isDark = document.body.classList.contains('dark-theme');
     const rootStyle = getComputedStyle(document.documentElement);
-    const textColor = isDark ? '#ffffff' : '#334155';
 
     const colors: string[] = [];
     for (let i = 1; i <= 10; i++) {
@@ -191,16 +191,18 @@ export class Dashboard implements OnInit, OnDestroy {
     }
 
     const chartData = data.employeesByDepartment;
-    const activeEmployeesTotal = data.activeEmployees;
-    const backgroundColors = chartData.map((_, i) => colors[i % colors.length]);
+    const totalEmployeesCount = data.activeEmployees;
+    const backgroundColors = chartData.map((_item: unknown, i: number) => colors[i % colors.length]);
     this.chartColors.set(backgroundColors);
 
     this.chartData.set({
-      labels: chartData.map((d) => this.getDepartmentName(d.departmentName)),
+      labels: chartData.map((d: { departmentName: string; lastMonthCount: number; thisMonthCount: number; totalCount: number }) =>
+        this.languageService.getDepartmentName(d.departmentName)
+      ),
       datasets: [
         {
           label: this.translate.instant('SIDEBAR.EMPLOYEES'),
-          data: chartData.map((d) => d.thisMonthCount),
+          data: chartData.map((d: { departmentName: string; lastMonthCount: number; thisMonthCount: number; totalCount: number }) => d.totalCount),
           backgroundColor: backgroundColors,
           borderColor: isDark ? '#1e293b' : '#ffffff',
           borderWidth: 3,
@@ -271,11 +273,10 @@ export class Dashboard implements OnInit, OnDestroy {
 
         ctx.font = "bold 36px 'Inter', sans-serif";
         ctx.fillStyle = isDarkTheme ? '#ffffff' : '#0f172a';
-        ctx.fillText(activeEmployeesTotal.toString(), centerX, centerY + 18);
+        ctx.fillText(totalEmployeesCount.toString(), centerX, centerY + 18);
         ctx.restore();
       },
     };
-
     this.chartPlugins = [centerTextPlugin];
   }
 }

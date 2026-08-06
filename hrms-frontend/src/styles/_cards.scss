@@ -1,0 +1,19 @@
+@use "variables" as *;
+
+%card-base {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  border-radius: $radius-xxl; // 12px
+  transition: all 0.25s ease;
+  color: var(--text-main);
+
+  &:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+}
+
+.card {
+  @extend %card-base;
+}

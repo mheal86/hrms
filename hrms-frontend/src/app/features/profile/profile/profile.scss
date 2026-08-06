@@ -1,65 +1,122 @@
-.avatar-initials-lg {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1e3a5f 0%, #16304d 100%);
-  color: white;
+// ─── Variables ───────────────────────────────────────────────
+$avatar-size-lg: 120px;
+$border-radius-circle: 50%;
+$panel-width: 320px;
+
+// ─── Mixin ───────────────────────────────────────────────────
+@mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@mixin avatar-circle($size) {
+  width: $size;
+  height: $size;
+  border-radius: $border-radius-circle;
+}
+
+// ─── Avatar ──────────────────────────────────────────────────
+.avatar-initials-lg {
+  @include avatar-circle($avatar-size-lg);
+  @include flex-center;
+  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+  color: var(--text-on-primary);
   font-size: 36px;
   font-weight: 600;
   margin: 0 auto;
 }
 
-:host ::ng-deep .custom-password-dialog .p-password {
-  width: 100%;
+.avatar-img {
+  @include avatar-circle($avatar-size-lg);
+  object-fit: cover;
 }
 
-:host ::ng-deep .custom-password-dialog .p-password input {
-  width: 100%;
+// ─── Detail Table ────────────────────────────────────────────
+.detail-table {
+  td:first-child {
+    width: 150px;
+  }
 }
 
-/* Increase specificity to override PrimeNG dialog content overflow */
-body :host ::ng-deep .custom-password-dialog .p-dialog-content {
-  overflow: visible;
-  padding-top: 5px;
+// ─── PrimeNG Overrides ───────────────────────────────────────
+:host ::ng-deep {
+  .custom-password-dialog {
+    .p-password {
+      &, input {
+        width: 100%;
+      }
+    }
+
+    .p-dialog-content {
+      overflow: visible;
+      padding-top: 5px;
+    }
+
+    .p-dialog {
+      overflow: visible;
+    }
+  }
+
+  .p-password-overlay {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow-card, 0 4px 12px rgba(15, 23, 42, 0.08));
+    min-width: $panel-width;
+    max-width: $panel-width;
+
+    .p-password-meter,
+    .p-password-meter-text {
+      display: none;
+    }
+
+    .p-progressbar {
+      .p-progressbar-value {
+        background: var(--color-primary);
+        transition: width 0.3s ease;
+      }
+    }
+  }
 }
 
-/* Increase specificity to override PrimeNG dialog overflow */
-body :host ::ng-deep .custom-password-dialog .p-dialog {
-  overflow: visible;
-}
+.password-strength-panel {
+  background: transparent;
 
-/* Custom styling for the password overlay panel (Light Mode by default) */
-body :host ::ng-deep .p-password-overlay {
-  background: #ffffff;
-  border: 1px solid var(--border-color, #cbd5e1);
-  border-radius: 8px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-card, 0 4px 12px rgba(15, 23, 42, 0.08));
-  /* Override JS inline width using min-width and max-width instead of important */
-  min-width: 320px;
-  max-width: 320px;
-}
+  .header {
+    color: var(--text-main);
+  }
 
-/* Dark Mode override for password overlay panel */
-body :host-context(.dark-theme) ::ng-deep .p-password-overlay {
-  background: #18181b;
-  border: 1px solid #27272a;
-  box-shadow:
-    0 10px 15px -3px rgba(0, 0, 0, 0.5),
-    0 4px 6px -4px rgba(0, 0, 0, 0.5);
-}
+  .title-icon {
+    font-size: 1.1rem;
+    color: var(--text-main);
+  }
 
-/* Hide PrimeNG default meter components using higher specificity instead of important */
-body :host ::ng-deep .p-password-overlay .p-password-meter,
-body :host ::ng-deep .p-password-overlay .p-password-meter-text {
-  display: none;
-}
+  .title-text {
+    font-size: 0.95rem;
+    color: var(--text-main);
+  }
 
-/* Customize value indicator of PrimeNG progressbar inside overlay */
-:host ::ng-deep .p-password-overlay .p-progressbar .p-progressbar-value {
-  background: #3b82f6; /* Blue fill */
-  transition: width 0.3s ease;
+  .badge-strength {
+    color: #fff;
+    border-radius: 4px;
+  }
+
+  .strength-progress {
+    height: 5px;
+    background-color: var(--divider, #cbd5e1);
+    border-radius: 3px;
+  }
+
+  .strength-progress-bar {
+    transition:
+      width 0.3s ease,
+      background-color 0.3s ease;
+    border-radius: 3px;
+  }
+
+  ul li i {
+    font-size: 0.8rem;
+  }
 }

@@ -41,6 +41,7 @@
     "USERNAME_SPACE": "Username không được chứa khoảng trắng",
     "USERNAME_CHARS": "Username chỉ được chứa chữ, số, dấu chấm, gạch dưới, gạch ngang",
     "USERNAME_EXISTS": "Tên tài khoản này đã tồn tại",
+    "USERNAME_CHECK_ERROR": "Không thể kiểm tra trùng lặp tài khoản",
     "DEPT_NAME_SPECIAL": "Tên phòng ban không được chứa ký tự đặc biệt"
   },
   "NAVBAR": {
@@ -84,7 +85,8 @@
     "EMPLOYEE_EDIT": "Sửa nhân viên",
     "EMPLOYEE_DETAIL": "Chi tiết nhân viên",
     "PROFILE": "Hồ sơ cá nhân",
-    "NOT_FOUND": "Không tìm thấy trang"
+    "NOT_FOUND": "Không tìm thấy trang",
+    "FORBIDDEN": "Truy cập bị từ chối"
   },
   "DASHBOARD": {
     "EMPLOYEES_CARD": "Nhân sự (Hoạt động / Tổng)",
@@ -96,6 +98,7 @@
     "COL_DEPT": "Phòng ban",
     "COL_LAST_MONTH": "Tháng trước",
     "COL_THIS_MONTH": "Tháng này",
+    "COL_TOTAL": "Tổng số NV",
     "COL_FULL_NAME": "Họ tên",
     "COL_EMAIL": "Email",
     "COL_STATUS": "Trạng thái",
@@ -230,6 +233,7 @@
     "INACTIVE_WARNING": "⚠️ Tài khoản này đã ngừng hoạt động.",
     "INACTIVE_WARNING_TEXT": "Bạn không thể chỉnh sửa thông tin cá nhân.",
     "NO_EMPLOYEE_LINKED": "Tài khoản này chưa gắn hồ sơ nhân viên.",
+    "LOAD_ERROR": "Không tải được thông tin",
     "FIELD_EMAIL": "Email",
     "FIELD_POSITION": "Chức vụ",
     "FIELD_DEPARTMENT": "Phòng ban",
@@ -268,6 +272,11 @@
   },
   "NOT_FOUND": {
     "MESSAGE": "Trang bạn tìm không tồn tại",
+    "GO_HOME": "Về trang chủ"
+  },
+  "FORBIDDEN": {
+    "TITLE": "Truy cập bị từ chối",
+    "MESSAGE": "Bạn không có quyền truy cập trang này. Chỉ quản trị viên mới được phép.",
     "GO_HOME": "Về trang chủ"
   },
   "FORM": {

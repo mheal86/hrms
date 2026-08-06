@@ -1,0 +1,494 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+:root {
+  /* ═══ Typography Base ═══ */
+  --font-base: #{$font-base};
+
+  /* ═══ Brand Colors ═══ */
+  --color-primary: #{$indigo-700};
+  --color-primary-hover: #{$indigo-800};
+  --color-primary-active: #{$indigo-900};
+  --color-primary-subtle: #{$indigo-50};
+  --color-primary-light: #{$indigo-500};
+  --color-secondary: #{$slate-600};
+  --color-accent: #{$teal-600};
+  --color-accent-hover: #{$teal-700};
+
+  /* ═══ Bootstrap Variable Overrides (Light Mode) ═══ */
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: 67, 56, 202;
+  --bs-secondary-color: var(--text-muted);
+
+  /* ═══ Status Colors ═══ */
+  --color-success: #{$emerald-800};
+  --color-success-bg: #{$emerald-50};
+  --color-success-border: #{$emerald-300};
+  --color-warning: #{$amber-800};
+  --color-warning-bg: #{$amber-50};
+  --color-warning-border: #{$amber-300};
+  --color-error: #{$rose-800};
+  --color-error-bg: #{$rose-50};
+  --color-error-border: #{$rose-300};
+  --color-info: #{$sky-800};
+  --color-info-bg: #{$sky-50};
+  --color-info-border: #{$sky-300};
+  --color-pending: #{$rust-800};
+  --color-pending-bg: #{$rust-50};
+  --color-pending-border: #{$rust-300};
+
+  /* ═══ Backgrounds ═══ */
+  --bg-primary: #dbeafe;
+  --bg-secondary: #f0f7ff;
+  --bg-sidebar: #{$indigo-950};
+  --bg-header: #{$indigo-950};
+  --surface-card: #f0f7ff;
+  --surface-hover: #e0effe;
+  --surface-selected: #bfdbfe;
+
+  /* ═══ Borders ═══ */
+  --border-color: #{$slate-300};
+  --border-strong: #{$slate-400};
+  --divider: #{$slate-100};
+
+  /* ═══ Typography ═══ */
+  --text-main: #{$slate-900};
+  --text-secondary: #{$slate-600};
+  --text-muted: #{$slate-500};
+  --text-disabled: #{$slate-400};
+  --text-inverse: #{$white};
+  --text-on-primary: #{$white};
+
+  /* ═══ Navigation & Sidebar (Dark Context) ═══ */
+  --nav-text-muted: #{$indigo-300};
+  --nav-text-hover: #{$indigo-100};
+  --nav-text-active: #{$white};
+  --nav-brand-accent: #{$indigo-400};
+  --nav-item-hover-bg: rgba(255, 255, 255, 0.08);
+  --nav-active-bg-start: #{$indigo-600};
+  --nav-active-bg-end: #{$indigo-500};
+  --nav-danger: #{$red-500};
+  --nav-danger-hover: #{$red-600};
+  --nav-border-light: rgba(255, 255, 255, 0.15);
+  --nav-border-lighter: rgba(255, 255, 255, 0.06);
+  --nav-bg-glass: rgba(255, 255, 255, 0.08);
+  --nav-bg-glass-hover: rgba(255, 255, 255, 0.14);
+  --nav-text-slate: #{$slate-200};
+
+  /* ═══ Table ═══ */
+  --table-header-bg: #1e3a8a;
+  --table-header-text: #{$white};
+  --table-row-odd: #{$slate-50};
+  --table-row-even: #e8f0fe;
+  --table-row-hover: #dbeafe;
+  --table-row-selected: #bfdbfe;
+  --table-border: #bfdbfe;
+
+  /* ═══ Chart Colors (Light Mode) ═══ */
+  --chart-1: #{$indigo-600};
+  --chart-2: #{$sky-500};
+  --chart-3: #{$emerald-600};
+  --chart-4: #{$amber-500};
+  --chart-5: #{$pink-500};
+  --chart-6: #{$violet-500};
+  --chart-7: #{$orange-500};
+  --chart-8: #{$teal-500};
+  --chart-9: #{$red-500};
+  --chart-10: #{$slate-500};
+
+  /* ═══ Form ═══ */
+  --input-bg: #{$white};
+  --input-border: #{$slate-400};
+  --input-text: #{$slate-900};
+  --input-placeholder: #{$slate-500};
+  --input-focus-border: #{$indigo-700};
+  --input-focus-ring: rgba(67, 56, 202, 0.15);
+  --input-error-border: #{$rose-800};
+  --input-error-focus-ring: rgba(225, 29, 72, 0.15);
+  --input-disabled-bg: #{$slate-200};
+  --input-disabled-text: #{$slate-500};
+  --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+  /* ═══ Button Tokens (Light) ═══ */
+  --btn-primary-bg: #{$indigo-700};
+  --btn-primary-hover: #{$indigo-800};
+  --btn-primary-active: #{$indigo-900};
+  --btn-primary-text: #{$white};
+
+  --btn-success-bg: #{$emerald-700};
+  --btn-success-hover: #{$emerald-800};
+  --btn-success-active: #{$emerald-900};
+  --btn-success-text: #{$white};
+
+  --btn-warning-bg: #{$amber-700};
+  --btn-warning-hover: #{$amber-850};
+  --btn-warning-active: #{$amber-900};
+  --btn-warning-text: #{$white};
+
+  --btn-danger-bg: #{$rose-700};
+  --btn-danger-hover: #{$rose-850};
+  --btn-danger-active: #{$rose-900};
+  --btn-danger-text: #{$white};
+
+  --btn-accent-bg: #{$teal-600};
+  --btn-accent-hover: #{$teal-700};
+  --btn-accent-border: #{$teal-600};
+
+  /* ═══ Shadows ═══ */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+  --shadow-card: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.06);
+  --shadow-modal: 0 24px 64px rgba(15, 23, 42, 0.15);
+  --shadow-dropdown: 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* ═══ Overlays & Overlay Text ═══ */
+  --mask-bg: rgba(15, 23, 42, 0.6);
+  --text-on-primary-muted: rgba(255, 255, 255, 0.8);
+
+  /* ═══ Button Glow Shadows ═══ */
+  --btn-primary-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
+  --btn-primary-outline-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  --btn-success-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+  --btn-warning-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
+  --btn-danger-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
+  --btn-accent-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+
+  /* ═══ Role Badges (Light) ═══ */
+  --badge-admin-bg: #fef3c7;
+  --badge-admin-text: #92400e;
+  --badge-admin-border: #fde68a;
+  --badge-hr-bg: #fce7f3;
+  --badge-hr-text: #9d174d;
+  --badge-hr-border: #fbcfe8;
+  --badge-manager-bg: #ede9fe;
+  --badge-manager-text: #6d28d9;
+  --badge-manager-border: #ddd6fe;
+  --badge-new-bg: var(--color-primary-subtle);
+  --badge-new-text: var(--color-primary-hover);
+  --badge-new-border: rgba(79, 70, 229, 0.3);
+
+  /* Legacy aliases */
+  --card-shadow: var(--shadow-card);
+  --card-shadow-hover: var(--shadow-card-hover);
+}
+
+.dark-theme {
+  /* ═══ Brand Colors ═══ */
+  --color-primary: #{$indigo-300};
+  --color-primary-hover: #{$indigo-200};
+  --color-primary-active: #{$indigo-100};
+  --color-primary-subtle: #{$indigo-950};
+  --color-primary-light: #{$indigo-400};
+  --color-secondary: #{$slate-300};
+  --color-accent: #{$teal-400};
+  --color-accent-hover: #{$teal-200};
+
+  /* ═══ Bootstrap Variable Overrides (Dark Mode) ═══ */
+  --bs-primary: var(--color-primary);
+  --bs-primary-rgb: 165, 180, 252;
+  --bs-secondary-color: var(--text-muted);
+
+  /* ═══ Status Colors ═══ */
+  --color-success: #34d399;
+  --color-success-bg: rgba(5, 150, 105, 0.15);
+  --color-success-border: #{$emerald-600};
+  --color-warning: #{$amber-400};
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-warning-border: #{$amber-700};
+  --color-error: #{$rose-200};
+  --color-error-bg: rgba(225, 29, 72, 0.15);
+  --color-error-border: #{$rose-700};
+  --color-info: #{$sky-300};
+  --color-info-bg: rgba(14, 165, 233, 0.15);
+  --color-info-border: #{$sky-700};
+  --color-pending: #{$rust-300};
+  --color-pending-bg: rgba(251, 146, 60, 0.15);
+  --color-pending-border: #{$rust-700};
+
+  /* ═══ Backgrounds ═══ */
+  --bg-primary: #{$slate-dark};
+  --bg-secondary: #{$slate-800};
+  --bg-sidebar: #{$indigo-dark};
+  --bg-header: #{$indigo-dark};
+  --surface-card: #{$slate-800};
+  --surface-hover: #2a354f;
+  --surface-selected: #{$indigo-900};
+
+  /* ═══ Borders ═══ */
+  --border-color: #{$slate-600};
+  --border-strong: #{$slate-50};
+  --divider: #{$slate-800};
+
+  /* ═══ Typography ═══ */
+  --text-main: #{$slate-100};
+  --text-secondary: #{$slate-300};
+  --text-muted: #{$slate-400};
+  --text-disabled: #{$slate-500};
+  --text-inverse: #{$slate-900};
+  --text-on-primary: #{$white};
+
+  /* ═══ Table ═══ */
+  --table-header-bg: #{$indigo-dark};
+  --table-header-text: #{$slate-300};
+  --table-row-odd: #{$slate-800};
+  --table-row-even: #162030;
+  --table-row-hover: #25234d;
+  --table-row-selected: #{$indigo-900};
+  --table-border: #334155;
+
+  /* ═══ Chart Colors (Dark Mode) ═══ */
+  --chart-1: #{$indigo-400};
+  --chart-2: #{$sky-400};
+  --chart-3: #{$emerald-300};
+  --chart-4: #{$amber-400};
+  --chart-5: #{$pink-400};
+  --chart-6: #{$violet-400};
+  --chart-7: #{$orange-400};
+  --chart-8: #{$teal-400};
+  --chart-9: #{$rose-200};
+  --chart-10: #{$slate-400};
+
+  /* ═══ Form ═══ */
+  --input-bg: #{$slate-800};
+  --input-border: #{$slate-600};
+  --input-text: #{$slate-100};
+  --input-placeholder: #{$slate-400};
+  --input-focus-border: #{$indigo-400};
+  --input-focus-ring: rgba(129, 140, 248, 0.2);
+  --input-error-border: #{$rose-200};
+  --input-error-focus-ring: rgba(225, 29, 72, 0.25);
+  --input-disabled-bg: #{$slate-900};
+  --input-disabled-text: #{$slate-600};
+  --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+
+  /* ═══ Button Tokens (Dark) ═══ */
+  --btn-primary-bg: #{$indigo-600};
+  --btn-primary-hover: #{$indigo-500};
+  --btn-primary-active: #{$indigo-700};
+  --btn-primary-text: #{$white};
+
+  --btn-success-bg: #{$emerald-700};
+  --btn-success-hover: #{$emerald-600};
+  --btn-success-active: #{$emerald-800};
+
+  --btn-warning-bg: #{$amber-700};
+  --btn-warning-hover: #{$amber-600};
+  --btn-warning-active: #{$amber-800};
+
+  --btn-danger-bg: #{$rose-700};
+  --btn-danger-hover: #{$rose-600};
+  --btn-danger-active: #{$rose-800};
+
+  --btn-accent-bg: #{$teal-600};
+  --btn-accent-hover: #{$teal-500};
+  --btn-accent-border: #{$teal-500};
+
+  /* ═══ Shadows ═══ */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 20px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  /* ═══ Button Glow Shadows (Dark — higher opacity for visibility) ═══ */
+  --btn-primary-shadow: 0 4px 12px rgba(67, 56, 202, 0.5);
+  --btn-primary-outline-shadow: 0 4px 12px rgba(79, 70, 229, 0.45);
+  --btn-success-shadow: 0 4px 12px rgba(4, 120, 87, 0.5);
+  --btn-warning-shadow: 0 4px 12px rgba(180, 83, 9, 0.5);
+  --btn-danger-shadow: 0 4px 12px rgba(190, 18, 60, 0.5);
+  --btn-accent-shadow: 0 4px 12px rgba(13, 148, 136, 0.5);
+
+  /* ═══ Role Badges (Dark) ═══ */
+  --badge-admin-bg: rgba(245, 158, 11, 0.2);
+  --badge-admin-text: #fbbf24;
+  --badge-admin-border: rgba(245, 158, 11, 0.3);
+  --badge-hr-bg: rgba(236, 72, 153, 0.2);
+  --badge-hr-text: #f9a8d4;
+  --badge-hr-border: rgba(236, 72, 153, 0.3);
+  --badge-manager-bg: rgba(124, 58, 237, 0.2);
+  --badge-manager-text: #c4b5fd;
+  --badge-manager-border: rgba(124, 58, 237, 0.3);
+  --badge-new-bg: rgba(79, 70, 229, 0.2);
+  --badge-new-text: var(--color-primary);
+  --badge-new-border: rgba(79, 70, 229, 0.3);
+
+  /* ═══ Overlays & Overlay Text ═══ */
+  --mask-bg: rgba(0, 0, 0, 0.75);
+  --text-on-primary-muted: rgba(255, 255, 255, 0.75);
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY & BASE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+
+:focus-visible {
+  outline: 2px solid var(--color-primary-light, #{$indigo-400});
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--input-focus-ring);
+}
+
+.custom-select-trigger:focus {
+  outline: none;
+}
+
+html,
+body {
+  font-family: var(--font-base);
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  transition:
+    background-color #{$transition-normal},
+    color #{$transition-normal},
+    border-color #{$transition-normal};
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+main {
+  background-color: var(--bg-primary);
+  margin-top: #{$space-5xl}; // 56px
+  margin-left: 220px;
+  transition: #{$transition-layout};
+  min-width: 0;
+
+  @include tablet-up {
+    &.sidebar-collapsed-layout {
+      margin-left: 70px;
+    }
+  }
+
+  @include mobile {
+    margin-left: 0;
+    margin-top: #{$space-5xl};
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Dark Mode Table Overrides ─── */
+.dark-theme {
+  .card-title,
+  .card-subtitle,
+  .modal-title {
+    color: var(--text-main);
+  }
+
+  .table,
+  .table td,
+  .table th {
+    color: var(--text-main);
+    background-color: var(--bg-secondary);
+    border-color: var(--table-border);
+  }
+
+  .table thead th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+  }
+
+  .table tbody tr:nth-child(even) td {
+    background-color: var(--table-row-even);
+  }
+
+  .table-hover tbody tr:hover td {
+    background-color: var(--table-row-hover);
+  }
+}
+
+.list-group-item {
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+  border-color: var(--border-color);
+  transition: #{$transition-normal};
+
+  &:hover {
+    background-color: var(--surface-hover);
+    color: var(--text-main);
+    cursor: pointer;
+  }
+
+  &.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--text-on-primary);
+
+    .text-muted {
+      color: var(--text-on-primary-muted);
+    }
+
+    .text-white {
+      color: var(--text-on-primary);
+    }
+  }
+}
+
+a:not(.btn) {
+  .dark-theme & {
+    color: var(--color-accent);
+
+    &:hover {
+      color: var(--color-accent-hover);
+    }
+  }
+}
+
+input,
+select,
+textarea {
+  .dark-theme & {
+    color: var(--input-text);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+
+    &::placeholder {
+      color: var(--input-placeholder);
+      opacity: 0.8;
+    }
+  }
+}
+
+select option {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  padding: #{$space-lg} #{$space-xxl};
+  font-size: 0.95rem;
+
+  &:disabled {
+    color: var(--text-disabled);
+  }
+
+  .dark-theme & {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+}
+
+/* ─── Modal Theme ─── */
+.modal-box {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  transition:
+    background-color #{$transition-slow},
+    color #{$transition-slow},
+    border-color #{$transition-slow};
+}
+
+.modal-content {
+  .dark-theme & {
+    background-color: var(--bg-secondary);
+    border-color: var(--border-color);
+    color: var(--text-main);
+  }
+}

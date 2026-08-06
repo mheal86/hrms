@@ -11,15 +11,13 @@
       <div class="col-md-4">
         <div class="card text-center">
           <div class="card-body">
-            @if (data.employee?.avatarUrl) {
+            @if (data.employee && data.employee.avatarUrl) {
               <img
-                [src]="baseUrl + data.employee?.avatarUrl"
-                width="120"
-                height="120"
-                style="object-fit: cover; border-radius: 50%"
+                [src]="baseUrl + data.employee.avatarUrl"
+                class="avatar-img"
               />
             }
-            @if (!data.employee?.avatarUrl) {
+            @if (!data.employee || !data.employee.avatarUrl) {
               <div class="avatar-initials-lg">
                 {{ getInitials(data.employee?.firstName, data.employee?.lastName, data.username) }}
               </div>
@@ -33,10 +31,12 @@
             </h5>
             @if (data.employee) {
               <p class="text-muted small mb-1">
-                {{ (getPositionTranslation(data.employee.position) | translate) || '-' }}
+                {{
+                  (languageService.getPositionTranslation(data.employee.position) | translate) ||'-'
+                }}
               </p>
               <p class="text-muted small mb-3">
-                {{ getDepartmentName(data.employee.department) }}
+                {{ languageService.getDepartmentName(data.employee.department) }}
               </p>
             }
 
@@ -77,7 +77,7 @@
             </div>
 
             <!-- Thông báo khi nhân viên ngừng hoạt động -->
-            @if (data.employee?.status === 'INACTIVE') {
+            @if (data.employee && data.employee.status === 'INACTIVE') {
               <div class="alert alert-warning py-2 mb-3 small">
                 <strong>{{ 'PROFILE.INACTIVE_WARNING' | translate }}</strong>
                 {{ 'PROFILE.INACTIVE_WARNING_TEXT' | translate }}
@@ -92,18 +92,22 @@
                 >
                   <ng-template #body let-emp>
                     <tr>
-                      <td class="fw-bold" style="width: 150px">
+                      <td class="fw-bold">
                         {{ 'PROFILE.FIELD_EMAIL' | translate }}
                       </td>
                       <td>{{ emp.email }}</td>
                     </tr>
                     <tr>
                       <td class="fw-bold">{{ 'PROFILE.FIELD_POSITION' | translate }}</td>
-                      <td>{{ (getPositionTranslation(emp.position) | translate) || '-' }}</td>
+                      <td>
+                        {{
+                          (languageService.getPositionTranslation(emp.position) | translate) || '-'
+                        }}
+                      </td>
                     </tr>
                     <tr>
                       <td class="fw-bold">{{ 'PROFILE.FIELD_DEPARTMENT' | translate }}</td>
-                      <td>{{ getDepartmentName(emp.department) }}</td>
+                      <td>{{ languageService.getDepartmentName(emp.department) }}</td>
                     </tr>
                     <tr>
                       <td class="fw-bold">{{ 'PROFILE.FIELD_PHONE' | translate }}</td>
@@ -140,31 +144,7 @@
             @if (isEditMode()) {
               <div>
                 <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                  <div class="mb-3">
-                    <label class="form-label">{{ 'PROFILE.PHONE_LABEL' | translate }}</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      formControlName="phone"
-                      [placeholder]="'PROFILE.PHONE_PLACEHOLDER' | translate"
-                      maxlength="10"
-                      (input)="onPhoneInput($event)"
-                      [class.is-invalid]="form.get('phone')?.invalid && form.get('phone')?.touched"
-                    />
-                    <div class="invalid-feedback">{{ 'PROFILE.PHONE_INVALID' | translate }}</div>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">{{ 'PROFILE.ADDRESS_LABEL' | translate }}</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      formControlName="address"
-                      [class.is-invalid]="
-                        form.get('address')?.invalid && form.get('address')?.touched
-                      "
-                    />
-                    <div class="invalid-feedback">{{ 'PROFILE.ADDRESS_INVALID' | translate }}</div>
-                  </div>
+                  <formly-form [form]="form" [fields]="profileFields" [model]="profileModel"></formly-form>
                   <div class="d-flex gap-2">
                     <p-button
                       type="submit"
@@ -260,23 +240,21 @@
             >
               <!-- Custom template footer hiển thị checklist độ mạnh mật khẩu -->
               <ng-template #footer>
-                <div class="text-muted small w-100" style="background: transparent">
+                <div class="text-muted small w-100 password-strength-panel">
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center gap-2" style="color: var(--text-main)">
+                    <div class="d-flex align-items-center gap-2 header">
                       <i
-                        class="pi pi-shield"
-                        style="font-size: 1.1rem; color: var(--text-main)"
+                        class="pi pi-shield title-icon"
                       ></i>
-                      <span class="fw-bold" style="font-size: 0.95rem; color: var(--text-main)">{{
+                      <span class="fw-bold title-text">{{
                         'PROFILE.PASS_STRENGTH_TITLE' | translate
-                      }}</span>
+                       }}</span>
                     </div>
                     <!-- Badge ở góc phải -->
                     @if (newPasswordValue) {
                       <span
-                        class="badge px-2 py-1 text-xs fw-semibold"
+                        class="badge px-2 py-1 text-xs fw-semibold badge-strength"
                         [style.backgroundColor]="strengthColor"
-                        style="color: #fff; border-radius: 4px"
                       >
                         {{ strengthLabel }}
                       </span>
@@ -284,94 +262,29 @@
                   </div>
 
                   <!-- Custom dynamic progress bar matching strength color -->
-                  <div
-                    class="progress mb-3"
-                    style="
-                      height: 5px;
-                      background-color: var(--divider, #cbd5e1);
-                      border-radius: 3px;
-                    "
-                  >
+                  <div class="progress mb-3 strength-progress">
                     <div
-                      class="progress-bar"
+                      class="progress-bar strength-progress-bar"
                       role="progressbar"
                       [style.width.%]="strengthValue"
                       [style.backgroundColor]="strengthColor"
-                      style="
-                        transition:
-                          width 0.3s ease,
-                          background-color 0.3s ease;
-                        border-radius: 3px;
-                      "
                     ></div>
                   </div>
 
                   <ul class="list-unstyled mb-0 d-flex flex-column gap-2 mt-2">
-                    <li
-                      class="d-flex align-items-center gap-2"
-                      [style.color]="hasMinLength() ? 'var(--color-success)' : 'var(--text-muted)'"
-                    >
-                      <i
-                        class="pi"
-                        [ngClass]="
-                          hasMinLength() ? 'pi-check text-success' : 'pi-times text-danger'
-                        "
-                        style="font-size: 0.8rem"
-                      ></i>
-                      <span>{{ 'PROFILE.PASS_MIN_LENGTH' | translate }}</span>
-                    </li>
-                    <li
-                      class="d-flex align-items-center gap-2"
-                      [style.color]="hasUppercase() ? 'var(--color-success)' : 'var(--text-muted)'"
-                    >
-                      <i
-                        class="pi"
-                        [ngClass]="
-                          hasUppercase() ? 'pi-check text-success' : 'pi-times text-danger'
-                        "
-                        style="font-size: 0.8rem"
-                      ></i>
-                      <span>{{ 'PROFILE.PASS_UPPERCASE' | translate }}</span>
-                    </li>
-                    <li
-                      class="d-flex align-items-center gap-2"
-                      [style.color]="hasLowercase() ? 'var(--color-success)' : 'var(--text-muted)'"
-                    >
-                      <i
-                        class="pi"
-                        [ngClass]="
-                          hasLowercase() ? 'pi-check text-success' : 'pi-times text-danger'
-                        "
-                        style="font-size: 0.8rem"
-                      ></i>
-                      <span>{{ 'PROFILE.PASS_LOWERCASE' | translate }}</span>
-                    </li>
-                    <li
-                      class="d-flex align-items-center gap-2"
-                      [style.color]="hasNumber() ? 'var(--color-success)' : 'var(--text-muted)'"
-                    >
-                      <i
-                        class="pi"
-                        [ngClass]="hasNumber() ? 'pi-check text-success' : 'pi-times text-danger'"
-                        style="font-size: 0.8rem"
-                      ></i>
-                      <span>{{ 'PROFILE.PASS_NUMBER' | translate }}</span>
-                    </li>
-                    <li
-                      class="d-flex align-items-center gap-2"
-                      [style.color]="
-                        hasSpecialChar() ? 'var(--color-success)' : 'var(--text-muted)'
-                      "
-                    >
-                      <i
-                        class="pi"
-                        [ngClass]="
-                          hasSpecialChar() ? 'pi-check text-success' : 'pi-times text-danger'
-                        "
-                        style="font-size: 0.8rem"
-                      ></i>
-                      <span>{{ 'PROFILE.PASS_SPECIAL' | translate }}</span>
-                    </li>
+                    @for (rule of passwordRules; track rule.key) {
+                      <li
+                        class="d-flex align-items-center gap-2"
+                        [style.color]="newPasswordValidation[rule.key] ? 'var(--color-success)' : 'var(--text-muted)'"
+                      >
+                        <i
+                          [ngClass]="
+                            newPasswordValidation[rule.key] ? 'pi pi-check text-success' : 'pi pi-times text-danger'
+                          "
+                        ></i>
+                        <span>{{ rule.label | translate }}</span>
+                      </li>
+                    }
                   </ul>
                 </div>
               </ng-template>

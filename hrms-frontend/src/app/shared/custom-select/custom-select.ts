@@ -3,15 +3,10 @@ import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
 
-export type SelectValue = string | number | boolean | undefined;
-
-export interface SelectOption {
-  label: string;
-  value: SelectValue;
-}
+import { SelectOption, SelectValue } from '../../core/models/select-option-model';
 
 @Component({
-  selector: 'app-custom-select',
+  selector: 'app-custom-select',  
   imports: [CommonModule, Select, FormsModule],
   providers: [
     {
@@ -31,10 +26,8 @@ export class CustomSelectComponent implements ControlValueAccessor {
   val: SelectValue | null = null; // Giá trị hiện tại của select
   disabled: boolean = false; // Trạng thái bật/tắt của select (false = bật, true = tắt)
 
-  private onChange: (val: SelectValue | null) => void = () => {}; // Hàm callback khi giá trị thay đổi
-  private onTouched: () => void = () => {}; // Hàm callback khi select được chạm vào
-
-  constructor() {}
+  onChange: (val: SelectValue | null) => void = () => {}; // Hàm callback khi giá trị thay đổi
+  onTouched: () => void = () => {}; // Hàm callback khi select được chạm vào
 
   onSelectChange(event: { value: SelectValue | null }) {
     this.val = event.value;

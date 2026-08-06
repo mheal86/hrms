@@ -1,141 +1,142 @@
-/* ─── Sidebar Navigation ─── */
-.app-sidebar {
-  background-color: var(--bg-sidebar);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-  width: 220px;
-  /* position: fixed — sidebar luôn cố định, không cuộn cùng trang */
-  position: fixed;
-  top: 56px;
-  left: 0;
-  height: calc(100vh - 56px);
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 1020;
-  transition:
-    background-color 0.3s ease,
-    width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s ease;
-  /* Scrollbar styling */
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-}
+// ─── Variables ───────────────────────────────────────────────
+$sidebar-width: 220px;
+$sidebar-collapsed-width: 70px;
+$navbar-height: 56px;
+$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+$nav-avatar-gradient: linear-gradient(135deg, var(--nav-active-bg-start) 0%, var(--nav-active-bg-end) 100%);
 
-.app-sidebar::-webkit-scrollbar {
-  width: 4px;
-}
-
-.app-sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-/* Nav links inherit white-on-dark context from sidebar */
-.app-sidebar .nav-link {
-  color: #a5b4fc; /* Indigo-300 — readable on dark bg */
-  padding: 9px 14px;
-  border-radius: 8px;
-  margin-bottom: 3px;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.app-sidebar .nav-icon {
-  font-size: 1.1rem;
-  width: 20px;
-  height: 20px;
+// ─── Mixin ───────────────────────────────────────────────────
+@mixin flex-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.app-sidebar .nav-link:hover .nav-icon {
-  transform: translateX(4px);
-}
-
-.app-sidebar .nav-text {
-  display: inline-block;
-  opacity: 1;
-  max-width: 150px;
+// ─── Sidebar ─────────────────────────────────────────────────
+.app-sidebar {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  width: $sidebar-width;
+  position: fixed;
+  top: $navbar-height;
+  left: 0;
+  height: calc(100vh - #{$navbar-height});
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 998;
   transition:
-    opacity 0.25s ease,
-    max-width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-  white-space: nowrap;
+    background-color 0.3s ease,
+    width 0.3s $easing-spring,
+    border-color 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+
+  &::-webkit-scrollbar { width: 4px; }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  .nav-link {
+    color: var(--nav-text-muted);
+    padding: 9px 14px;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.25s $easing-spring;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &:hover {
+      background-color: var(--nav-item-hover-bg);
+      color: var(--nav-text-hover);
+
+      .nav-icon {
+        transform: translateX(4px);
+      }
+    }
+
+    &.active {
+      background: $nav-avatar-gradient;
+      color: var(--nav-text-active);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+  }
+
+  .nav-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    height: 20px;
+    @include flex-center;
+    flex-shrink: 0;
+    transition: transform 0.25s $easing-spring;
+  }
+
+  .nav-text {
+    display: inline-block;
+    opacity: 1;
+    max-width: 150px;
+    transition:
+      opacity 0.25s ease,
+      max-width 0.25s $easing-spring;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 }
 
-.app-sidebar .nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.07);
-  color: #e0e7ff; /* Indigo-100 */
-}
-
-.app-sidebar .nav-link.active {
-  background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
-}
-
-/* Sidebar backdrop for mobile */
+// ─── Backdrop (mobile) ───────────────────────────────────────
 .sidebar-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(2px);
   z-index: 1040;
 }
 
+// ─── Responsive ──────────────────────────────────────────────
 @media (max-width: 767.98px) {
   .app-sidebar {
-    position: fixed;
-    top: 56px;
-    left: 0;
-    height: calc(100vh - 56px);
     transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.3s $easing-spring;
     z-index: 1050;
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-  }
 
-  .app-sidebar.sidebar-open {
-    transform: translateX(0);
+    &.sidebar-open {
+      transform: translateX(0);
+    }
   }
 }
 
 @media (min-width: 768px) {
   .app-sidebar.collapsed {
-    width: 70px;
-  }
+    width: $sidebar-collapsed-width;
 
-  .app-sidebar.collapsed .nav {
-    padding-left: 8px;
-    padding-right: 8px;
-  }
+    .nav {
+      padding-left: 8px;
+      padding-right: 8px;
+    }
 
-  .app-sidebar.collapsed .nav-text {
-    opacity: 0;
-    max-width: 0;
-    pointer-events: none;
-  }
+    .nav-text {
+      opacity: 0;
+      max-width: 0;
+      pointer-events: none;
+    }
 
-  .app-sidebar.collapsed .nav-link:hover .nav-icon {
-    transform: scale(1.2);
-  }
+    .nav-link {
+      justify-content: center;
+      padding: 11px 0;
+      gap: 0;
 
-  .app-sidebar.collapsed .nav-link {
-    justify-content: center;
-    padding: 11px 0;
-    gap: 0;
-  }
+      &:hover .nav-icon {
+        transform: scale(1.2);
+      }
+    }
 
-  .app-sidebar.collapsed .nav-item {
-    margin-bottom: 8px;
+    .nav-item {
+      margin-bottom: 8px;
+    }
   }
 }

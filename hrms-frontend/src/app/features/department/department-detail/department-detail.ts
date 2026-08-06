@@ -1,24 +1,27 @@
-import { Component, OnInit, OnDestroy, signal, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, HostListener, computed, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Department } from '../department';
-import { Department as DepartmentModel } from '../department-model';
-import { Employee } from '../../employee/employee';
-import { Employee as EmployeeModel } from '../../employee/employee-model';
+import { Department } from '../../../core/services/department.service';
+import { Department as DepartmentModel } from '../../../core/models/department-model';
+import { Employee } from '../../../core/services/employee.service';
+import { Employee as EmployeeModel, EmployeeStatus } from '../../../core/models/employee-model';
 import { Spinner } from '../../../shared/spinner/spinner';
-import { Auth } from '../../../core/auth';
-import { Notification } from '../../../core/notification';
-import { Confirm } from '../../../core/confirm';
-import { CustomSelectComponent, SelectOption } from '../../../shared/custom-select/custom-select';
-import { Subject, takeUntil } from 'rxjs';
+import { Auth } from '../../../core/services/auth';
+import { Notification } from '../../../core/services/notification';
+import { Confirm } from '../../../core/services/confirm';
+import { CustomSelectComponent } from '../../../shared/custom-select/custom-select';
+import { Subject, takeUntil, finalize } from 'rxjs';
 import { Menu } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
 import { Dialog } from 'primeng/dialog';
 import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
+import { LanguageService } from '../../../core/services/language.service';
+import { getInitials } from '../../../core/utils/employee-utils';
 
 @Component({
   selector: 'app-department-detail',
@@ -31,6 +34,7 @@ import { environment } from '../../../../environments/environment';
     Menu,
     Dialog,
     Button,
+    InputText,
     TableModule,
     TranslatePipe,
   ],
@@ -38,9 +42,20 @@ import { environment } from '../../../../environments/environment';
   styleUrl: './department-detail.scss',
 })
 export class DepartmentDetail implements OnInit, OnDestroy {
+  departmentService = inject(Department);
+  employeeService = inject(Employee);
+  route = inject(ActivatedRoute);
+  location = inject(Location);
+  authService = inject(Auth);
+  notificationService = inject(Notification);
+  confirmService = inject(Confirm);
+  router = inject(Router);
+  translate = inject(TranslateService);
+  languageService = inject(LanguageService);
+
   baseUrl = environment.baseUrl;
   @HostListener('document:keydown.escape', ['$event'])
-  handleEscape(event: Event) {
+  handleEscape(_event: Event) {
     if (this.isTransferModalOpen()) {
       this.closeTransferModal();
     }
@@ -48,7 +63,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       this.closeAddEmployeeModal();
     }
   }
-  department = signal<DepartmentModel | null>(null);
+  department = signal<DepartmentModel | undefined>(undefined);
   employees = signal<EmployeeModel[]>([]);
   allDepartments = signal<DepartmentModel[]>([]);
   isLoading = signal(false);
@@ -62,7 +77,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       {
         label: this.translate.instant('DEPARTMENT.MENU_EMP_EDIT'),
         icon: 'pi pi-pencil',
-        disabled: emp.status === 'INACTIVE',
+        disabled: emp.status === EmployeeStatus.INACTIVE,
         command: () => {
           this.router.navigate(['/employees/edit', emp._id], {
             queryParams: { departmentId: this.department()?._id },
@@ -79,7 +94,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       {
         label: this.translate.instant('DEPARTMENT.MENU_EMP_DELETE'),
         icon: 'pi pi-trash',
-        disabled: emp.status === 'ACTIVE',
+        disabled: emp.status === EmployeeStatus.ACTIVE,
         styleClass: 'text-danger',
         command: () => {
           this.onDelete(emp);
@@ -89,10 +104,18 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   }
 
   isTransferModalOpen = signal(false);
-  selectedEmployeeForTransfer = signal<EmployeeModel | null>(null);
+  selectedEmployeeForTransfer = signal<EmployeeModel | undefined>(undefined);
   selectedTargetDepartmentId = signal('');
-  transferOptions = signal<SelectOption[]>([]);
-
+  transferOptions = computed(() => {
+    this.languageService.currentLang();
+    const currentDeptId = this.department()?._id;
+    return this.allDepartments()
+      .filter((d) => d._id !== currentDeptId)
+      .map((d) => ({
+        label: this.languageService.getDepartmentName(d.name),
+        value: d._id || '',
+      }));
+  });
   isAddEmployeeModalOpen = signal(false);
   selectedEmployeeToTransferInId = signal('');
   searchedOtherEmployees = signal<EmployeeModel[]>([]);
@@ -106,19 +129,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     { field: 'status', header: 'DEPARTMENT.COL_STATUS' },
   ];
 
-  private destroy$ = new Subject<void>();
-
-  constructor(
-    private departmentService: Department,
-    private employeeService: Employee,
-    private route: ActivatedRoute,
-    private location: Location,
-    public authService: Auth,
-    private notificationService: Notification,
-    private confirmService: Confirm,
-    private router: Router,
-    private translate: TranslateService,
-  ) {}
+  destroy$ = new Subject<void>();
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -138,17 +149,18 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.departmentService
       .getById(id)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading.set(false))
+      )
       .subscribe({
         next: (data) => {
           this.department.set(data);
-          this.isLoading.set(false);
         },
         error: (err) => {
           this.errorMessage.set(
             err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
           );
-          this.isLoading.set(false);
         },
       });
   }
@@ -161,7 +173,11 @@ export class DepartmentDetail implements OnInit, OnDestroy {
         next: (depts) => {
           this.allDepartments.set(depts);
         },
-        error: () => {},
+        error: (err) => {
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
+        },
       });
   }
 
@@ -169,14 +185,18 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     this.isLoadingEmployees.set(true);
     this.employeeService
       .getAll(1, 100, '', 'firstName', 'asc', departmentId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoadingEmployees.set(false))
+      )
       .subscribe({
         next: (res) => {
           this.employees.set(res.data);
-          this.isLoadingEmployees.set(false);
         },
-        error: () => {
-          this.isLoadingEmployees.set(false);
+        error: (err) => {
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
         },
       });
   }
@@ -184,19 +204,12 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   openTransferModal(emp: EmployeeModel) {
     this.selectedEmployeeForTransfer.set(emp);
     this.selectedTargetDepartmentId.set('');
-
-    const currentDeptId = this.department()?._id;
-    const options = this.allDepartments()
-      .filter((d) => d._id !== currentDeptId)
-      .map((d) => ({ label: d.name, value: d._id }));
-    this.transferOptions.set(options);
-
     this.isTransferModalOpen.set(true);
   }
 
   closeTransferModal() {
     this.isTransferModalOpen.set(false);
-    this.selectedEmployeeForTransfer.set(null);
+    this.selectedEmployeeForTransfer.set(undefined);
     this.selectedTargetDepartmentId.set('');
   }
 
@@ -210,20 +223,26 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     const confirmed = await this.confirmService.ask(
       this.translate.instant('DEPARTMENT.TRANSFER_DEPT_CONFIRM', {
         empName: `${emp.firstName} ${emp.lastName}`,
-        deptName: this.getDepartmentName(targetDept.name),
+        deptName: this.languageService.getDepartmentName(targetDept.name),
       }),
     );
     if (!confirmed) return;
 
-    this.isLoadingEmployees.set(true);
     this.closeTransferModal();
+    this.updateEmployeeDepartment(emp._id, targetDeptId, 'DEPARTMENT.TRANSFER_SUCCESS');
+  }
 
+  updateEmployeeDepartment(empId: string, targetDeptId: string, successMsgKey: string) {
+    this.isLoadingEmployees.set(true);
     this.employeeService
-      .update(emp._id, { department: targetDeptId })
-      .pipe(takeUntil(this.destroy$))
+      .update(empId, { department: targetDeptId })
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoadingEmployees.set(false))
+      )
       .subscribe({
         next: () => {
-          this.notificationService.success(this.translate.instant('DEPARTMENT.TRANSFER_SUCCESS'));
+          this.notificationService.success(this.translate.instant(successMsgKey));
           const currentDeptId = this.department()?._id;
           if (currentDeptId) {
             this.loadEmployees(currentDeptId);
@@ -233,7 +252,6 @@ export class DepartmentDetail implements OnInit, OnDestroy {
           this.notificationService.error(
             err.error?.message || this.translate.instant('DEPARTMENT.TRANSFER_ERROR'),
           );
-          this.isLoadingEmployees.set(false);
         },
       });
   }
@@ -271,50 +289,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     this.location.back();
   }
 
-  getInitials(firstName: string, lastName: string): string {
-    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
-  }
-
-  getDepartmentName(dept: any): string {
-    const fallback = this.translate.instant('EMPLOYEE.UNASSIGNED');
-    if (!dept) return fallback;
-    const name = typeof dept === 'object' ? dept.name || fallback : dept;
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_LIST.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_LIST.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_LIST.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_LIST.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_LIST.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_LIST.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_LIST.RD',
-      'Phòng R&D': 'DEPARTMENTS_LIST.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_LIST.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_LIST.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_LIST.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_LIST.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_LIST.TRAINING',
-    };
-    const translationKey = mapping[name];
-    if (translationKey) {
-      const translated = this.translate.instant(translationKey);
-      return translated !== translationKey ? translated : name;
-    }
-    return name;
-  }
-
-  getPositionTranslation(position: any): string {
-    if (!position) return '';
-    const mapping: { [key: string]: string } = {
-      'Nhân viên': 'FORM.POSITION_STAFF',
-      'Trưởng nhóm': 'FORM.POSITION_TEAM_LEADER',
-      'Trưởng phòng': 'FORM.POSITION_DEPT_HEAD',
-      'Phó phòng': 'FORM.POSITION_DEPT_DEPUTY',
-      'Phó giám đốc': 'FORM.POSITION_DEPUTY_GD',
-      'Giám đốc': 'FORM.POSITION_GD',
-      'Thực tập sinh': 'FORM.POSITION_INTERN',
-    };
-    return mapping[position] || position;
-  }
+  getInitials = getInitials;
 
   openAddEmployeeModal() {
     this.selectedEmployeeToTransferInId.set('');
@@ -335,7 +310,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   loadOtherEmployees() {
     const currentDeptId = this.department()?._id;
     this.employeeService
-      .getAll(1, 1000, '', 'firstName', 'asc', '', 'ACTIVE')
+      .getAll(1, 1000, '', 'firstName', 'asc', '', EmployeeStatus.ACTIVE)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {
@@ -346,7 +321,11 @@ export class DepartmentDetail implements OnInit, OnDestroy {
             return empDeptId !== currentDeptId;
           });
         },
-        error: () => {},
+        error: (err) => {
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('DEPARTMENT.LOAD_ERROR'),
+          );
+        },
       });
   }
 
@@ -381,60 +360,18 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     const emp = this.otherEmployeesList.find((e) => e._id === empId);
     if (!emp) return;
 
-    const oldDeptName = this.getDepartmentName(emp.department);
+    const oldDeptName = this.languageService.getDepartmentName(emp.department);
 
     // Hiển thông báo xác nhận đúng theo mẫu yêu cầu
     const confirmed = await this.confirmService.ask(
       this.translate.instant('DEPARTMENT.TRANSFER_IN_CONFIRM', {
         from: oldDeptName,
-        to: this.getDepartmentName(currentDept.name),
+        to: this.languageService.getDepartmentName(currentDept.name),
       }),
     );
     if (!confirmed) return;
 
-    this.isLoadingEmployees.set(true);
     this.closeAddEmployeeModal();
-
-    this.employeeService
-      .update(emp._id!, { department: currentDept._id })
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.notificationService.success(
-            this.translate.instant('DEPARTMENT.TRANSFER_IN_SUCCESS'),
-          );
-          this.loadEmployees(currentDept._id!);
-        },
-        error: (err) => {
-          this.notificationService.error(
-            err.error?.message || this.translate.instant('DEPARTMENT.TRANSFER_IN_ERROR'),
-          );
-          this.isLoadingEmployees.set(false);
-        },
-      });
-  }
-
-  getDepartmentDesc(name: any, description: any): string {
-    const mapping: { [key: string]: string } = {
-      'Phòng Nhân sự': 'DEPARTMENTS_DESC.HR',
-      'Phòng Công nghệ thông tin': 'DEPARTMENTS_DESC.TECH',
-      'Phòng Kế toán': 'DEPARTMENTS_DESC.FINANCE',
-      'Phòng Marketing': 'DEPARTMENTS_DESC.MARKETING',
-      'Phòng Kinh doanh': 'DEPARTMENTS_DESC.SALES',
-      'Phòng Hành chính': 'DEPARTMENTS_DESC.ADMIN',
-      'Phòng Nghiên cứu & Phát triển': 'DEPARTMENTS_DESC.RD',
-      'Phòng R&D': 'DEPARTMENTS_DESC.RD',
-      'Phòng Quản lý dự án': 'DEPARTMENTS_DESC.PROJECT',
-      'Phòng Chăm sóc khách hàng': 'DEPARTMENTS_DESC.CUSTOMER_SERVICE',
-      'Phòng Pháp chế': 'DEPARTMENTS_DESC.LEGAL',
-      'Phòng Thiết kế': 'DEPARTMENTS_DESC.DESIGN',
-      'Phòng Đào tạo': 'DEPARTMENTS_DESC.TRAINING',
-    };
-    const translationKey = mapping[name];
-    if (translationKey) {
-      const translated = this.translate.instant(translationKey);
-      return translated !== translationKey ? translated : description;
-    }
-    return description || '';
+    this.updateEmployeeDepartment(emp._id!, currentDept._id!, 'DEPARTMENT.TRANSFER_IN_SUCCESS');
   }
 }

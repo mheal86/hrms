@@ -1,38 +1,79 @@
-/* ─── Employee List Avatar ─── */
+// ─── Variables ───────────────────────────────────────────────
+$avatar-size-sm: 32px;
+$avatar-size-lg: 36px;
+$border-radius-circle: 50%;
+$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+$transition-fast: 0.2s ease;
+$nav-btn-size: 36px;
+$nav-btn-radius: 8px;
+
+// ─── Mixins ──────────────────────────────────────────────────
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin avatar-circle($size) {
+  width: $size;
+  height: $size;
+  border-radius: $border-radius-circle;
+}
+
+@mixin avatar-initials($size, $font-size) {
+  @include avatar-circle($size);
+  @include flex-center;
+  background: $avatar-gradient;
+  color: var(--text-on-primary);
+  font-size: $font-size;
+  font-weight: 600;
+}
+
+@mixin nav-icon-btn($size: $nav-btn-size) {
+  width: $size;
+  height: $size;
+  padding: 6px;
+  border-radius: $nav-btn-radius;
+  background: transparent;
+  border: none;
+  transition: all $transition-fast;
+}
+
+// ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+  @include avatar-circle($avatar-size-sm);
   object-fit: cover;
 }
 
 .avatar-initials {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 13px;
-  font-weight: 600;
+  @include avatar-initials($avatar-size-lg, 13px);
 }
 
-/* ─── Sort Icon ─── */
 .sort-icon {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-left: 4px;
-  transition: color 0.2s ease;
+  font-size: 0.8rem;
+  margin-left: 0.25rem;
 }
 
-.sort-icon.active {
-  color: #a5b4fc; /* Indigo-300 — visible on dark header */
+.sortable-header {
+  cursor: pointer;
 }
 
-/* Style for text-danger menu items inside PrimeNG overlay menu */
-:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-text,
-:host ::ng-deep .text-danger .p-menuitem-link .p-menuitem-icon {
-  color: var(--color-error, #be123c);
+// ─── Filter Controls ─────────────────────────────────────────
+.search-input-group {
+  max-width: 320px;
+}
+
+.filter-select-dept  { width: 200px; display: inline-block; }
+.filter-select-status{ width: 180px; display: inline-block; }
+
+// ─── PrimeNG Overrides ───────────────────────────────────────
+:host ::ng-deep {
+  .text-danger {
+    .p-menuitem-link {
+      .p-menuitem-text,
+      .p-menuitem-icon {
+        color: var(--color-error);
+      }
+    }
+  }
 }

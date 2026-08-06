@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: './environment/.env' });
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const connectDB = require('./config/db');

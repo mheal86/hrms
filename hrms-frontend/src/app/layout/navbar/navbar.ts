@@ -1,27 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Auth } from '../../core/auth';
-import { SidebarState } from '../../core/sidebar-state';
-import { LanguageService, SupportedLang } from '../../core/language.service';
+import { Auth } from '../../core/services/auth';
+import { SidebarState } from '../../core/services/sidebar-state';
+import { LanguageService, SupportedLang } from '../../core/services/language.service';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
-  imports: [CommonModule, Button, Select, FormsModule, TranslatePipe],
+  imports: [CommonModule, Button, Select, FormsModule, TranslatePipe, RouterLink],
   templateUrl: './navbar.html',
   styleUrl: './navbar.scss',
 })
 export class Navbar implements OnInit {
-  isDarkMode = false;
+  authService = inject(Auth);
+  sidebarState = inject(SidebarState);
+  languageService = inject(LanguageService);
 
-  constructor(
-    public authService: Auth,
-    public sidebarState: SidebarState,
-    public languageService: LanguageService,
-  ) {}
+  isDarkMode = false;
 
   ngOnInit() {
     const theme = localStorage.getItem('theme') || 'light';
@@ -36,7 +35,7 @@ export class Navbar implements OnInit {
     window.dispatchEvent(new Event('themeChanged'));
   }
 
-  private applyTheme() {
+  applyTheme() {
     const root = document.documentElement;
     if (this.isDarkMode) {
       root.classList.add('dark-theme');

@@ -41,6 +41,7 @@
     "USERNAME_SPACE": "Username must not contain spaces",
     "USERNAME_CHARS": "Username can only contain letters, numbers, dot, underscore, hyphen",
     "USERNAME_EXISTS": "This username already exists",
+    "USERNAME_CHECK_ERROR": "Failed to check username availability",
     "DEPT_NAME_SPECIAL": "Department name cannot contain special characters"
   },
   "NAVBAR": {
@@ -84,7 +85,8 @@
     "EMPLOYEE_EDIT": "Edit Employee",
     "EMPLOYEE_DETAIL": "Employee Detail",
     "PROFILE": "Profile",
-    "NOT_FOUND": "Page Not Found"
+    "NOT_FOUND": "Page Not Found",
+    "FORBIDDEN": "Access Denied"
   },
   "DASHBOARD": {
     "EMPLOYEES_CARD": "Staff (Active / Total)",
@@ -96,6 +98,7 @@
     "COL_DEPT": "Department",
     "COL_LAST_MONTH": "Last Month",
     "COL_THIS_MONTH": "This Month",
+    "COL_TOTAL": "Total Staff",
     "COL_FULL_NAME": "Full Name",
     "COL_EMAIL": "Email",
     "COL_STATUS": "Status",
@@ -230,6 +233,7 @@
     "INACTIVE_WARNING": "⚠️ This account is inactive.",
     "INACTIVE_WARNING_TEXT": "You cannot edit your personal information.",
     "NO_EMPLOYEE_LINKED": "This account is not linked to an employee profile.",
+    "LOAD_ERROR": "Failed to load profile information",
     "FIELD_EMAIL": "Email",
     "FIELD_POSITION": "Position",
     "FIELD_DEPARTMENT": "Department",
@@ -268,6 +272,11 @@
   },
   "NOT_FOUND": {
     "MESSAGE": "The page you are looking for does not exist",
+    "GO_HOME": "Go to Dashboard"
+  },
+  "FORBIDDEN": {
+    "TITLE": "Access Denied",
+    "MESSAGE": "You do not have permission to view this page. Only administrators are allowed.",
     "GO_HOME": "Go to Dashboard"
   },
   "FORM": {

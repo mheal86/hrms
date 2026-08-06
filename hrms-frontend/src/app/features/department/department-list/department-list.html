@@ -1,7 +1,8 @@
 <div class="page-fade list-layout-container">
   <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-    <div class="input-group" style="max-width: 320px">
+    <div class="input-group search-input-group">
       <input
+        pInputText
         type="text"
         class="form-control"
         [placeholder]="'DEPARTMENT.SEARCH_PLACEHOLDER' | translate"
@@ -57,10 +58,10 @@
               <td>
                 @if (col.field === 'name') {
                   <a [routerLink]="['/departments', dept._id]" class="text-decoration-none">{{
-                    getDepartmentName(dept.name)
+                    languageService.getDepartmentName(dept.name)
                   }}</a>
                 } @else if (col.field === 'description') {
-                  {{ getDepartmentDesc(dept.name, dept.description) }}
+                  {{ languageService.getDepartmentDesc(dept.name, dept.description) }}
                 } @else {
                   {{ dept[col.field] }}
                 }
@@ -103,16 +104,7 @@
 
   @if (!isLoading() && departments().length === 0) {
     <div class="empty-state">
-      <svg
-        width="64"
-        height="64"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="#cbd5e1"
-        stroke-width="1.5"
-      >
-        <path d="M3 21h18M5 21V7l8-4v18M13 9h6v12M9 9v.01M9 12v.01M9 15v.01M9 18v.01" />
-      </svg>
+      <i class="pi pi-building text-muted"></i>
       <p class="mt-3 text-muted">{{ 'DEPARTMENT.EMPTY_STATE' | translate }}</p>
     </div>
   }

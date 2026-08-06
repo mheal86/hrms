@@ -1,49 +1,64 @@
-/* ─── Department Detail Avatar ─── */
+// ─── Variables ───────────────────────────────────────────────
+$avatar-size-sm: 32px;
+$avatar-size-lg: 120px;
+$border-radius-circle: 50%;
+$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+$shadow-modal-fade: rgba(15, 23, 42, 0.6);
+$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ─── Mixins ──────────────────────────────────────────────────
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin avatar-circle($size) {
+  width: $size;
+  height: $size;
+  border-radius: $border-radius-circle;
+}
+
+@mixin avatar-initials($size, $font-size) {
+  @include avatar-circle($size);
+  @include flex-center;
+  background: $avatar-gradient;
+  color: var(--text-on-primary);
+  font-size: $font-size;
+  font-weight: 600;
+}
+
+// ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
+  @include avatar-circle($avatar-size-sm);
   object-fit: cover;
 }
 
 .avatar-initials {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
+  @include avatar-initials($avatar-size-sm, 12px);
 }
 
-/* ─── Confirm / Delete Modal ─── */
+// ─── Modal Backdrop ──────────────────────────────────────────
 .modal-backdrop-custom {
+  @include flex-center;
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(15, 23, 42, 0.6);
+  inset: 0;
+  background: $shadow-modal-fade;
   backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 10000;
   animation: backdropFadeIn 0.2s ease;
+
+  .dark-theme & {
+    background: rgba(0, 0, 0, 0.75);
+  }
 }
 
 @keyframes backdropFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+// ─── Modal Box ───────────────────────────────────────────────
 .modal-box {
   background: var(--bg-secondary);
   color: var(--text-main);
@@ -53,7 +68,7 @@
   min-width: 380px;
   max-width: 95%;
   box-shadow: var(--shadow-modal);
-  animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalSlideIn 0.25s $easing-spring;
   transition:
     background-color 0.3s ease,
     color 0.3s ease,
@@ -71,70 +86,51 @@
   }
 }
 
-.dark-theme .modal-backdrop-custom {
-  background: rgba(0, 0, 0, 0.75);
-}
-
-/* ─── Premium Choice Card Styles ─── */
+// ─── Hover Card Action ───────────────────────────────────────
 .hover-card-action {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
+  cursor: pointer;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  .pi {
+    transition: transform 0.25s ease;
+  }
+
+  &:hover {
+    transform: translateY(-3px);
+    border-color: var(--color-primary-light);
+    background-color: var(--surface-hover);
+    box-shadow: var(--shadow-card-hover);
+
+    .pi {
+      transform: scale(1.1);
+    }
+  }
 }
 
-.hover-card-action:hover {
-  transform: translateY(-3px);
-  border-color: var(--color-primary-light);
-  background-color: var(--surface-hover);
-  box-shadow: var(--shadow-card-hover);
+// ─── Scrollable List ─────────────────────────────────────────
+.scrollable-list-container {
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-.hover-card-action .pi {
-  transition: transform 0.25s ease;
-}
+// ─── PrimeNG Overrides ───────────────────────────────────────
+:host ::ng-deep {
+  .back-btn-custom.p-button {
+    @include flex-center;
+    @include avatar-circle(32px);
+    display: inline-flex;
+    padding: 0;
+    color: var(--color-primary-light);
+    background: transparent;
+    border: none;
+    transition: all 0.25s $easing-spring;
 
-.hover-card-action:hover .pi {
-  transform: scale(1.1);
-}
-
-/* ─── List Group Item Custom Styles for p-button ─── */
-body .scrollable-list-container ::ng-deep p-button {
-  width: 100%;
-  display: block;
-}
-
-body .scrollable-list-container ::ng-deep .list-group-item-btn.p-button.p-component {
-  width: 100%;
-  text-align: left;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1.25rem;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
-  border-radius: 0;
-  transition: all 0.15s ease-in-out;
-  margin-bottom: -1px;
-}
-
-body .scrollable-list-container ::ng-deep .list-group-item-btn.p-button.p-component:hover {
-  background-color: var(--surface-hover);
-  color: var(--text-main);
-}
-
-body .scrollable-list-container ::ng-deep .list-group-item-btn.p-button.p-component.active {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: #ffffff;
-  z-index: 2;
-}
-
-body
-  .scrollable-list-container
-  ::ng-deep
-  .list-group-item-btn.p-button.p-component.active
-  .text-light-active {
-  color: rgba(255, 255, 255, 0.8);
+    &:hover {
+      background-color: var(--surface-hover);
+      color: var(--color-primary);
+    }
+  }
 }
