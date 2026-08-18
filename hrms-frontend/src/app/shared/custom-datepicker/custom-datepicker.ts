@@ -23,8 +23,8 @@ export class CustomDatePickerComponent implements ControlValueAccessor {
   val: Date | null = null;
   disabled: boolean = false;
 
-  onChange: (val: Date | null) => void = () => {};
-  onTouched: () => void = () => {};
+  onChange: (val: Date | null) => void = () => { };
+  onTouched: () => void = () => { };
 
   onModelChange(value: Date | null) {
     this.val = value;

@@ -1,33 +1,25 @@
 <div class="page-fade">
   <h3>
     {{
-      isEditMode() ? ('DEPARTMENT.EDIT_TITLE' | translate) : ('DEPARTMENT.ADD_TITLE' | translate)
+    isEditMode() ? ('DEPARTMENT.EDIT_TITLE' | translate) : ('DEPARTMENT.ADD_TITLE' | translate)
     }}
   </h3>
 
   @if (isLoading()) {
-    <app-spinner></app-spinner>
+  <app-spinner></app-spinner>
   }
   @if (errorMessage()) {
-    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  <div class="alert alert-danger">{{ errorMessage() }}</div>
   }
 
   <div class="card form-card">
     <div class="card-body p-4">
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <formly-form [form]="form" [fields]="fields" [model]="model"></formly-form>
-        <p-button
-          type="submit"
-          [label]="'COMMON.SAVE' | translate"
-          [disabled]="isLoading()"
-          styleClass="me-2"
-        ></p-button>
-        <p-button
-          type="button"
-          [label]="'COMMON.CANCEL' | translate"
-          severity="secondary"
-          (click)="onCancel()"
-        ></p-button>
+        <p-button type="submit" [label]="'COMMON.SAVE' | translate" [disabled]="isLoading()"
+          styleClass="me-2"></p-button>
+        <p-button type="button" [label]="'COMMON.CANCEL' | translate" severity="secondary"
+          (click)="onCancel()"></p-button>
       </form>
     </div>
   </div>

@@ -25,7 +25,7 @@
   &:hover {
     background-color: var(--btn-primary-hover);
     border-color: var(--btn-primary-hover);
-    box-shadow: var(--btn-primary-shadow);
+    box-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
     transform: translateY(-1px);
   }
 
@@ -45,7 +45,7 @@
   &:hover {
     background-color: var(--btn-primary-bg);
     color: var(--btn-primary-text);
-    box-shadow: var(--btn-primary-outline-shadow);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
   }
 }
 
@@ -70,7 +70,7 @@
   &:hover {
     background-color: var(--btn-success-hover);
     border-color: var(--btn-success-hover);
-    box-shadow: var(--btn-success-shadow);
+    box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
     transform: translateY(-1px);
   }
 
@@ -90,7 +90,7 @@
   &:hover {
     background-color: var(--btn-warning-hover);
     border-color: var(--btn-warning-hover);
-    box-shadow: var(--btn-warning-shadow);
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
     transform: translateY(-1px);
   }
 
@@ -110,7 +110,7 @@
   &:hover {
     background-color: var(--btn-danger-hover);
     border-color: var(--btn-danger-hover);
-    box-shadow: var(--btn-danger-shadow);
+    box-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
     transform: translateY(-1px);
   }
 
@@ -142,7 +142,7 @@
   &:hover {
     background-color: var(--btn-accent-hover);
     border-color: var(--btn-accent-hover);
-    box-shadow: var(--btn-accent-shadow);
+    box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
     transform: translateY(-1px);
   }
 }

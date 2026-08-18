@@ -109,32 +109,39 @@ export class EmployeeForm implements OnInit, OnDestroy {
   existingAccount = signal<UserAccountData | undefined>(undefined);
   destroy$ = new Subject<void>();
 
-
-
   ngOnInit() {
+    this.subscribeToLanguageChanges();
+    this.loadDepartments();
+    this.initFormMode();
+  }
+
+  subscribeToLanguageChanges() {
     merge(
       of(null),
       this.translate.onLangChange
     )
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.initFields());
+  }
 
-    this.loadDepartments();
-
+  initFormMode() {
     this.employeeId = this.route.snapshot.paramMap.get('id') ?? undefined;
     if (this.employeeId) {
       this.isEditMode.set(true);
       this.loadEmployee(this.employeeId);
     } else {
       this.createAccount.set(true);
-
-      this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-        const deptId = params['departmentId'];
-        if (deptId) {
-          this.model = { ...this.model, department: deptId };
-        }
-      });
+      this.loadDepartmentFromQueryParams();
     }
+  }
+
+  loadDepartmentFromQueryParams() {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const deptId = params['departmentId'];
+      if (deptId) {
+        this.model = { ...this.model, department: deptId };
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -488,14 +495,18 @@ export class EmployeeForm implements OnInit, OnDestroy {
             roleName: user.role.name,
           };
         },
-        error: () => {},
+        error: (err) => {
+          this.notificationService.error(
+            err.error?.message || this.translate.instant('EMPLOYEE.CHECK_ACCOUNT_ERROR')
+          );
+        },
       });
   }
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0] ?? undefined;
+      this.selectedFile = input.files[0];
       const reader = new FileReader();
       reader.onload = (e) => {
         if (e.target?.result) {
@@ -515,7 +526,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
     if (this.form.invalid || (this.createAccount() && this.accountForm.invalid)) {
       return;
     }
-    
+
     this.isLoading.set(true);
     this.errorMessage.set('');
 
@@ -531,17 +542,17 @@ export class EmployeeForm implements OnInit, OnDestroy {
 
     const checkUsername$ = (this.createAccount() && !this.isEditMode())
       ? this.userService.checkUsername(username).pipe(
-          switchMap(res => {
-            if (res.exists) {
-              throw { isValidationError: true, controlName: 'username', error: { duplicateUsername: true } };
-            }
-            return of(null);
-          }),
-          catchError(err => {
-            if (err.isValidationError) throw err;
-            throw { type: 'check_username', originalError: err };
-          })
-        )
+        switchMap(res => {
+          if (res.exists) {
+            throw { isValidationError: true, controlName: 'username', error: { duplicateUsername: true } };
+          }
+          return of(null);
+        }),
+        catchError(err => {
+          if (err.isValidationError) throw err;
+          throw { type: 'check_username', originalError: err };
+        })
+      )
       : of(null);
 
     checkUsername$.pipe(

@@ -8,39 +8,39 @@ $border-radius-input: 8px;
   width: 100%;
 
   ::ng-deep {
-  .custom-datepicker-element {
-    width: 100%;
-
-    .p-datepicker-input {
+    .custom-datepicker-element {
       width: 100%;
-      height: $input-height;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: $border-radius-input;
-      color: var(--input-text);
-      padding: 10px 14px;
-      font-size: 0.9rem;
-      transition: all 0.2s ease;
 
-      &:focus,
-      .p-focus > & {
-        border-color: var(--input-focus-border);
-        box-shadow: 0 0 0 4px var(--input-focus-ring);
-        outline: none;
-      }
+      .p-datepicker-input {
+        width: 100%;
+        height: $input-height;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: $border-radius-input;
+        color: var(--input-text);
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
 
-      &:hover:not(:disabled) {
-        border-color: var(--border-strong);
-      }
+        &:focus,
+        .p-focus>& {
+          border-color: var(--input-focus-border);
+          box-shadow: 0 0 0 4px var(--input-focus-ring);
+          outline: none;
+        }
 
-      &:disabled,
-      &.p-disabled {
-        background-color: var(--input-disabled-bg);
-        color: var(--input-disabled-text);
-        cursor: not-allowed;
-        opacity: 1;
+        &:hover:not(:disabled) {
+          border-color: var(--border-strong);
+        }
+
+        &:disabled,
+        &.p-disabled {
+          background-color: var(--input-disabled-bg);
+          color: var(--input-disabled-text);
+          cursor: not-allowed;
+          opacity: 1;
+        }
       }
     }
   }
-}
 }

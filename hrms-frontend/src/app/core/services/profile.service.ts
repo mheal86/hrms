@@ -20,11 +20,11 @@ export class Profile {
     return this.http.get<ProfileData>(this.getUrl());
   }
 
-  updateProfile(data: UpdateProfilePayload): Observable<unknown> {
-    return this.http.put(this.getUrl(), data);
+  updateProfile(data: UpdateProfilePayload): Observable<{ success?: boolean }> {
+    return this.http.put<{ success?: boolean }>(this.getUrl(), data);
   }
 
-  changePassword(currentPassword: string, newPassword: string): Observable<unknown> {
-    return this.http.put(this.getUrl('change-password'), { currentPassword, newPassword });
+  changePassword(currentPassword: string, newPassword: string): Observable<{ success?: boolean; message?: string }> {
+    return this.http.put<{ success?: boolean; message?: string }>(this.getUrl('change-password'), { currentPassword, newPassword });
   }
 }

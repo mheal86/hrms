@@ -1,37 +1,79 @@
-import { Component, OnDestroy, signal, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Auth } from '../../../core/services/auth';
 import { CommonModule } from '@angular/common';
-import { Subject, takeUntil, finalize } from 'rxjs';
+import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { Button } from 'primeng/button';
-import { InputText } from 'primeng/inputtext';
-import { Password } from 'primeng/password';
+import { FormlyModule, FormlyFieldConfig } from '@ngx-formly/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, Button, InputText, Password, TranslatePipe],
+  imports: [ReactiveFormsModule, CommonModule, Button, FormlyModule, TranslatePipe],
   templateUrl: './login.html',
   styleUrl: './login.scss',
 })
-export class Login implements OnDestroy {
+export class Login implements OnInit, OnDestroy {
   fb = inject(FormBuilder);
   authService = inject(Auth);
   router = inject(Router);
   translate = inject(TranslateService);
 
-  loginForm: FormGroup = this.fb.group({
-    username: ['', Validators.required],
-    password: ['', Validators.required],
-  });
+  loginForm: FormGroup = this.fb.group({});
+  loginModel = {
+    username: '',
+    password: '',
+  };
+  loginFields: FormlyFieldConfig[] = [];
+
   errorMessage = signal('');
   isLoading = signal(false);
-  showPassword = signal(false);
   destroy$ = new Subject<void>();
 
-  togglePasswordVisibility() {
-    this.showPassword.update((v) => !v);
+  ngOnInit() {
+    merge(
+      of(null),
+      this.translate.onLangChange
+    )
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.initFields());
+  }
+
+  initFields() {
+    this.loginFields = [
+      {
+        key: 'username',
+        type: 'input',
+        className: 'mb-3 d-block',
+        props: {
+          label: this.translate.instant('AUTH.USERNAME_LABEL'),
+          placeholder: this.translate.instant('AUTH.USERNAME_PLACEHOLDER'),
+          required: true,
+        },
+        validation: {
+          messages: {
+            required: () => this.translate.instant('AUTH.USERNAME_REQUIRED'),
+          },
+        },
+      },
+      {
+        key: 'password',
+        type: 'input',
+        className: 'mb-3 d-block',
+        props: {
+          type: 'password',
+          label: this.translate.instant('AUTH.PASSWORD_LABEL'),
+          placeholder: this.translate.instant('AUTH.PASSWORD_PLACEHOLDER'),
+          required: true,
+        },
+        validation: {
+          messages: {
+            required: () => this.translate.instant('AUTH.PASSWORD_REQUIRED'),
+          },
+        },
+      },
+    ];
   }
 
   onSubmit() {
@@ -43,7 +85,7 @@ export class Login implements OnDestroy {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    const { username, password } = this.loginForm.value;
+    const { username, password } = this.loginModel;
 
     this.authService
       .login(username, password)

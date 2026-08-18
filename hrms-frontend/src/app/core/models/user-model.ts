@@ -1,3 +1,5 @@
+import { BaseDocument } from './base-model';
+
 export interface CreateUserPayload {
   username: string;
   password: string;
@@ -5,8 +7,7 @@ export interface CreateUserPayload {
   employeeId: string;
 }
 
-export interface UserAccountData {
-  _id: string;
+export interface UserAccountData extends BaseDocument {
   username: string;
   role: { _id: string; name: string };
 }

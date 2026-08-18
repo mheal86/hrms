@@ -10,4 +10,8 @@ import { CustomSelectComponent } from '../custom-select/custom-select';
   styleUrl: './custom-select-type.scss',
   imports: [CommonModule, ReactiveFormsModule, CustomSelectComponent, FormlyModule],
 })
-export class FormlyFieldCustomSelect extends FieldType<FieldTypeConfig> {}
+export class FormlyFieldCustomSelect extends FieldType<FieldTypeConfig> {
+  get selectOptions(): any[] {
+    return Array.isArray(this.props?.options) ? this.props.options : [];
+  }
+}

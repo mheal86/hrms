@@ -2,37 +2,38 @@
   display: block;
 
   ::ng-deep {
-  .p-breadcrumb {
-    background: transparent;
-    border: none;
-    padding: 0 0 15px 0;
+    .p-breadcrumb {
+      background: transparent;
+      border: none;
+      padding: 0 0 15px 0;
 
-    .p-breadcrumb-item-link {
-      color: var(--color-primary);
-      font-weight: 500;
-      transition: color 0.2s ease;
+      .p-breadcrumb-item-link {
+        color: var(--color-primary);
+        font-weight: 500;
+        transition: color 0.2s ease;
 
-      &:hover {
-        color: var(--color-primary-hover);
-        text-decoration: underline;
-      }
-    }
-
-    .p-breadcrumb-item {
-      &:last-child {
-        .p-breadcrumb-item-link,
-        span {
-          color: var(--text-main);
-          font-weight: 800;
-          pointer-events: none;
+        &:hover {
+          color: var(--color-primary-hover);
+          text-decoration: underline;
         }
       }
-    }
 
-    .p-breadcrumb-separator {
-      color: var(--text-muted);
-      margin: 0 8px;
+      .p-breadcrumb-item {
+        &:last-child {
+
+          .p-breadcrumb-item-link,
+          span {
+            color: var(--text-main);
+            font-weight: 800;
+            pointer-events: none;
+          }
+        }
+      }
+
+      .p-breadcrumb-separator {
+        color: var(--text-muted);
+        margin: 0 8px;
+      }
     }
   }
-}
 }

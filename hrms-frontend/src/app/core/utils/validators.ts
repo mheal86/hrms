@@ -44,7 +44,7 @@ export function setupNumericInputHook(destroy$: Subject<void>, maxLen: number = 
       if (val) {
         const cleaned = cleanNumericInput(val, maxLen);
         if (cleaned !== val) {
-          field.formControl?.setValue(cleaned, { emitEvent: false });
+          field.formControl!.setValue(cleaned, { emitEvent: false });
         }
       }
     });

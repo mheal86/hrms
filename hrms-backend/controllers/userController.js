@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Role = require('../models/Role');
 const Employee = require('../models/Employee');
+const { logActivity } = require('../utils/auditLogger');
 
 
 
@@ -124,12 +125,26 @@ exports.update = async (req, res) => {
       user.role = role._id;
     }
 
+    const isPasswordChanged = !!newPassword;
+
     if (newPassword) {
       user.password = await bcrypt.hash(newPassword, 10);
       user.tokenVersion = (user.tokenVersion || 0) + 1;
     }
 
     await user.save();
+
+    // Ghi log hoạt động
+    await logActivity({
+      req,
+      action: isPasswordChanged ? 'CHANGE_PASSWORD_BY_ADMIN' : 'UPDATE_USER',
+      targetType: 'USER',
+      targetId: user._id,
+      targetName: user.username,
+      details: isPasswordChanged 
+        ? { message: `Admin reset password for user ${user.username}` }
+        : { username: user.username, role: roleName },
+    });
 
     const updatedUser = await User.findById(user._id).populate('role', 'name').select('-password');
     res.status(200).json(updatedUser);

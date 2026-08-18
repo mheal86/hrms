@@ -35,7 +35,7 @@
     background-color: var(--color-error-bg);
 
     &:focus {
-      box-shadow: 0 0 0 3px var(--input-error-focus-ring);
+      box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
     }
   }
 
@@ -43,11 +43,6 @@
     color: var(--input-text);
     background-color: var(--input-bg);
     border-color: var(--input-border);
-
-    &:disabled {
-      background-color: var(--input-disabled-bg);
-      color: var(--input-disabled-text);
-    }
   }
 }
 
@@ -60,10 +55,14 @@
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: var(--select-arrow);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 12px 12px;
+
+  .dark-theme & {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  }
 }
 
 input[type='file'].form-control {
@@ -171,4 +170,8 @@ input[type='date'] {
   input::-ms-clear {
     display: none;
   }
+}
+
+textarea.form-control {
+  @include custom-scrollbar;
 }

@@ -9,7 +9,7 @@ export class Confirm {
   constructor(
     public confirmationService: ConfirmationService,
     public translate: TranslateService,
-  ) {}
+  ) { }
 
   ask(message: string): Promise<boolean> {
     return new Promise((resolve) => {

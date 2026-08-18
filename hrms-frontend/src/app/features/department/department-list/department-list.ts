@@ -54,12 +54,12 @@ export class DepartmentList implements OnInit, OnDestroy {
     { field: 'description', header: 'DEPARTMENT.COL_DESCRIPTION', sortable: false },
   ];
 
-
   currentPage = signal(1);
   totalPages = signal(1);
   total = signal(0);
   pageSize = 5;
   first = 0;
+  menuItems: MenuItem[] = [];
 
   destroy$ = new Subject<void>();
 
@@ -106,8 +106,6 @@ export class DepartmentList implements OnInit, OnDestroy {
     this.currentPage.set((event.page ?? 0) + 1);
     this.loadDepartments();
   }
-
-  menuItems: MenuItem[] = [];
 
   getDepartmentMenuItems(dept: DepartmentModel): MenuItem[] {
     return [

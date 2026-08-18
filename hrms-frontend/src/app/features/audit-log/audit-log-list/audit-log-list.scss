@@ -1,0 +1,62 @@
+@use "../../../../styles/variables" as *;
+@use "../../../../styles/mixins" as *;
+
+.search-input-group {
+  max-width: 320px;
+}
+
+.filter-select-user {
+  width: 195px;
+  display: inline-block;
+}
+
+.filter-select-action {
+  width: 195px;
+  display: inline-block;
+}
+
+:host ::ng-deep {
+  .filter-calendar {
+    min-width: 220px;
+    height: 38px;
+
+    .p-inputtext {
+      height: 38px;
+      font-size: $font-sm;
+      border-radius: $radius-sm;
+      background-color: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--input-text);
+    }
+  }
+
+  .user-chip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: $font-xs;
+    padding: $space-xs $space-sm;
+
+    .p-chip-icon {
+      font-size: $font-sm;
+    }
+  }
+
+  .action-tag {
+    font-weight: 600;
+    font-size: $font-xs;
+    padding: $space-xs $space-md;
+    border-radius: $radius-sm;
+    display: inline-flex;
+    align-items: center;
+    gap: $space-xs;
+    text-transform: uppercase;
+  }
+
+  .details-btn {
+    padding: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: $radius-round;
+  }
+}

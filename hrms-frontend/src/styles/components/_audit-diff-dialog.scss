@@ -1,0 +1,114 @@
+@use "../variables" as v;
+@use "../mixins" as m;
+
+.dialog-pre-container {
+  border: 1px solid var(--border-color);
+  background-color: var(--input-bg);
+}
+
+.details-dialog-pre {
+  @include m.custom-scrollbar;
+  max-height: 400px;
+  overflow: auto;
+  font-family: monospace;
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+  color: var(--input-text);
+}
+
+.audit-details-dialog {
+  .details-diff-container {
+    border: 1px solid var(--border-color);
+    border-radius: v.$radius-md;
+    overflow: hidden;
+    background-color: var(--surface-card);
+
+    .p-datatable {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      background: transparent;
+
+      .p-datatable-wrapper {
+        border: none;
+        background: transparent;
+        border-radius: 0;
+      }
+
+      .p-datatable-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+      }
+
+      .p-datatable-thead > tr > th {
+        background-color: var(--table-header-bg);
+        color: var(--table-header-text);
+        font-weight: 600;
+        font-size: v.$font-sm;
+        padding: v.$space-sm v.$space-md;
+        border-style: solid;
+        border-color: var(--border-color);
+        border-width: 0 0 1px 1px;
+      }
+
+      .p-datatable-tbody > tr > td {
+        padding: v.$space-sm v.$space-md;
+        font-size: v.$font-sm;
+        color: var(--text-main);
+        vertical-align: middle;
+        border-style: solid;
+        border-color: var(--border-color);
+        border-width: 0 0 1px 1px;
+      }
+
+      .p-datatable-thead > tr > th:first-child,
+      .p-datatable-tbody > tr > td:first-child {
+        border-left-width: 0;
+      }
+
+      .p-datatable-tbody > tr:last-child > td {
+        border-bottom-width: 0;
+      }
+
+      .diff-field {
+        font-weight: 500;
+        color: var(--text-secondary);
+        background-color: var(--bg-secondary);
+      }
+
+      .diff-before {
+        color: var(--color-error);
+        background-color: var(--color-error-bg);
+        opacity: 0.85;
+      }
+
+      .diff-after {
+        color: var(--color-success);
+        background-color: var(--color-success-bg);
+        font-weight: 500;
+      }
+    }
+  }
+
+  .details-pair-item {
+    padding: v.$space-sm 0;
+    border-bottom: 1px solid var(--border-color);
+
+    .pair-label {
+      color: var(--text-muted);
+      font-size: v.$font-xs;
+      font-weight: 500;
+    }
+
+    .pair-value {
+      color: var(--text-main);
+      font-size: v.$font-sm;
+      font-weight: 600;
+      margin-top: 4px;
+      word-break: break-all;
+      min-height: 20px;
+    }
+  }
+}

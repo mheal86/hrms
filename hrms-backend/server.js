@@ -7,6 +7,7 @@ const connectDB = require('./config/db');
 require('./models/Role');
 require('./models/User');
 require('./models/DepartmentHistory');
+require('./models/AuditLog');
 
 const departmentRoutes = require('./routes/departmentRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
@@ -14,6 +15,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const auditRoutes = require('./routes/auditRoutes');
 
 const app = express();
 
@@ -38,6 +40,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 app.use('/uploads', express.static('uploads'));
 

@@ -14,7 +14,7 @@ export class Auth {
   constructor(
     public http: HttpClient,
     public router: Router,
-  ) {}
+  ) { }
 
   getUrl(path?: string): string {
     return path ? `${this.apiUrl}/${path}` : this.apiUrl;

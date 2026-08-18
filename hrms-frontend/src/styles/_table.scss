@@ -23,12 +23,12 @@
     th {
       background-color: var(--table-header-bg);
       color: var(--table-header-text);
-      font-weight: 600;
+      font-weight: 700;
       border: none;
       border-right: 1px solid var(--border-color);
       padding: #{$space-md} #{$space-xxl};
       text-transform: uppercase;
-      font-size: $font-xs; // 0.72rem
+      font-size: $font-sm;
       letter-spacing: 0.06em;
       vertical-align: middle;
       white-space: nowrap;

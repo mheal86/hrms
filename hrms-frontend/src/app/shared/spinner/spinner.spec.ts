@@ -1,9 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { Spinner } from './spinner';
+import { By } from '@angular/platform-browser';
 
 describe('Spinner', () => {
-  let component: Spinner;
   let fixture: ComponentFixture<Spinner>;
 
   beforeEach(async () => {
@@ -11,11 +10,19 @@ describe('Spinner', () => {
       imports: [Spinner],
     }).compileComponents();
     fixture = TestBed.createComponent(Spinner);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    fixture.destroy();
+    TestBed.resetTestingModule();
+  });
+
+  it('should render spinner-wrapper and p-progressspinner in DOM', () => {
+    const wrapper = fixture.debugElement.query(By.css('.spinner-wrapper'));
+    const spinner = fixture.debugElement.query(By.css('p-progressspinner'));
+
+    expect(wrapper).not.toBeNull();
+    expect(spinner).not.toBeNull();
   });
 });

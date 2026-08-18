@@ -14,8 +14,6 @@ import { Notification } from '../../../core/services/notification';
 import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
 import { Dialog } from 'primeng/dialog';
-import { Password } from 'primeng/password';
-import { FloatLabel } from 'primeng/floatlabel';
 import { Button } from 'primeng/button';
 import { TableModule } from 'primeng/table';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -25,8 +23,6 @@ import { FormlyModule, FormlyFieldConfig } from '@ngx-formly/core';
 import { getInitials } from '../../../core/utils/employee-utils';
 import { phoneValidator, addressValidator, validatePhone, validateAddress, cleanNumericInput, setupNumericInputHook } from '../../../core/utils/validators';
 
-
-
 @Component({
   selector: 'app-profile',
   imports: [
@@ -34,8 +30,6 @@ import { phoneValidator, addressValidator, validatePhone, validateAddress, clean
     ReactiveFormsModule,
     Spinner,
     Dialog,
-    Password,
-    FloatLabel,
     Button,
     TableModule,
     TranslatePipe,
@@ -53,6 +47,7 @@ export class Profile implements OnInit, OnDestroy {
   languageService = inject(LanguageService);
 
   baseUrl = environment.baseUrl;
+  getInitials = getInitials;
   profileData = signal<ProfileData | undefined>(undefined);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -92,6 +87,8 @@ export class Profile implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   profileFields: FormlyFieldConfig[] = [];
   profileModel: { phone?: string; address?: string } = {};
+  passwordFields: FormlyFieldConfig[] = [];
+  passwordModel = { currentPassword: '', newPassword: '', confirmPassword: '' };
 
   ngOnInit() {
     merge(
@@ -134,6 +131,56 @@ export class Profile implements OnInit, OnDestroy {
           address: {
             expression: (c: AbstractControl) => validateAddress(c.value),
             message: () => this.translate.instant('PROFILE.ADDRESS_INVALID'),
+          },
+        },
+      },
+    ];
+
+    this.passwordFields = [
+      {
+        key: 'currentPassword',
+        type: 'input',
+        className: 'mb-3 d-block',
+        props: {
+          type: 'password',
+          label: this.translate.instant('PROFILE.CURRENT_PASSWORD'),
+          required: true,
+        },
+        validation: {
+          messages: {
+            required: () => this.translate.instant('PROFILE.CURRENT_PASS_REQUIRED'),
+          },
+        },
+      },
+      {
+        key: 'newPassword',
+        type: 'input',
+        className: 'mb-3 d-block',
+        props: {
+          type: 'password',
+          label: this.translate.instant('PROFILE.NEW_PASSWORD'),
+          required: true,
+          minLength: 6,
+        },
+        validation: {
+          messages: {
+            required: () => this.translate.instant('PROFILE.NEW_PASS_REQUIRED'),
+            minlength: () => this.translate.instant('PROFILE.PASS_MIN_LENGTH'),
+          },
+        },
+      },
+      {
+        key: 'confirmPassword',
+        type: 'input',
+        className: 'mb-3 d-block',
+        props: {
+          type: 'password',
+          label: this.translate.instant('PROFILE.CONFIRM_PASSWORD'),
+          required: true,
+        },
+        validation: {
+          messages: {
+            required: () => this.translate.instant('PROFILE.CONFIRM_PASS_REQUIRED'),
           },
         },
       },
@@ -218,6 +265,7 @@ export class Profile implements OnInit, OnDestroy {
 
   resetPasswordFormState() {
     this.passwordForm.reset();
+    this.passwordModel = { currentPassword: '', newPassword: '', confirmPassword: '' };
     this.passwordFormSubmitted.set(false);
     this.passwordErrorMessage.set('');
     this.showCurrentPassword.set(false);
@@ -285,10 +333,8 @@ export class Profile implements OnInit, OnDestroy {
       });
   }
 
-  getInitials = getInitials;
-
   get newPasswordValue(): string {
-    return this.passwordForm.get('newPassword')?.value || '';
+    return this.passwordModel.newPassword || this.passwordForm.get('newPassword')?.value || '';
   }
 
   get newPasswordValidation() {

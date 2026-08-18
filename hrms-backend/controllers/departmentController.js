@@ -1,5 +1,6 @@
 const Department = require('../models/Department');
 const Employee = require('../models/Employee');
+const { logActivity } = require('../utils/auditLogger');
 
 const escapeRegex = (string) => {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -14,16 +15,52 @@ exports.getAll = async (req, res) => {
 
     const filter = {};
 
+    const mapSearchToDepartmentName = (searchTerm) => {
+      const normalized = searchTerm.toLowerCase().trim()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+
+      const mappings = [
+        { keys: ['hr', 'human resources', 'nhan su'], val: 'Nhân sự' },
+        { keys: ['tech', 'it', 'information technology', 'cong nghe thong tin', 'cntt'], val: 'Công nghệ thông tin' },
+        { keys: ['finance', 'accounting', 'ke toan'], val: 'Kế toán' },
+        { keys: ['marketing'], val: 'Marketing' },
+        { keys: ['sales', 'kinh doanh'], val: 'Kinh doanh' },
+        { keys: ['admin', 'administration', 'hanh chinh'], val: 'Hành chính' },
+        { keys: ['r&d', 'research', 'development', 'nghien cuu'], val: 'Nghiên cứu & Phát triển' },
+        { keys: ['project', 'quan ly du an'], val: 'Quản lý dự án' },
+        { keys: ['customer service', 'support', 'cham soc khach hang'], val: 'Chăm sóc khách hàng' },
+        { keys: ['legal', 'phap che'], val: 'Pháp chế' },
+        { keys: ['design', 'thiet ke'], val: 'Thiết kế' },
+        { keys: ['training', 'dao tao'], val: 'Đào tạo' }
+      ];
+
+      const matchedNames = [];
+      for (const item of mappings) {
+        if (item.keys.some(k => normalized.includes(k) || k.includes(normalized))) {
+          matchedNames.push(item.val);
+        }
+      }
+      return matchedNames;
+    };
+
     if (search) {
       const tokens = search.split(/\s+/).filter(Boolean);
       filter.$and = tokens.map((token) => {
         const escapedToken = escapeRegex(token);
-        return {
-          $or: [
-            { name: { $regex: escapedToken, $options: 'i' } },
-            { description: { $regex: escapedToken, $options: 'i' } },
-          ],
-        };
+        const conditions = [
+          { name: { $regex: escapedToken, $options: 'i' } },
+          { description: { $regex: escapedToken, $options: 'i' } },
+        ];
+
+        const matchedNames = mapSearchToDepartmentName(token);
+        if (matchedNames.length > 0) {
+          matchedNames.forEach(name => {
+            conditions.push({ name: { $regex: escapeRegex(name), $options: 'i' } });
+          });
+        }
+
+        return { $or: conditions };
       });
     }
 
@@ -85,6 +122,17 @@ exports.create = async (req, res) => {
 
     const department = new Department({ name: trimmedName, description });
     const saved = await department.save();
+
+    // Ghi log hoạt động
+    await logActivity({
+      req,
+      action: 'CREATE_DEPARTMENT',
+      targetType: 'DEPARTMENT',
+      targetId: saved._id,
+      targetName: saved.name,
+      details: saved,
+    });
+
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -116,13 +164,26 @@ exports.update = async (req, res) => {
       return res.status(400).json({ message: 'Tên phòng ban này đã tồn tại' });
     }
 
+    const oldDept = await Department.findById(req.params.id);
+    if (!oldDept) {
+      return res.status(404).json({ message: 'Department not found' });
+    }
+
     const updated = await Department.findByIdAndUpdate(req.params.id, { name: trimmedName, description }, {
       new: true,
       runValidators: true,
     });
-    if (!updated) {
-      return res.status(404).json({ message: 'Department not found' });
-    }
+
+    // Ghi log hoạt động
+    await logActivity({
+      req,
+      action: 'UPDATE_DEPARTMENT',
+      targetType: 'DEPARTMENT',
+      targetId: updated._id,
+      targetName: updated.name,
+      details: { before: oldDept, after: updated },
+    });
+
     res.status(200).json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -147,6 +208,17 @@ exports.remove = async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ message: 'Department not found' });
     }
+
+    // Ghi log hoạt động
+    await logActivity({
+      req,
+      action: 'DELETE_DEPARTMENT',
+      targetType: 'DEPARTMENT',
+      targetId: deleted._id,
+      targetName: deleted.name,
+      details: deleted,
+    });
+
     res.status(204).send();
   } catch (err) {
     res.status(500).json({ message: err.message });

@@ -1,38 +1,31 @@
 @use 'sass:list';
+@use '../../../../styles/mixins' as m;
+@use '../../../../styles/variables' as v;
 
 // ─── Variables ───────────────────────────────────────────────
 $avatar-size-sm: 32px;
-$border-radius-circle: 50%;
-$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
 $chart-height: 240px;
 $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
 // ─── Mixins ──────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin avatar-initials($size, $font-size) {
-  width: $size;
-  height: $size;
-  border-radius: $border-radius-circle;
-  @include flex-center;
-  background: $avatar-gradient;
-  font-size: $font-size;
-  font-weight: 600;
-}
-
 @mixin soft-icon-bg($bg-light, $color, $bg-dark: null) {
   background-color: $bg-light;
-  svg { stroke: $color; }
-  i   { color: $color; }
+
+  svg {
+    stroke: $color;
+  }
+
+  i {
+    color: $color;
+  }
 
   @if $bg-dark {
     .dark-theme & {
       background-color: $bg-dark;
-      svg { stroke: $color; }
+
+      svg {
+        stroke: $color;
+      }
     }
   }
 }
@@ -68,8 +61,15 @@ $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fadeInCard {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // ─── Stat Icon ───────────────────────────────────────────────
@@ -77,7 +77,7 @@ $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
   width: 44px;
   height: 44px;
   border-radius: 10px;
-  @include flex-center;
+  @include m.flex-center;
   flex-shrink: 0;
 
   i {
@@ -101,35 +101,29 @@ $soft-icon-themes: (
 
 // ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  width: $avatar-size-sm;
-  height: $avatar-size-sm;
-  border-radius: $border-radius-circle;
+  @include m.avatar-base($avatar-size-sm);
   object-fit: cover;
 }
 
 .avatar-initials {
-  @include avatar-initials($avatar-size-sm, 12px);
-  color: white;
+  @include m.avatar-initials($avatar-size-sm, 12px);
+  color: var(--text-on-primary);
 }
 
 // ─── Scrollable Containers ───────────────────────────────────
-%scrollbar-style {
-  &::-webkit-scrollbar       { width: 6px; }
-  &::-webkit-scrollbar-track { background: transparent; }
-  &::-webkit-scrollbar-thumb {
-    background-color: var(--border-color);
-    border-radius: 4px;
-    &:hover { background-color: var(--text-muted); }
-  }
-}
-
 .scrollable-table-container,
 .legend-scroll-container {
-  @extend %scrollbar-style;
+  @include m.custom-scrollbar;
 }
 
-.legend-scroll-container   { @include scrollable-panel($chart-height); }
-.dashboard-table-container { @include scrollable-panel($chart-height); position: relative; }
+.legend-scroll-container {
+  @include scrollable-panel($chart-height);
+}
+
+.dashboard-table-container {
+  @include scrollable-panel($chart-height);
+  position: relative;
+}
 
 .scrollable-table-container {
   padding: 3px;
@@ -156,8 +150,13 @@ $soft-icon-themes: (
 }
 
 @keyframes fadeInChartCard {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 // ─── PrimeNG Overrides ───────────────────────────────────────
@@ -209,4 +208,3 @@ $soft-icon-themes: (
   color: var(--text-main);
   font-size: 0.875rem;
 }
-

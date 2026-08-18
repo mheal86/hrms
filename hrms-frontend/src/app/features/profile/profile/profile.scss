@@ -43,7 +43,9 @@ $panel-width: 320px;
 :host ::ng-deep {
   .custom-password-dialog {
     .p-password {
-      &, input {
+
+      &,
+      input {
         width: 100%;
       }
     }

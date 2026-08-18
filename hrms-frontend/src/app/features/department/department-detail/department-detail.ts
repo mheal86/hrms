@@ -18,10 +18,16 @@ import { Dialog } from 'primeng/dialog';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
+import { Card } from 'primeng/card';
+import { Divider } from 'primeng/divider';
+import { ProgressBar } from 'primeng/progressbar';
+import { UIChart } from 'primeng/chart';
+import { Chart, registerables } from 'chart.js';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment';
 import { LanguageService } from '../../../core/services/language.service';
 import { getInitials } from '../../../core/utils/employee-utils';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-department-detail',
@@ -37,6 +43,10 @@ import { getInitials } from '../../../core/utils/employee-utils';
     InputText,
     TableModule,
     TranslatePipe,
+    Card,
+    Divider,
+    ProgressBar,
+    UIChart,
   ],
   templateUrl: './department-detail.html',
   styleUrl: './department-detail.scss',
@@ -54,6 +64,9 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   languageService = inject(LanguageService);
 
   baseUrl = environment.baseUrl;
+  getInitials = getInitials;
+  menuItems: MenuItem[] = [];
+
   @HostListener('document:keydown.escape', ['$event'])
   handleEscape(_event: Event) {
     if (this.isTransferModalOpen()) {
@@ -63,6 +76,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
       this.closeAddEmployeeModal();
     }
   }
+
   department = signal<DepartmentModel | undefined>(undefined);
   employees = signal<EmployeeModel[]>([]);
   allDepartments = signal<DepartmentModel[]>([]);
@@ -70,7 +84,233 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   isLoadingEmployees = signal(false);
   errorMessage = signal('');
 
-  menuItems: MenuItem[] = [];
+  themeTrigger = signal(0);
+
+  @HostListener('window:themeChanged')
+  onThemeChanged() {
+    this.themeTrigger.update((v) => v + 1);
+  }
+
+  // Lọc ra các nhân viên đang hoạt động (ACTIVE) của phòng ban
+  activeEmployeesOfDept = computed(() => {
+    return this.employees().filter((emp) => emp.status === 'ACTIVE');
+  });
+
+  // 1. Tổng số nhân viên đang hoạt động
+  totalActiveEmployees = computed(() => {
+    return this.activeEmployeesOfDept().length;
+  });
+
+  // 2. Số lượng nhân viên Nam đang hoạt động
+  maleEmployeesCount = computed(() => {
+    return this.activeEmployeesOfDept().filter((emp) => emp.gender === 'MALE').length;
+  });
+
+  // 3. Số lượng nhân viên Nữ đang hoạt động
+  femaleEmployeesCount = computed(() => {
+    return this.activeEmployeesOfDept().filter((emp) => emp.gender === 'FEMALE').length;
+  });
+
+  // Tính tỷ lệ phần trăm Nam/Nữ
+  malePercentage = computed(() => {
+    const total = this.totalActiveEmployees();
+    return total > 0 ? Math.round((this.maleEmployeesCount() / total) * 100) : 0;
+  });
+
+  femalePercentage = computed(() => {
+    const total = this.totalActiveEmployees();
+    return total > 0 ? Math.round((this.femaleEmployeesCount() / total) * 100) : 0;
+  });
+
+  // 4. Độ tuổi trung bình của các nhân sự hoạt động có thông tin ngày sinh
+  averageAge = computed(() => {
+    const active = this.activeEmployeesOfDept();
+    const empsWithAge = active.filter((emp) => emp.dateOfBirth);
+    if (empsWithAge.length === 0) return 0;
+
+    const today = new Date();
+    const totalAge = empsWithAge.reduce((sum, emp) => {
+      const birthDate = new Date(emp.dateOfBirth!);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return sum + age;
+    }, 0);
+
+    return Math.round(totalAge / empsWithAge.length);
+  });
+
+  // 5. Nhân viên mới nhất (có ngày vào làm gần nhất)
+  newestEmployee = computed(() => {
+    const active = this.activeEmployeesOfDept();
+    const empsWithHireDate = active.filter((emp) => emp.hireDate);
+    if (empsWithHireDate.length === 0) return undefined;
+
+    return [...empsWithHireDate].sort((a, b) => {
+      return new Date(b.hireDate!).getTime() - new Date(a.hireDate!).getTime();
+    })[0];
+  });
+
+  // 6. Nhân viên lâu năm nhất (có ngày vào làm sớm nhất)
+  longestServingEmployee = computed(() => {
+    const active = this.activeEmployeesOfDept();
+    const empsWithHireDate = active.filter((emp) => emp.hireDate);
+    if (empsWithHireDate.length === 0) return undefined;
+
+    return [...empsWithHireDate].sort((a, b) => {
+      return new Date(a.hireDate!).getTime() - new Date(b.hireDate!).getTime();
+    })[0];
+  });
+
+  // 7. Phân bố chức vụ
+  positionDistribution = computed(() => {
+    const active = this.activeEmployeesOfDept();
+    const distMap: { [key: string]: number } = {};
+
+    active.forEach((emp) => {
+      const position = emp.position || 'UNASSIGNED';
+      distMap[position] = (distMap[position] || 0) + 1;
+    });
+
+    return distMap;
+  });
+
+  hasPositionData = computed(() => {
+    return Object.keys(this.positionDistribution()).length > 0;
+  });
+
+  // Chọn loại biểu đồ: bar (nếu > 5 chức vụ), doughnut (nếu <= 5 chức vụ)
+  positionChartType = computed<'doughnut' | 'bar'>(() => {
+    return Object.keys(this.positionDistribution()).length > 5 ? 'bar' : 'doughnut';
+  });
+
+  positionChartData = computed(() => {
+    this.themeTrigger();
+    this.languageService.currentLang();
+
+    const dist = this.positionDistribution();
+    const positions = Object.keys(dist);
+    const counts = Object.values(dist);
+
+    const isDark = document.body.classList.contains('dark-theme');
+    const rootStyle = getComputedStyle(document.documentElement);
+
+    const colors: string[] = [];
+    for (let i = 1; i <= 10; i++) {
+      const val = rootStyle.getPropertyValue(`--chart-${i}`).trim();
+      colors.push(val || (isDark ? '#818cf8' : '#4f46e5'));
+    }
+
+    const backgroundColors = positions.map((_, i) => colors[i % colors.length]);
+
+    const labels = positions.map((pos) => {
+      if (pos === 'UNASSIGNED') {
+        return this.translate.instant('DEPARTMENT.NO_POSITION');
+      }
+      const translationKey = this.languageService.getPositionTranslation(pos);
+      return this.translate.instant(translationKey);
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          data: counts,
+          backgroundColor: backgroundColors,
+          borderColor: isDark ? '#1e293b' : '#ffffff',
+          borderWidth: 2,
+        },
+      ],
+    };
+  });
+
+  positionChartOptions = computed(() => {
+    this.themeTrigger();
+    this.languageService.currentLang();
+
+    const isDark = document.body.classList.contains('dark-theme');
+    const chartType = this.positionChartType();
+    const isBar = chartType === 'bar';
+
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.05)';
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+
+    const baseOptions: any = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: !isBar,
+          position: 'right',
+          labels: {
+            color: textColor,
+            font: {
+              family: "'Inter', sans-serif",
+              size: 11,
+              weight: '500'
+            },
+            boxWidth: 8
+          }
+        },
+        tooltip: {
+          backgroundColor: isDark ? '#1e293b' : '#ffffff',
+          titleColor: isDark ? '#f8fafc' : '#0f172a',
+          bodyColor: isDark ? '#cbd5e1' : '#334155',
+          borderColor: isDark ? '#475569' : '#e2e8f0',
+          borderWidth: 1,
+          padding: 8,
+          cornerRadius: 6,
+          callbacks: {
+            label: (context: any) => {
+              const value = context.raw || 0;
+              const total = this.totalActiveEmployees();
+              const percent = total > 0 ? Math.round((value / total) * 100) : 0;
+              return ` ${context.label}: ${value} (${percent}%)`;
+            }
+          }
+        }
+      }
+    };
+
+    if (isBar) {
+      baseOptions.indexAxis = 'y';
+      baseOptions.scales = {
+        x: {
+          grid: {
+            color: gridColor,
+            drawBorder: false
+          },
+          ticks: {
+            color: textColor,
+            precision: 0,
+            font: {
+              family: "'Inter', sans-serif",
+              size: 10
+            }
+          }
+        },
+        y: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: textColor,
+            font: {
+              family: "'Inter', sans-serif",
+              size: 11
+            }
+          }
+        }
+      };
+    } else {
+      baseOptions.cutout = '60%';
+    }
+
+    return baseOptions;
+  });
 
   getEmployeeMenuItems(emp: EmployeeModel): MenuItem[] {
     return [
@@ -288,8 +528,6 @@ export class DepartmentDetail implements OnInit, OnDestroy {
   goBack() {
     this.location.back();
   }
-
-  getInitials = getInitials;
 
   openAddEmployeeModal() {
     this.selectedEmployeeToTransferInId.set('');

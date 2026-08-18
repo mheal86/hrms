@@ -2,7 +2,6 @@ import { Component, Input, forwardRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { Select } from 'primeng/select';
-
 import { SelectOption, SelectValue } from '../../core/models/select-option-model';
 
 @Component({
@@ -18,10 +17,13 @@ import { SelectOption, SelectValue } from '../../core/models/select-option-model
   templateUrl: './custom-select.html',
   styleUrl: './custom-select.scss',
 })
+
 export class CustomSelectComponent implements ControlValueAccessor {
-  @Input() options: SelectOption[] = []; // Danh sách các lựa chọn được truyền vào
-  @Input() placeholder: string = 'Chọn...'; // Chữ mờ hiển thị khi chưa chọn gì
-  @Input() isInvalid: boolean = false; // Biến xác định select này đang bị lỗi để hiện viền đỏ
+  @Input() options: SelectOption[] = [];
+  @Input() placeholder: string = 'Chọn...';
+  @Input() isInvalid: boolean = false;
+  @Input() showClear: boolean = false;
+  @Input() filter: boolean = false;
 
   val: SelectValue | null = null; // Giá trị hiện tại của select
   disabled: boolean = false; // Trạng thái bật/tắt của select (false = bật, true = tắt)

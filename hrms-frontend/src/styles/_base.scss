@@ -104,10 +104,8 @@
   --input-focus-border: #{$indigo-700};
   --input-focus-ring: rgba(67, 56, 202, 0.15);
   --input-error-border: #{$rose-800};
-  --input-error-focus-ring: rgba(225, 29, 72, 0.15);
   --input-disabled-bg: #{$slate-200};
   --input-disabled-text: #{$slate-500};
-  --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 
   /* ═══ Button Tokens (Light) ═══ */
   --btn-primary-bg: #{$indigo-700};
@@ -141,32 +139,6 @@
   --shadow-modal: 0 24px 64px rgba(15, 23, 42, 0.15);
   --shadow-dropdown: 0 8px 24px rgba(15, 23, 42, 0.08);
 
-  /* ═══ Overlays & Overlay Text ═══ */
-  --mask-bg: rgba(15, 23, 42, 0.6);
-  --text-on-primary-muted: rgba(255, 255, 255, 0.8);
-
-  /* ═══ Button Glow Shadows ═══ */
-  --btn-primary-shadow: 0 4px 12px rgba(67, 56, 202, 0.3);
-  --btn-primary-outline-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
-  --btn-success-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
-  --btn-warning-shadow: 0 4px 12px rgba(180, 83, 9, 0.3);
-  --btn-danger-shadow: 0 4px 12px rgba(190, 18, 60, 0.3);
-  --btn-accent-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-
-  /* ═══ Role Badges (Light) ═══ */
-  --badge-admin-bg: #fef3c7;
-  --badge-admin-text: #92400e;
-  --badge-admin-border: #fde68a;
-  --badge-hr-bg: #fce7f3;
-  --badge-hr-text: #9d174d;
-  --badge-hr-border: #fbcfe8;
-  --badge-manager-bg: #ede9fe;
-  --badge-manager-text: #6d28d9;
-  --badge-manager-border: #ddd6fe;
-  --badge-new-bg: var(--color-primary-subtle);
-  --badge-new-text: var(--color-primary-hover);
-  --badge-new-border: rgba(79, 70, 229, 0.3);
-
   /* Legacy aliases */
   --card-shadow: var(--shadow-card);
   --card-shadow-hover: var(--shadow-card-hover);
@@ -177,7 +149,7 @@
   --color-primary: #{$indigo-300};
   --color-primary-hover: #{$indigo-200};
   --color-primary-active: #{$indigo-100};
-  --color-primary-subtle: #{$indigo-950};
+  --color-primary-subtle: rgba(79, 70, 229, 0.1);
   --color-primary-light: #{$indigo-400};
   --color-secondary: #{$slate-300};
   --color-accent: #{$teal-400};
@@ -256,10 +228,8 @@
   --input-focus-border: #{$indigo-400};
   --input-focus-ring: rgba(129, 140, 248, 0.2);
   --input-error-border: #{$rose-200};
-  --input-error-focus-ring: rgba(225, 29, 72, 0.25);
   --input-disabled-bg: #{$slate-900};
   --input-disabled-text: #{$slate-600};
-  --select-arrow: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
 
   /* ═══ Button Tokens (Dark) ═══ */
   --btn-primary-bg: #{$indigo-600};
@@ -270,14 +240,17 @@
   --btn-success-bg: #{$emerald-700};
   --btn-success-hover: #{$emerald-600};
   --btn-success-active: #{$emerald-800};
+  --btn-success-text: #{$white};
 
   --btn-warning-bg: #{$amber-700};
   --btn-warning-hover: #{$amber-600};
   --btn-warning-active: #{$amber-800};
+  --btn-warning-text: #{$white};
 
   --btn-danger-bg: #{$rose-700};
   --btn-danger-hover: #{$rose-600};
   --btn-danger-active: #{$rose-800};
+  --btn-danger-text: #{$white};
 
   --btn-accent-bg: #{$teal-600};
   --btn-accent-hover: #{$teal-500};
@@ -289,34 +262,7 @@
   --shadow-card-hover: 0 20px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
   --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
   --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.5);
-
-  /* ═══ Button Glow Shadows (Dark — higher opacity for visibility) ═══ */
-  --btn-primary-shadow: 0 4px 12px rgba(67, 56, 202, 0.5);
-  --btn-primary-outline-shadow: 0 4px 12px rgba(79, 70, 229, 0.45);
-  --btn-success-shadow: 0 4px 12px rgba(4, 120, 87, 0.5);
-  --btn-warning-shadow: 0 4px 12px rgba(180, 83, 9, 0.5);
-  --btn-danger-shadow: 0 4px 12px rgba(190, 18, 60, 0.5);
-  --btn-accent-shadow: 0 4px 12px rgba(13, 148, 136, 0.5);
-
-  /* ═══ Role Badges (Dark) ═══ */
-  --badge-admin-bg: rgba(245, 158, 11, 0.2);
-  --badge-admin-text: #fbbf24;
-  --badge-admin-border: rgba(245, 158, 11, 0.3);
-  --badge-hr-bg: rgba(236, 72, 153, 0.2);
-  --badge-hr-text: #f9a8d4;
-  --badge-hr-border: rgba(236, 72, 153, 0.3);
-  --badge-manager-bg: rgba(124, 58, 237, 0.2);
-  --badge-manager-text: #c4b5fd;
-  --badge-manager-border: rgba(124, 58, 237, 0.3);
-  --badge-new-bg: rgba(79, 70, 229, 0.2);
-  --badge-new-text: var(--color-primary);
-  --badge-new-border: rgba(79, 70, 229, 0.3);
-
-  /* ═══ Overlays & Overlay Text ═══ */
-  --mask-bg: rgba(0, 0, 0, 0.75);
-  --text-on-primary-muted: rgba(255, 255, 255, 0.75);
 }
-
 
 /* ═══════════════════════════════════════════════════════════════
    ACCESSIBILITY & BASE STYLES
@@ -405,14 +351,15 @@ h6 {
   }
 }
 
+/* ─── Global List Group item overrides ─── */
 .list-group-item {
-  background-color: var(--bg-secondary);
+  background-color: #{$white};
   color: var(--text-main);
-  border-color: var(--border-color);
+  border-color: #{$slate-300};
   transition: #{$transition-normal};
 
   &:hover {
-    background-color: var(--surface-hover);
+    background-color: #{$slate-100};
     color: var(--text-main);
     cursor: pointer;
   }
@@ -420,14 +367,35 @@ h6 {
   &.active {
     background-color: var(--color-primary);
     border-color: var(--color-primary);
-    color: var(--text-on-primary);
+    color: #{$white};
 
     .text-muted {
-      color: var(--text-on-primary-muted);
+      color: rgba(255, 255, 255, 0.8);
+    }
+  }
+
+  .dark-theme & {
+    background-color: #{$slate-800};
+    color: var(--text-main);
+    border-color: #{$slate-600};
+
+    &:hover {
+      background-color: #{$slate-700};
+      color: var(--text-main);
     }
 
-    .text-white {
-      color: var(--text-on-primary);
+    &.active {
+      background-color: var(--surface-selected);
+      border-color: var(--color-primary-light);
+      color: #{$white};
+
+      .text-muted {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .text-white {
+        color: #{$white};
+      }
     }
   }
 }

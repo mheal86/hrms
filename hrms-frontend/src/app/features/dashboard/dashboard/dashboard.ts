@@ -5,7 +5,7 @@ import { Dashboard as DashboardService } from '../../../core/services/dashboard.
 import { DashboardSummary } from '../../../core/models/dashboard-model';
 import { Employee } from '../../../core/services/employee.service';
 import { Employee as EmployeeModel } from '../../../core/models/employee-model';
-import { Chart, registerables, ChartData, ChartOptions, Plugin } from 'chart.js';
+import { Chart, registerables, ChartData, ChartOptions, Plugin, TooltipItem } from 'chart.js';
 import { Spinner } from '../../../shared/spinner/spinner';
 import { Auth } from '../../../core/services/auth';
 import { finalize, Subject, takeUntil } from 'rxjs';
@@ -26,6 +26,7 @@ Chart.register(...registerables);
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit, OnDestroy {
+  getInitials = getInitials;
   baseUrl = environment.baseUrl;
   summary = signal<DashboardSummary | undefined>(undefined);
   isLoading = signal(false);
@@ -90,7 +91,7 @@ export class Dashboard implements OnInit, OnDestroy {
     public authService: Auth,
     public translate: TranslateService,
     public languageService: LanguageService,
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
@@ -153,7 +154,9 @@ export class Dashboard implements OnInit, OnDestroy {
     };
 
     requestAnimationFrame(step);
-  }  loadRecentEmployees() {
+  }
+
+  loadRecentEmployees() {
     this.isLoadingRecent.set(true);
     this.employeeService
       .getAll(1, 5, '', 'createdAt', 'desc')
@@ -170,7 +173,6 @@ export class Dashboard implements OnInit, OnDestroy {
         },
       });
   }
-  getInitials = getInitials;
 
   @HostListener('window:themeChanged')
   onThemeChanged() {
@@ -192,7 +194,7 @@ export class Dashboard implements OnInit, OnDestroy {
 
     const chartData = data.employeesByDepartment;
     const totalEmployeesCount = data.activeEmployees;
-    const backgroundColors = chartData.map((_item: unknown, i: number) => colors[i % colors.length]);
+    const backgroundColors = chartData.map((_item: { departmentName: string; lastMonthCount: number; thisMonthCount: number; totalCount: number }, i: number) => colors[i % colors.length]);
     this.chartColors.set(backgroundColors);
 
     this.chartData.set({
@@ -239,7 +241,7 @@ export class Dashboard implements OnInit, OnDestroy {
           padding: 10,
           cornerRadius: 8,
           callbacks: {
-            label: (context: { label: string; raw: unknown }) => {
+            label: (context: TooltipItem<'doughnut'>) => {
               const value = (context.raw as number) || 0;
               const empLabel = this.translate.instant('SIDEBAR.EMPLOYEES');
               return ` ${context.label}: ${value} ${empLabel}`;

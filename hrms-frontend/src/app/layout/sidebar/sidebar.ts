@@ -19,6 +19,7 @@ export class Sidebar {
     { link: '/dashboard', icon: 'pi pi-home', label: 'SIDEBAR.DASHBOARD', adminOnly: false },
     { link: '/departments', icon: 'pi pi-building', label: 'SIDEBAR.DEPARTMENTS', adminOnly: true },
     { link: '/employees', icon: 'pi pi-users', label: 'SIDEBAR.EMPLOYEES', adminOnly: true },
+    { link: '/audit-logs', icon: 'pi pi-history', label: 'SIDEBAR.AUDIT_LOGS', adminOnly: true },
     { link: '/profile', icon: 'pi pi-user', label: 'SIDEBAR.PROFILE', adminOnly: false },
   ];
 }

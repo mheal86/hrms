@@ -1,353 +1,208 @@
 <div class="page-fade">
   @if (isLoading()) {
-    <app-spinner></app-spinner>
+  <app-spinner></app-spinner>
   }
   @if (errorMessage()) {
-    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  <div class="alert alert-danger">{{ errorMessage() }}</div>
   }
 
   @if (profileData(); as data) {
-    <div class="row">
-      <div class="col-md-4">
-        <div class="card text-center">
-          <div class="card-body">
-            @if (data.employee && data.employee.avatarUrl) {
-              <img
-                [src]="baseUrl + data.employee.avatarUrl"
-                class="avatar-img"
-              />
-            }
-            @if (!data.employee || !data.employee.avatarUrl) {
-              <div class="avatar-initials-lg">
-                {{ getInitials(data.employee?.firstName, data.employee?.lastName, data.username) }}
-              </div>
-            }
-            <h5>
-              {{
-                data.employee
-                  ? data.employee.firstName + ' ' + data.employee.lastName
-                  : data.username
-              }}
-            </h5>
-            @if (data.employee) {
-              <p class="text-muted small mb-1">
-                {{
-                  (languageService.getPositionTranslation(data.employee.position) | translate) ||'-'
-                }}
-              </p>
-              <p class="text-muted small mb-3">
-                {{ languageService.getDepartmentName(data.employee.department) }}
-              </p>
-            }
-
-            <div class="d-grid gap-2">
-              <p-button
-                [label]="'PROFILE.CHANGE_PASSWORD_BTN' | translate"
-                [outlined]="true"
-                severity="primary"
-                size="small"
-                styleClass="w-full"
-                (click)="openPasswordModal()"
-              ></p-button>
-            </div>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card text-center">
+        <div class="card-body">
+          @if (data.employee && data.employee.avatarUrl) {
+          <img [src]="baseUrl + data.employee.avatarUrl" class="avatar-img" />
+          }
+          @if (!data.employee || !data.employee.avatarUrl) {
+          <div class="avatar-initials-lg">
+            {{ getInitials(data.employee?.firstName, data.employee?.lastName, data.username) }}
           </div>
-        </div>
-      </div>
+          }
+          <h5>
+            {{
+            data.employee
+            ? data.employee.firstName + ' ' + data.employee.lastName
+            : data.username
+            }}
+          </h5>
+          @if (data.employee) {
+          <p class="text-muted small mb-1">
+            {{
+            (languageService.getPositionTranslation(data.employee.position) | translate) ||'-'
+            }}
+          </p>
+          <p class="text-muted small mb-3">
+            {{ languageService.getDepartmentName(data.employee.department) }}
+          </p>
+          }
 
-      <div class="col-md-8">
-        <div class="card">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="mb-0 text-main">{{ 'PROFILE.TITLE' | translate }}</h5>
-              <!-- Chỉ hiển thị nút Chỉnh sửa khi có nhân viên đang hoạt động và không phải tài khoản admin cao nhất -->
-              @if (
-                !isEditMode() &&
-                data.employee &&
-                data.employee.status !== 'INACTIVE' &&
-                data.username !== 'admin'
-              ) {
-                <p-button
-                  [label]="'PROFILE.EDIT_BTN' | translate"
-                  [outlined]="true"
-                  severity="secondary"
-                  size="small"
-                  (click)="enterEditMode()"
-                ></p-button>
-              }
-            </div>
-
-            <!-- Thông báo khi nhân viên ngừng hoạt động -->
-            @if (data.employee && data.employee.status === 'INACTIVE') {
-              <div class="alert alert-warning py-2 mb-3 small">
-                <strong>{{ 'PROFILE.INACTIVE_WARNING' | translate }}</strong>
-                {{ 'PROFILE.INACTIVE_WARNING_TEXT' | translate }}
-              </div>
-            }
-
-            @if (!isEditMode()) {
-              <div>
-                <p-table
-                  [value]="data.employee ? [data.employee] : []"
-                  styleClass="p-datatable-sm detail-table"
-                >
-                  <ng-template #body let-emp>
-                    <tr>
-                      <td class="fw-bold">
-                        {{ 'PROFILE.FIELD_EMAIL' | translate }}
-                      </td>
-                      <td>{{ emp.email }}</td>
-                    </tr>
-                    <tr>
-                      <td class="fw-bold">{{ 'PROFILE.FIELD_POSITION' | translate }}</td>
-                      <td>
-                        {{
-                          (languageService.getPositionTranslation(emp.position) | translate) || '-'
-                        }}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td class="fw-bold">{{ 'PROFILE.FIELD_DEPARTMENT' | translate }}</td>
-                      <td>{{ languageService.getDepartmentName(emp.department) }}</td>
-                    </tr>
-                    <tr>
-                      <td class="fw-bold">{{ 'PROFILE.FIELD_PHONE' | translate }}</td>
-                      <td>{{ emp.phone || '-' }}</td>
-                    </tr>
-                    <tr>
-                      <td class="fw-bold">{{ 'PROFILE.FIELD_ADDRESS' | translate }}</td>
-                      <td>{{ emp.address || '-' }}</td>
-                    </tr>
-                    @if (emp.status === 'INACTIVE') {
-                      <tr>
-                        <td class="fw-bold text-danger">
-                          {{ 'PROFILE.FIELD_DEACTIVATED_DATE' | translate }}
-                        </td>
-                        <td class="text-danger">
-                          {{
-                            emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-'
-                          }}
-                        </td>
-                      </tr>
-                    }
-                  </ng-template>
-                  <ng-template #emptymessage>
-                    <tr>
-                      <td colspan="2" class="text-muted">
-                        {{ 'PROFILE.NO_EMPLOYEE_LINKED' | translate }}
-                      </td>
-                    </tr>
-                  </ng-template>
-                </p-table>
-              </div>
-            }
-
-            @if (isEditMode()) {
-              <div>
-                <form [formGroup]="form" (ngSubmit)="onSubmit()">
-                  <formly-form [form]="form" [fields]="profileFields" [model]="profileModel"></formly-form>
-                  <div class="d-flex gap-2">
-                    <p-button
-                      type="submit"
-                      [label]="
-                        isSaving()
-                          ? ('PROFILE.SAVING_CHANGES' | translate)
-                          : ('PROFILE.SAVE_CHANGES' | translate)
-                      "
-                      [disabled]="isSaving()"
-                    ></p-button>
-                    <p-button
-                      type="button"
-                      [label]="'COMMON.CANCEL' | translate"
-                      [outlined]="true"
-                      severity="secondary"
-                      (click)="cancelEdit()"
-                    ></p-button>
-                  </div>
-                </form>
-              </div>
-            }
+          <div class="d-grid gap-2">
+            <p-button [label]="'PROFILE.CHANGE_PASSWORD_BTN' | translate" [outlined]="true" severity="primary"
+              size="small" styleClass="w-full" (click)="openPasswordModal()"></p-button>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 text-main">{{ 'PROFILE.TITLE' | translate }}</h5>
+            <!-- Chỉ hiển thị nút Chỉnh sửa khi có nhân viên đang hoạt động và không phải tài khoản admin cao nhất -->
+            @if (
+            !isEditMode() &&
+            data.employee &&
+            data.employee.status !== 'INACTIVE' &&
+            data.username !== 'admin'
+            ) {
+            <p-button [label]="'PROFILE.EDIT_BTN' | translate" [outlined]="true" severity="secondary" size="small"
+              (click)="enterEditMode()"></p-button>
+            }
+          </div>
+
+          <!-- Thông báo khi nhân viên ngừng hoạt động -->
+          @if (data.employee && data.employee.status === 'INACTIVE') {
+          <div class="alert alert-warning py-2 mb-3 small">
+            <strong>{{ 'PROFILE.INACTIVE_WARNING' | translate }}</strong>
+            {{ 'PROFILE.INACTIVE_WARNING_TEXT' | translate }}
+          </div>
+          }
+
+          @if (!isEditMode()) {
+          <div>
+            <p-table [value]="data.employee ? [data.employee] : []" styleClass="p-datatable-sm detail-table">
+              <ng-template #body let-emp>
+                <tr>
+                  <td class="fw-bold">
+                    {{ 'PROFILE.FIELD_EMAIL' | translate }}
+                  </td>
+                  <td>{{ emp.email }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'PROFILE.FIELD_POSITION' | translate }}</td>
+                  <td>
+                    {{
+                    (languageService.getPositionTranslation(emp.position) | translate) || '-'
+                    }}
+                  </td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'PROFILE.FIELD_DEPARTMENT' | translate }}</td>
+                  <td>{{ languageService.getDepartmentName(emp.department) }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'PROFILE.FIELD_PHONE' | translate }}</td>
+                  <td>{{ emp.phone || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="fw-bold">{{ 'PROFILE.FIELD_ADDRESS' | translate }}</td>
+                  <td>{{ emp.address || '-' }}</td>
+                </tr>
+                @if (emp.status === 'INACTIVE') {
+                <tr>
+                  <td class="fw-bold text-danger">
+                    {{ 'PROFILE.FIELD_DEACTIVATED_DATE' | translate }}
+                  </td>
+                  <td class="text-danger">
+                    {{
+                    emp.deactivatedDate ? (emp.deactivatedDate | date: 'dd/MM/yyyy') : '-'
+                    }}
+                  </td>
+                </tr>
+                }
+              </ng-template>
+              <ng-template #emptymessage>
+                <tr>
+                  <td colspan="2" class="text-muted">
+                    {{ 'PROFILE.NO_EMPLOYEE_LINKED' | translate }}
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+          }
+
+          @if (isEditMode()) {
+          <div>
+            <form [formGroup]="form" (ngSubmit)="onSubmit()">
+              <formly-form [form]="form" [fields]="profileFields" [model]="profileModel"></formly-form>
+              <div class="d-flex gap-2">
+                <p-button type="submit" [label]="
+                        isSaving()
+                          ? ('PROFILE.SAVING_CHANGES' | translate)
+                          : ('PROFILE.SAVE_CHANGES' | translate)
+                      " [disabled]="isSaving()"></p-button>
+                <p-button type="button" [label]="'COMMON.CANCEL' | translate" [outlined]="true" severity="secondary"
+                  (click)="cancelEdit()"></p-button>
+              </div>
+            </form>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
   }
 
   <!-- PrimeNG Dialog thay thế cho custom modal cũ -->
-  <p-dialog
-    [header]="'PROFILE.CHANGE_PASS_DIALOG_TITLE' | translate"
-    [visible]="isPasswordModalOpen()"
-    (onHide)="closePasswordModal()"
-    [modal]="true"
-    [style]="{ width: '450px' }"
-    [resizable]="false"
-    [draggable]="false"
-    styleClass="custom-password-dialog"
-  >
+  <p-dialog [header]="'PROFILE.CHANGE_PASS_DIALOG_TITLE' | translate" [visible]="isPasswordModalOpen()"
+    (onHide)="closePasswordModal()" [modal]="true" [style]="{ width: '450px' }" [resizable]="false" [draggable]="false"
+    styleClass="custom-password-dialog">
     @if (passwordErrorMessage()) {
-      <div class="alert alert-danger py-2 mb-3">{{ passwordErrorMessage() }}</div>
+    <div class="alert alert-danger py-2 mb-3">{{ passwordErrorMessage() }}</div>
     }
 
     <!-- Dùng @if để reset hoàn toàn form và trạng thái hiển thị của các ô input khi đóng/mở -->
     @if (isPasswordModalOpen()) {
-      <form
-        [formGroup]="passwordForm"
-        (ngSubmit)="onChangePassword()"
-        class="d-flex flex-column gap-4 pt-3"
-      >
-        <div>
-          <p-floatlabel>
-            <p-password
-              id="currentPassword"
-              formControlName="currentPassword"
-              [toggleMask]="true"
-              [feedback]="false"
-              [invalid]="
-                passwordForm.get('currentPassword')?.invalid &&
-                passwordForm.get('currentPassword')?.touched &&
-                (passwordForm.get('currentPassword')?.dirty || passwordFormSubmitted())
-              "
-              styleClass="w-full"
-              inputStyleClass="form-control w-full"
-            ></p-password>
-            <label for="currentPassword">{{ 'PROFILE.CURRENT_PASSWORD' | translate }}</label>
-          </p-floatlabel>
-          @if (
-            passwordForm.get('currentPassword')?.invalid &&
-            passwordForm.get('currentPassword')?.touched &&
-            (passwordForm.get('currentPassword')?.dirty || passwordFormSubmitted())
-          ) {
-            <div class="text-danger small mt-1">
-              {{ 'PROFILE.CURRENT_PASS_REQUIRED' | translate }}
-            </div>
-          }
+    <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" class="d-flex flex-column gap-4 pt-3">
+      <formly-form [form]="passwordForm" [fields]="passwordFields" [model]="passwordModel"></formly-form>
+
+      <!-- Custom strength meter & checklists -->
+      @if (newPasswordValue) {
+      <div class="text-muted small w-100 password-strength-panel mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex align-items-center gap-2 header">
+            <i class="pi pi-shield title-icon"></i>
+            <span class="fw-bold title-text">{{ 'PROFILE.PASS_STRENGTH_TITLE' | translate }}</span>
+          </div>
+          <!-- Badge ở góc phải -->
+          <span class="badge px-2 py-1 text-xs fw-semibold badge-strength" [style.backgroundColor]="strengthColor">
+            {{ strengthLabel }}
+          </span>
         </div>
 
-        <div>
-          <p-floatlabel>
-            <p-password
-              id="newPassword"
-              formControlName="newPassword"
-              [toggleMask]="true"
-              [feedback]="true"
-              promptLabel=""
-              [invalid]="
-                passwordForm.get('newPassword')?.invalid &&
-                passwordForm.get('newPassword')?.touched &&
-                (passwordForm.get('newPassword')?.dirty || passwordFormSubmitted())
-              "
-              styleClass="w-full"
-              inputStyleClass="form-control w-full"
-            >
-              <!-- Custom template footer hiển thị checklist độ mạnh mật khẩu -->
-              <ng-template #footer>
-                <div class="text-muted small w-100 password-strength-panel">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div class="d-flex align-items-center gap-2 header">
-                      <i
-                        class="pi pi-shield title-icon"
-                      ></i>
-                      <span class="fw-bold title-text">{{
-                        'PROFILE.PASS_STRENGTH_TITLE' | translate
-                       }}</span>
-                    </div>
-                    <!-- Badge ở góc phải -->
-                    @if (newPasswordValue) {
-                      <span
-                        class="badge px-2 py-1 text-xs fw-semibold badge-strength"
-                        [style.backgroundColor]="strengthColor"
-                      >
-                        {{ strengthLabel }}
-                      </span>
-                    }
-                  </div>
-
-                  <!-- Custom dynamic progress bar matching strength color -->
-                  <div class="progress mb-3 strength-progress">
-                    <div
-                      class="progress-bar strength-progress-bar"
-                      role="progressbar"
-                      [style.width.%]="strengthValue"
-                      [style.backgroundColor]="strengthColor"
-                    ></div>
-                  </div>
-
-                  <ul class="list-unstyled mb-0 d-flex flex-column gap-2 mt-2">
-                    @for (rule of passwordRules; track rule.key) {
-                      <li
-                        class="d-flex align-items-center gap-2"
-                        [style.color]="newPasswordValidation[rule.key] ? 'var(--color-success)' : 'var(--text-muted)'"
-                      >
-                        <i
-                          [ngClass]="
-                            newPasswordValidation[rule.key] ? 'pi pi-check text-success' : 'pi pi-times text-danger'
-                          "
-                        ></i>
-                        <span>{{ rule.label | translate }}</span>
-                      </li>
-                    }
-                  </ul>
-                </div>
-              </ng-template>
-            </p-password>
-            <label for="newPassword">{{ 'PROFILE.NEW_PASSWORD' | translate }}</label>
-          </p-floatlabel>
-          @if (
-            passwordForm.get('newPassword')?.invalid &&
-            passwordForm.get('newPassword')?.touched &&
-            (passwordForm.get('newPassword')?.dirty || passwordFormSubmitted())
-          ) {
-            <div class="text-danger small mt-1">
-              {{ 'PROFILE.NEW_PASS_REQUIRED' | translate }}
-            </div>
-          }
+        <!-- Custom dynamic progress bar matching strength color -->
+        <div class="progress mb-3 strength-progress">
+          <div class="progress-bar strength-progress-bar" role="progressbar" [style.width.%]="strengthValue"
+            [style.backgroundColor]="strengthColor"></div>
         </div>
 
-        <div>
-          <p-floatlabel>
-            <p-password
-              id="confirmPassword"
-              formControlName="confirmPassword"
-              [toggleMask]="true"
-              [feedback]="false"
-              [invalid]="
-                passwordForm.get('confirmPassword')?.invalid &&
-                passwordForm.get('confirmPassword')?.touched &&
-                (passwordForm.get('confirmPassword')?.dirty || passwordFormSubmitted())
-              "
-              styleClass="w-full"
-              inputStyleClass="form-control w-full"
-            ></p-password>
-            <label for="confirmPassword">{{ 'PROFILE.CONFIRM_PASSWORD' | translate }}</label>
-          </p-floatlabel>
-          @if (
-            passwordForm.get('confirmPassword')?.invalid &&
-            passwordForm.get('confirmPassword')?.touched &&
-            (passwordForm.get('confirmPassword')?.dirty || passwordFormSubmitted())
-          ) {
-            <div class="text-danger small mt-1">
-              {{ 'PROFILE.CONFIRM_PASS_REQUIRED' | translate }}
-            </div>
+        <ul class="list-unstyled mb-0 d-flex flex-column gap-2 mt-2">
+          @for (rule of passwordRules; track rule.key) {
+          <li class="d-flex align-items-center gap-2"
+            [style.color]="newPasswordValidation[rule.key] ? 'var(--color-success)' : 'var(--text-muted)'">
+            <i [ngClass]="
+                      newPasswordValidation[rule.key] ? 'pi pi-check text-success' : 'pi pi-times text-danger'
+                    "></i>
+            <span>{{ rule.label | translate }}</span>
+          </li>
           }
-        </div>
+        </ul>
+      </div>
+      }
 
-        <div class="d-flex justify-content-end gap-2 mt-2">
-          <p-button
-            type="button"
-            [label]="'COMMON.CANCEL' | translate"
-            severity="secondary"
-            (click)="closePasswordModal()"
-          ></p-button>
-          <p-button
-            type="submit"
-            [label]="
+      <div class="d-flex justify-content-end gap-2 mt-2">
+        <p-button type="button" [label]="'COMMON.CANCEL' | translate" severity="secondary"
+          (click)="closePasswordModal()"></p-button>
+        <p-button type="submit" [label]="
               isChangingPassword()
                 ? ('PROFILE.CHANGING_PASS' | translate)
                 : ('PROFILE.CHANGE_PASS_BTN' | translate)
-            "
-            [disabled]="isChangingPassword()"
-          ></p-button>
-        </div>
-      </form>
+            " [disabled]="isChangingPassword()"></p-button>
+      </div>
+    </form>
     }
   </p-dialog>
 </div>

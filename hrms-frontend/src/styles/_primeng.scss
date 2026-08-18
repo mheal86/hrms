@@ -151,11 +151,15 @@ body .p-dialog {
   }
 }
 
+/* Background overlay backdrop blur matching old styles */
 body .p-dialog-mask {
-  background: var(--mask-bg);
+  background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(4px);
 }
 
+body.dark-theme .p-dialog-mask {
+  background: rgba(0, 0, 0, 0.75);
+}
 
 /* ─── PrimeNG Button Custom Style Match (Light/Dark Mode) ─── */
 body .p-button {
@@ -216,9 +220,9 @@ body .p-button.p-button-outlined:not(.p-button-secondary) {
 
 body .p-button-primary.p-button-outlined:hover,
 body .p-button.p-button-outlined:not(.p-button-secondary):hover {
-  background-color: var(--color-primary-subtle);
-  color: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  background-color: rgba(37, 99, 235, 0.05);
+  color: var(--color-primary-dark, #{$blue-700});
+  border-color: var(--color-primary-dark, #{$blue-700});
 }
 
 /* Sizes matching bootstrap */
@@ -258,7 +262,7 @@ body .p-password.p-invalid .form-control,
 body .p-password.ng-invalid.ng-touched .form-control,
 body .p-inputtext.p-invalid {
   border-color: var(--color-error, #{$red-600});
-  box-shadow: 0 0 0 0.25rem var(--input-error-focus-ring);
+  box-shadow: 0 0 0 0.25rem rgba(220, 38, 38, 0.25);
 }
 
 /* Align and size PrimeNG p-button elements inside Bootstrap input-groups */
@@ -309,8 +313,10 @@ body .p-datatable {
     border-top: none;
     border-right: 1px solid var(--table-border);
     padding: 0.6rem 0.75rem;
-    font-weight: 600;
-    font-size: 0.825rem;
+    font-weight: 700;
+    font-size: $font-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
     white-space: nowrap;
     position: sticky;
     top: 0;
@@ -409,25 +415,38 @@ body .action-column .p-button.p-component .p-button-icon {
   margin-top: 4px;
   border-radius: $radius-xl; // 10px
   overflow: hidden;
-  box-shadow: var(--shadow-dropdown);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
+  /* Light mode overlay */
+  body:not(.dark-theme) & {
+    background: #{$white};
+    border: 1px solid #{$slate-200};
+  }
+
+  /* Dark mode overlay */
+  body.dark-theme & {
+    background: #{$slate-800};
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 
   .p-select-option {
     padding: 8px 12px;
     transition: #{$transition-fast};
-    color: var(--text-main);
-    background: transparent;
 
-    &:hover {
-      background: var(--color-primary-subtle);
-      color: var(--color-primary-hover);
-    }
+    body.dark-theme & {
+      color: #{$slate-200};
+      background: transparent;
 
-    &.p-select-option-selected {
-      background: var(--color-primary-subtle);
-      color: var(--color-primary-hover);
-      font-weight: 600;
+      &:hover {
+        background: rgba(99, 102, 241, 0.2);
+        color: #{$indigo-300};
+      }
+
+      &.p-select-option-selected {
+        background: rgba(99, 102, 241, 0.25);
+        color: #{$indigo-300};
+        font-weight: 600;
+      }
     }
   }
 }
@@ -580,7 +599,7 @@ body .scrollable-list-container {
       z-index: 2;
 
       .text-light-active {
-        color: var(--text-on-primary-muted);
+        color: rgba(255, 255, 255, 0.8);
       }
     }
   }

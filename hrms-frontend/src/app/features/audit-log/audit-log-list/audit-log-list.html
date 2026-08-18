@@ -1,0 +1,173 @@
+<div class="page-fade list-layout-container">
+  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center justify-content-between">
+    <div class="d-flex gap-2 flex-wrap flex-grow-1 align-items-center">
+      <!-- Search Input -->
+      <div class="input-group search-input-group">
+        <input pInputText type="text" class="form-control" [placeholder]="'AUDIT.SEARCH_PLACEHOLDER' | translate"
+          [(ngModel)]="searchTerm" (keydown.enter)="resetAndLoad()" />
+        <p-button icon="pi pi-search" [outlined]="true" severity="secondary" (click)="resetAndLoad()"
+          styleClass="search-btn" [title]="'COMMON.SEARCH' | translate"></p-button>
+      </div>
+
+      <!-- User Dropdown Filter -->
+      <app-custom-select class="filter-select-user" [(ngModel)]="selectedUser" (ngModelChange)="resetAndLoad()"
+        [options]="userOptions()" [placeholder]="'AUDIT.ALL_USERS' | translate" [showClear]="true" [filter]="true"
+        filterBy="label" panelClass="audit-filter-panel"></app-custom-select>
+
+      <!-- Action Dropdown Filter -->
+      <app-custom-select class="filter-select-action" [(ngModel)]="selectedAction" (ngModelChange)="resetAndLoad()"
+        [options]="actionOptions()" [placeholder]="'AUDIT.ALL_ACTIONS' | translate" [showClear]="true"
+        panelClass="audit-filter-panel"></app-custom-select>
+
+      <!-- Date Range Calendar -->
+      <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true" [showIcon]="true"
+        iconDisplay="input" (ngModelChange)="onDateRangeChange($event)"
+        [placeholder]="'AUDIT.FILTER_DATE_RANGE' | translate" styleClass="filter-calendar"
+        dateFormat="yy-mm-dd"></p-datepicker>
+
+      <!-- Clear Filters Button -->
+      <p-button icon="pi pi-filter-slash" [outlined]="true" severity="secondary" (click)="clearFilters()"
+        styleClass="clear-filter-btn" [title]="'COMMON.CANCEL' | translate"></p-button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+  <app-table-skeleton [rows]="10" [columns]="5"></app-table-skeleton>
+  }
+  @if (errorMessage()) {
+  <div class="alert alert-danger">{{ errorMessage() }}</div>
+  }
+
+  @if (!isLoading() && logs().length > 0) {
+  <div class="table-responsive scrollable-table-container">
+    <p-table [columns]="cols" [value]="logs()" styleClass="p-datatable-sm p-datatable-hoverable">
+      <ng-template #header let-columns>
+        <tr>
+          @for (col of columns; track col.field) {
+          @if (col.sortable) {
+          <th class="sortable-header" (click)="onSort(col.field)" style="cursor: pointer; user-select: none;">
+            {{ col.header | translate }}
+            <i [ngClass]="
+                      'pi ' +
+                      (sortField !== col.field
+                        ? 'pi-sort text-muted'
+                        : sortOrder === 'asc'
+                        ? 'pi-sort-amount-up text-primary'
+                        : 'pi-sort-amount-down text-primary')
+                    " class="sort-icon ms-1"></i>
+          </th>
+          } @else {
+          <th [class.text-center]="col.field === 'details'">{{ col.header | translate }}</th>
+          }
+          }
+        </tr>
+      </ng-template>
+      <ng-template #body let-log let-columns="columns">
+        <tr>
+          @for (col of columns; track col.field) {
+          <td [class.text-center]="col.field === 'details'">
+            @if (col.field === 'createdAt') {
+            <span class="text-nowrap">{{ log.createdAt | date: 'yyyy-MM-dd HH:mm:ss' }}</span>
+            } @else if (col.field === 'username') {
+            <p-chip [label]="log.username" icon="pi pi-user" styleClass="user-chip"></p-chip>
+            } @else if (col.field === 'action') {
+            @let config = getActionTagConfig(log.action);
+            <p-tag [severity]="config.severity" [value]="'AUDIT.ACTIONS_LIST.' + log.action | translate"
+              [icon]="config.icon" styleClass="action-tag"></p-tag>
+            } @else if (col.field === 'targetName') {
+            <div class="d-flex flex-column">
+              <span class="fw-semibold">{{ log.targetName || '-' }}</span>
+              <span class="text-muted font-xs">{{ 'AUDIT.TARGET_TYPES.' + log.targetType | translate }}</span>
+            </div>
+            } @else if (col.field === 'details') {
+            @if (log.details) {
+            <div class="details-cell d-flex justify-content-center">
+              <p-button icon="pi pi-eye" [text]="true" severity="secondary" size="small"
+                (click)="showDetails(log.details)" [title]="'AUDIT.SHOW_DETAILS' | translate"
+                styleClass="details-btn"></p-button>
+            </div>
+            } @else {
+            <span>-</span>
+            }
+            } @else {
+            {{ log[col.field] }}
+            }
+          </td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  }
+
+  @if (!isLoading() && logs().length === 0) {
+  <div class="text-center py-5 bg-card rounded shadow-sm">
+    <i class="pi pi-history text-muted" style="font-size: 3rem"></i>
+    <p class="mt-3 text-muted fw-semibold">{{ 'COMMON.NO_DATA' | translate }}</p>
+  </div>
+  }
+
+  @if (!isLoading() && total() > 0) {
+  <div class="d-flex justify-content-between align-items-center mt-3 paginator-row">
+    <span class="text-muted small">{{
+      'AUDIT.TOTAL_COUNT' | translate: { count: total() }
+      }}</span>
+    <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="pageSize" [totalRecords]="total()"
+      [rowsPerPageOptions]="[7, 15, 30, 50]" styleClass="border-none bg-transparent p-0"></p-paginator>
+  </div>
+  }
+</div>
+
+<!-- Details Modal Dialog -->
+<p-dialog [header]="'AUDIT.DETAILS_HEADER' | translate" [(visible)]="displayDetails" [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '650px' }" [draggable]="false" [resizable]="false" [dismissableMask]="true"
+  styleClass="audit-details-dialog">
+  @if (parsedDetails(); as parsed) {
+  <!-- Case 1: Diff (Changes) -->
+  @if (parsed.type === 'diff') {
+  <div class="details-diff-container">
+    <p-table [value]="parsed.diffs" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr>
+          <th scope="col" style="width: 30%">{{ 'AUDIT.DETAIL_COL_FIELD' | translate }}</th>
+          <th scope="col" style="width: 35%">{{ 'AUDIT.DETAIL_COL_BEFORE' | translate }}</th>
+          <th scope="col" style="width: 35%">{{ 'AUDIT.DETAIL_COL_AFTER' | translate }}</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-diff>
+        <tr>
+          <td class="diff-field">{{ diff.field }}</td>
+          <td class="diff-before text-decoration-line-through">{{ diff.before }}</td>
+          <td class="diff-after">{{ diff.after }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+  }
+
+  <!-- Case 2: Key-Value (Creation, Deletion details) -->
+  @if (parsed.type === 'key-value') {
+  <div class="row g-3 px-2">
+    @for (pair of parsed.pairs; track pair.key) {
+    <div class="col-12 col-sm-6">
+      <div class="details-pair-item">
+        <div class="pair-label">{{ pair.key }}</div>
+        <div class="pair-value">{{ pair.value }}</div>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  <!-- Case 3: Simple text/fallback -->
+  @if (parsed.type === 'simple') {
+  <div class="dialog-pre-container rounded p-1 bg-dark">
+    <pre class="details-dialog-pre text-white p-2 rounded m-0 font-xs">{{ parsed.simpleText }}</pre>
+  </div>
+  }
+  } @else {
+  <div class="text-center py-4 text-muted">
+    {{ 'COMMON.NO_DATA' | translate }}
+  </div>
+  }
+</p-dialog>

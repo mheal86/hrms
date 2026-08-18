@@ -9,36 +9,7 @@
     </div>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
-      <div class="mb-3">
-        <label class="form-label">{{ 'AUTH.USERNAME_LABEL' | translate }}</label>
-        <input
-          pInputText
-          type="text"
-          class="form-control"
-          formControlName="username"
-          [placeholder]="'AUTH.USERNAME_PLACEHOLDER' | translate"
-          [invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
-        />
-        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-          <div class="invalid-feedback d-block">{{ 'AUTH.USERNAME_REQUIRED' | translate }}</div>
-        }
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">{{ 'AUTH.PASSWORD_LABEL' | translate }}</label>
-        <p-password
-          formControlName="password"
-          [toggleMask]="true"
-          [placeholder]="'AUTH.PASSWORD_PLACEHOLDER' | translate"
-          [feedback]="false"
-          [invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-          styleClass="w-100"
-          inputStyleClass="form-control w-100"
-        ></p-password>
-        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
-          <div class="invalid-feedback d-block">{{ 'AUTH.PASSWORD_REQUIRED' | translate }}</div>
-        }
-      </div>
+      <formly-form [form]="loginForm" [fields]="loginFields" [model]="loginModel"></formly-form>
 
       @if (errorMessage()) {
         <div class="alert alert-danger py-2">

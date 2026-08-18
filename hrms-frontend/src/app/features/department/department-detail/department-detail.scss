@@ -1,92 +1,28 @@
-// ─── Variables ───────────────────────────────────────────────
+@use '../../../../styles/mixins' as m;
+@use '../../../../styles/variables' as v;
+
+// ─── Variables & Tokens ───────────────────────────────────────
 $avatar-size-sm: 32px;
 $avatar-size-lg: 120px;
-$border-radius-circle: 50%;
-$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-$shadow-modal-fade: rgba(15, 23, 42, 0.6);
+$avatar-size-badge: 36px;
 $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
 
-// ─── Mixins ──────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin avatar-circle($size) {
-  width: $size;
-  height: $size;
-  border-radius: $border-radius-circle;
-}
-
-@mixin avatar-initials($size, $font-size) {
-  @include avatar-circle($size);
-  @include flex-center;
-  background: $avatar-gradient;
-  color: var(--text-on-primary);
-  font-size: $font-size;
-  font-weight: 600;
-}
-
-// ─── Avatar ──────────────────────────────────────────────────
+// ─── Standard Elements ────────────────────────────────────────
 .avatar-sm {
-  @include avatar-circle($avatar-size-sm);
+  @include m.avatar-base($avatar-size-sm);
   object-fit: cover;
 }
 
 .avatar-initials {
-  @include avatar-initials($avatar-size-sm, 12px);
+  @include m.avatar-initials($avatar-size-sm, 12px);
 }
 
-// ─── Modal Backdrop ──────────────────────────────────────────
-.modal-backdrop-custom {
-  @include flex-center;
-  position: fixed;
-  inset: 0;
-  background: $shadow-modal-fade;
-  backdrop-filter: blur(4px);
-  z-index: 10000;
-  animation: backdropFadeIn 0.2s ease;
-
-  .dark-theme & {
-    background: rgba(0, 0, 0, 0.75);
-  }
+.scrollable-list-container {
+  @include m.custom-scrollbar;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-@keyframes backdropFadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-// ─── Modal Box ───────────────────────────────────────────────
-.modal-box {
-  background: var(--bg-secondary);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  padding: 28px;
-  border-radius: 16px;
-  min-width: 380px;
-  max-width: 95%;
-  box-shadow: var(--shadow-modal);
-  animation: modalSlideIn 0.25s $easing-spring;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-// ─── Hover Card Action ───────────────────────────────────────
 .hover-card-action {
   background-color: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -110,17 +46,115 @@ $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
-// ─── Scrollable List ─────────────────────────────────────────
-.scrollable-list-container {
-  max-height: 200px;
-  overflow-y: auto;
+// ─── Department Statistics Page Section ────────────────────────
+.department-stats {
+  margin-bottom: v.$space-3xl;
+
+  h5 i {
+    font-size: 18px;
+    color: var(--color-primary-light);
+  }
+
+  .stat-icon {
+    @include m.flex-center;
+    width: $avatar-size-badge;
+    height: $avatar-size-badge;
+    border-radius: v.$radius-md;
+    flex-shrink: 0;
+
+    i {
+      font-size: 18px;
+    }
+
+    &.bg-primary-soft {
+      background-color: var(--color-primary-subtle);
+      color: var(--color-primary);
+
+      i {
+        color: var(--color-primary);
+      }
+    }
+
+    &.bg-info-soft {
+      background-color: var(--color-info-bg);
+      color: var(--color-info);
+
+      i {
+        color: var(--color-info);
+      }
+    }
+
+    &.bg-warning-soft {
+      background-color: var(--color-warning-bg);
+      color: var(--color-warning);
+
+      i {
+        color: var(--color-warning);
+      }
+    }
+
+    &.bg-success-soft {
+      background-color: var(--color-success-bg);
+      color: var(--color-success);
+
+      i {
+        color: var(--color-success);
+      }
+    }
+  }
+
+  .gender-progress-bar {
+    height: 6px;
+    background-color: var(--border-color);
+    border-radius: v.$radius-sm;
+    overflow: hidden;
+  }
+
+  .newest-longest-item {
+    display: flex;
+    flex-direction: column;
+    gap: v.$space-sm;
+
+    h6 {
+      display: flex;
+      align-items: center;
+      gap: v.$space-sm;
+      font-size: v.$font-sm;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+  }
+
+  .bg-light-soft {
+    display: flex;
+    align-items: center;
+    gap: v.$space-md;
+    padding: v.$space-md v.$space-lg;
+    background: var(--surface-card);
+    border: 1px solid var(--border-color);
+    border-radius: v.$radius-md;
+    transition: v.$transition-normal;
+
+    &:hover {
+      box-shadow: var(--shadow-card-hover);
+      transform: translateY(-1px);
+      background-color: var(--surface-hover);
+      border-color: var(--color-primary-light);
+    }
+  }
+
+  .chart-container {
+    position: relative;
+    width: 100%;
+  }
 }
 
-// ─── PrimeNG Overrides ───────────────────────────────────────
+// ─── Component Isolated PrimeNG/Chart Overrides ──────────────
 :host ::ng-deep {
   .back-btn-custom.p-button {
-    @include flex-center;
-    @include avatar-circle(32px);
+    @include m.flex-center;
+    @include m.avatar-base(32px);
     display: inline-flex;
     padding: 0;
     color: var(--color-primary-light);
@@ -131,6 +165,66 @@ $easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
     &:hover {
       background-color: var(--surface-hover);
       color: var(--color-primary);
+    }
+  }
+
+  .department-stats {
+    .stat-card.p-card,
+    .detail-card.p-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-color);
+      border-radius: v.$radius-xxl;
+      box-shadow: var(--shadow-card);
+      color: var(--text-main);
+      transition: v.$transition-normal;
+      height: 100%;
+
+      .p-card-body {
+        padding: 20px;
+      }
+
+      &:hover {
+        box-shadow: var(--shadow-card-hover);
+        transform: translateY(-2px);
+        border-color: var(--color-primary-light);
+      }
+    }
+
+    .stat-card.p-card {
+      .p-card-body {
+        padding: v.$space-lg v.$space-xl;
+      }
+    }
+
+    .gender-progress-bar {
+      .p-progressbar-value {
+        border-radius: v.$radius-sm;
+      }
+
+      &.info-progress {
+        .p-progressbar-value {
+          background-color: var(--color-info);
+        }
+      }
+
+      &.warning-progress {
+        .p-progressbar-value {
+          background-color: var(--color-warning);
+        }
+      }
+    }
+
+    .chart-container {
+      .p-chart {
+        display: block;
+        height: 180px;
+        width: 100%;
+
+        canvas {
+          width: 100%;
+          height: 180px;
+        }
+      }
     }
   }
 }

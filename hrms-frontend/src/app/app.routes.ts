@@ -13,6 +13,7 @@ import { NotFound } from './features/not-found/not-found';
 import { Forbidden } from './features/forbidden/forbidden';
 import { EmployeeDetail } from './features/employee/employee-detail/employee-detail';
 import { DepartmentDetail } from './features/department/department-detail/department-detail';
+import { AuditLogList } from './features/audit-log/audit-log-list/audit-log-list';
 
 export const routes: Routes = [
   { path: 'login', component: Login, title: 'ROUTE_TITLE.LOGIN' },
@@ -43,9 +44,13 @@ export const routes: Routes = [
           { path: 'employees/new', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_ADD' },
           { path: 'employees/edit/:id', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_EDIT' },
           { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
+
+          // Audit Logs
+          { path: 'audit-logs', component: AuditLogList, title: 'ROUTE_TITLE.AUDIT_LOGS' },
         ],
       },
     ],
   },
   { path: '**', component: NotFound, title: 'ROUTE_TITLE.NOT_FOUND' },
 ];
+

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Employee = require('../models/Employee');
 const bcrypt = require('bcryptjs');
+const { logActivity } = require('../utils/auditLogger');
 
 // PUT /api/profile/change-password
 exports.changePassword = async (req, res) => {
@@ -28,6 +29,16 @@ exports.changePassword = async (req, res) => {
     user.password = await bcrypt.hash(newPassword, 10);
     user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
+
+    // Ghi log hoạt động
+    await logActivity({
+      req,
+      action: 'CHANGE_PASSWORD',
+      targetType: 'USER',
+      targetId: user._id,
+      targetName: user.username,
+      details: { message: 'User changed their password successfully' },
+    });
 
     res.status(200).json({ message: 'Đổi mật khẩu thành công' });
   } catch (err) {

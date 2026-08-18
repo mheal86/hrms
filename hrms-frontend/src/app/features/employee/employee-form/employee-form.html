@@ -24,6 +24,7 @@
                 [binary]="true"
                 inputId="createAccountCheck"
                 [ngModel]="createAccount()"
+                [ngModelOptions]="{standalone: true}"
                 (onChange)="toggleCreateAccount()"
               ></p-checkbox>
               <label class="form-check-label fw-semibold text-main mb-0 cursor-pointer" for="createAccountCheck">

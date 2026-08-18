@@ -1,393 +1,482 @@
 <div class="page-fade">
   @if (isLoading()) {
-    <app-spinner></app-spinner>
+  <app-spinner></app-spinner>
   }
   @if (errorMessage()) {
-    <div class="alert alert-danger">{{ errorMessage() }}</div>
+  <div class="alert alert-danger">{{ errorMessage() }}</div>
   }
 
   @if (department(); as dept) {
-    <div>
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <p-button
-          routerLink="/departments"
-          [label]="'COMMON.BACK' | translate"
-          icon="pi pi-arrow-left"
-          [outlined]="true"
-          severity="secondary"
-          size="small"
-        ></p-button>
-        <p-button
-          [routerLink]="['/departments/edit', dept._id]"
-          [label]="'DEPARTMENT.EDIT_DEPT_BTN' | translate"
-          icon="pi pi-pencil"
-          size="small"
-        ></p-button>
+  <div>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <p-button routerLink="/departments" [label]="'COMMON.BACK' | translate" icon="pi pi-arrow-left" [outlined]="true"
+        severity="secondary" size="small"></p-button>
+      <p-button [routerLink]="['/departments/edit', dept._id]" [label]="'DEPARTMENT.EDIT_DEPT_BTN' | translate"
+        icon="pi pi-pencil" size="small"></p-button>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="mb-1">{{ languageService.getDepartmentName(dept.name) }}</h4>
+        <p class="text-muted mb-0">
+          {{
+          languageService.getDepartmentDesc(dept.name, dept.description) ||
+          ('COMMON.NO_DESCRIPTION' | translate)
+          }}
+        </p>
       </div>
+    </div>
 
-      <div class="card mb-3">
-        <div class="card-body">
-          <h4 class="mb-1">{{ languageService.getDepartmentName(dept.name) }}</h4>
-          <p class="text-muted mb-0">
-            {{
-              languageService.getDepartmentDesc(dept.name, dept.description) ||
-                ('COMMON.NO_DESCRIPTION' | translate)
-            }}
-          </p>
-        </div>
-      </div>
+    <!-- Khu vực Thống kê phòng ban (Department Statistics) -->
+    <div class="mb-4 department-stats">
+      <h5 class="mb-3 fw-semibold text-main">
+        <i class="pi pi-chart-line me-2 text-primary"></i>
+        {{ 'DEPARTMENT.STATS_TITLE' | translate }}
+      </h5>
 
-      <div class="card">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">
-              {{ 'DEPARTMENT.DETAIL_EMPLOYEES_TITLE' | translate: { count: employees().length } }}
-            </h5>
-            <p-button
-              (click)="openAddEmployeeModal()"
-              [label]="'DEPARTMENT.ADD_EMPLOYEE_BTN' | translate"
-              icon="pi pi-plus"
-              [outlined]="true"
-              size="small"
-            ></p-button>
-          </div>
-
-          @if (isLoadingEmployees()) {
-            <app-spinner></app-spinner>
-          }
-
-          @if (!isLoadingEmployees() && employees().length > 0) {
-            <p-table
-              [columns]="cols"
-              [value]="employees()"
-              styleClass="p-datatable-sm p-datatable-hoverable"
-            >
-              <ng-template #header let-columns>
-                <tr>
-                  <th style="width: 50px"></th>
-                  @for (col of columns; track col.field) {
-                    <th>{{ col.header | translate }}</th>
-                  }
-                  @if (authService.isAdmin()) {
-                    <th style="width: 120px" class="text-center">
-                      {{ 'DEPARTMENT.COL_ACTIONS_EMP' | translate }}
-                    </th>
-                  }
-                </tr>
-              </ng-template>
-              <ng-template #body let-emp let-columns="columns">
-                <tr>
-                  <td>
-                    @if (emp.avatarUrl) {
-                      <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
-                    } @else {
-                      <div class="avatar-initials">
-                        {{ getInitials(emp.firstName, emp.lastName) }}
-                      </div>
-                    }
-                  </td>
-                  @for (col of columns; track col.field) {
-                    <td>
-                      @switch (col.field) {
-                        @case ('fullName') {
-                          <a
-                            [routerLink]="['/employees', emp._id]"
-                            [queryParams]="{ departmentId: department()?._id }"
-                            class="text-decoration-none"
-                          >
-                            {{ emp.firstName }} {{ emp.lastName }}
-                          </a>
-                        }
-                        @case ('status') {
-                          <span
-                            class="badge"
-                            [class.badge-success]="emp.status === 'ACTIVE'"
-                            [class.badge-secondary]="emp.status === 'INACTIVE'"
-                          >
-                            {{
-                              emp.status === 'ACTIVE'
-                                ? ('COMMON.ACTIVE' | translate)
-                                : ('COMMON.INACTIVE' | translate)
-                            }}
-                          </span>
-                        }
-                        @default {
-                          {{
-                            col.field === 'position'
-                              ? (languageService.getPositionTranslation(emp[col.field]) | translate)
-                              : emp[col.field]
-                          }}
-                        }
-                      }
-                    </td>
-                  }
-                  @if (authService.isAdmin()) {
-                    <td class="action-column text-center">
-                      <p-button
-                        icon="pi pi-ellipsis-v"
-                        [text]="true"
-                        severity="secondary"
-                        size="small"
-                        styleClass="action-btn-circle"
-                        (click)="menuItems = getEmployeeMenuItems(emp); menu.toggle($event)"
-                        [title]="'COMMON.ACTIONS' | translate"
-                      ></p-button>
-                    </td>
-                  }
-                </tr>
-              </ng-template>
-            </p-table>
-          }
-
-          @if (!isLoadingEmployees() && employees().length === 0) {
-            <p class="text-muted mb-0">
-              {{ 'DEPARTMENT.EMPTY_EMPLOYEES' | translate }}
-            </p>
-          }
-        </div>
-      </div>
-
-      <!-- PrimeNG Dialog: Chuyển phòng ban -->
-      <p-dialog
-        [header]="'DEPARTMENT.TRANSFER_DIALOG_TITLE' | translate"
-        [visible]="isTransferModalOpen()"
-        (onHide)="closeTransferModal()"
-        [modal]="true"
-        [style]="{ width: '420px' }"
-        [resizable]="false"
-        [draggable]="false"
-        appendTo="body"
-      >
-        @if (selectedEmployeeForTransfer(); as emp) {
-          <div class="pt-2">
-            <p class="mb-2">
-              {{ 'DEPARTMENT.TRANSFER_SELECT_NEW_DEPT' | translate }}
-              <strong>{{ emp.firstName }} {{ emp.lastName }}</strong
-              >:
-            </p>
-            <div class="mb-3">
-              <label class="form-label small text-muted"
-                >{{ 'DEPARTMENT.TRANSFER_CURRENT_DEPT' | translate }}
-                {{ languageService.getDepartmentName(department()?.name) }}</label
-              >
-              <app-custom-select
-                [options]="transferOptions()"
-                [placeholder]="'DEPARTMENT.TRANSFER_PLACEHOLDER' | translate"
-                [ngModel]="selectedTargetDepartmentId()"
-                (ngModelChange)="selectedTargetDepartmentId.set($event)"
-              >
-              </app-custom-select>
-            </div>
-          </div>
-        }
-        <ng-template #footer>
-          <p-button
-            type="button"
-            [label]="'COMMON.CANCEL' | translate"
-            severity="secondary"
-            (click)="closeTransferModal()"
-          ></p-button>
-          <p-button
-            type="button"
-            [label]="'DEPARTMENT.TRANSFER_CONFIRM_BTN' | translate"
-            [disabled]="!selectedTargetDepartmentId()"
-            (click)="confirmTransferDepartment(selectedTargetDepartmentId())"
-            styleClass="ms-2"
-          ></p-button>
-        </ng-template>
-      </p-dialog>
-
-      <!-- PrimeNG Dialog: Thêm nhân viên vào phòng ban -->
-      <p-dialog
-        [header]="'DEPARTMENT.ADD_EMPLOYEE_DIALOG_TITLE' | translate"
-        [visible]="isAddEmployeeModalOpen()"
-        (onHide)="closeAddEmployeeModal()"
-        [modal]="true"
-        [style]="{ width: '520px' }"
-        [resizable]="false"
-        [draggable]="false"
-        appendTo="body"
-      >
-        <!-- BƯỚC 1: CHỌN PHƯƠNG THỨC -->
-        @if (activeSubTab() === 'choose') {
-          <div class="py-2">
-            <p class="text-muted small mb-3">
-              {{ 'DEPARTMENT.ADD_METHOD_TITLE' | translate }}
-              <strong>{{ department()?.name }}</strong
-              >:
-            </p>
-
-            <div class="row g-3">
-              <div class="col-md-6">
-                <a
-                  [routerLink]="['/employees/new']"
-                  [queryParams]="{ departmentId: department()?._id }"
-                  (click)="closeAddEmployeeModal()"
-                  class="card h-100 text-center text-decoration-none p-3 border hover-card-action"
-                >
-                  <div class="fs-2 text-primary mb-2">
-                    <i class="pi pi-user-plus"></i>
-                  </div>
-                  <h6 class="fw-semibold text-main mb-1">
-                    {{ 'DEPARTMENT.ADD_METHOD_NEW_TITLE' | translate }}
-                  </h6>
-                  <p class="text-muted small mb-0">
-                    {{ 'DEPARTMENT.ADD_METHOD_NEW_DESC' | translate }}
-                    {{ languageService.getDepartmentName(department()?.name) }}
-                  </p>
-                </a>
+      <!-- Hàng thống kê chính: 4 cards -->
+      <div class="row g-3 mb-4">
+        <!-- Tổng số nhân viên -->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+          <p-card styleClass="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon bg-primary-soft">
+                <i class="pi pi-users"></i>
               </div>
+              <div>
+                <span class="card-title text-muted d-block mb-1">{{ 'DEPARTMENT.STATS_TOTAL' | translate }}</span>
+                <span class="fs-4 fw-bold text-main">{{ totalActiveEmployees() }}</span>
+              </div>
+            </div>
+          </p-card>
+        </div>
 
-              <div class="col-md-6">
-                <div
-                  (click)="activeSubTab.set('transfer')"
-                  class="card h-100 text-center p-3 border hover-card-action"
-                >
-                  <div class="fs-2 text-success mb-2">
-                    <i class="pi pi-users"></i>
-                  </div>
-                  <h6 class="fw-semibold text-main mb-1">
-                    {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate }}
-                  </h6>
-                  <p class="text-muted small mb-0">
-                    {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_DESC' | translate }}
-                    {{ languageService.getDepartmentName(department()?.name) }}
-                  </p>
+        <!-- Nam -->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+          <p-card styleClass="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon bg-info-soft">
+                <i class="pi pi-user text-info"></i>
+              </div>
+              <div class="flex-grow-1">
+                <span class="card-title text-muted d-block mb-1">{{ 'DEPARTMENT.STATS_MALE' | translate }}</span>
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                  <span class="fs-4 fw-bold text-main">{{ maleEmployeesCount() }}</span>
+                  <span class="small text-muted">({{ malePercentage() }}%)</span>
                 </div>
+                <p-progressBar [value]="malePercentage()" [showValue]="false"
+                  styleClass="gender-progress-bar info-progress"></p-progressBar>
               </div>
             </div>
+          </p-card>
+        </div>
 
-            <div class="d-flex justify-content-end mt-4">
-              <p-button
-                type="button"
-                [label]="'COMMON.CLOSE' | translate"
-                severity="secondary"
-                (click)="closeAddEmployeeModal()"
-              ></p-button>
+        <!-- Nữ -->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+          <p-card styleClass="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon bg-warning-soft">
+                <i class="pi pi-user text-warning"></i>
+              </div>
+              <div class="flex-grow-1">
+                <span class="card-title text-muted d-block mb-1">{{ 'DEPARTMENT.STATS_FEMALE' | translate }}</span>
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                  <span class="fs-4 fw-bold text-main">{{ femaleEmployeesCount() }}</span>
+                  <span class="small text-muted">({{ femalePercentage() }}%)</span>
+                </div>
+                <p-progressBar [value]="femalePercentage()" [showValue]="false"
+                  styleClass="gender-progress-bar warning-progress"></p-progressBar>
+              </div>
             </div>
-          </div>
+          </p-card>
+        </div>
+
+        <!-- Độ tuổi trung bình -->
+        <div class="col-lg-3 col-md-6 col-sm-6">
+          <p-card styleClass="stat-card">
+            <div class="d-flex align-items-center gap-3">
+              <div class="stat-icon bg-success-soft">
+                <i class="pi pi-calendar text-success"></i>
+              </div>
+              <div>
+                <span class="card-title text-muted d-block mb-1">{{ 'DEPARTMENT.STATS_AVG_AGE' | translate }}</span>
+                <span class="fs-4 fw-bold text-main">{{ averageAge() }} <span class="fs-6 fw-normal text-muted">{{
+                    'DEPARTMENT.STATS_YEARS' | translate }}</span></span>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+
+      <!-- Hàng thông tin nhân sự và Phân bố theo chức vụ -->
+      <div class="row g-3">
+        <!-- Cột bên trái: Nhân viên mới nhất & Nhân viên lâu năm nhất -->
+        <div class="col-lg-6">
+          <p-card styleClass="detail-card h-100">
+            <div class="d-flex flex-column gap-3">
+              <!-- Nhân viên mới nhất -->
+              <div class="newest-longest-item">
+                <h6 class="text-muted fw-semibold mb-2">
+                  <i class="pi pi-user-plus me-1 text-primary"></i>
+                  {{ 'DEPARTMENT.STATS_NEWEST' | translate }}
+                </h6>
+                @if (newestEmployee(); as emp) {
+                <div class="d-flex align-items-center gap-3 p-2 rounded border bg-light-soft">
+                  @if (emp.avatarUrl) {
+                  <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
+                  } @else {
+                  <div class="avatar-initials">
+                    {{ getInitials(emp.firstName, emp.lastName) }}
+                  </div>
+                  }
+                  <div class="flex-grow-1 min-w-0">
+                    <a [routerLink]="['/employees', emp._id]" [queryParams]="{ departmentId: department()?._id }"
+                      class="fw-semibold text-main text-decoration-none text-truncate d-block">
+                      {{ emp.firstName }} {{ emp.lastName }}
+                    </a>
+                    <span class="text-muted small text-truncate d-block">
+                      {{ (languageService.getPositionTranslation(emp.position) | translate) || ('DEPARTMENT.NO_POSITION'
+                      | translate) }}
+                    </span>
+                  </div>
+                  <div class="text-end shrink-0 ps-2">
+                    <span class="text-muted small d-block">{{ 'DEPARTMENT.STATS_JOINED' | translate }}</span>
+                    <span class="fw-medium text-main small">{{ emp.hireDate | date: 'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+                } @else {
+                <div class="text-muted small text-center py-3 border rounded bg-light-soft">
+                  {{ 'DEPARTMENT.STATS_EMPTY' | translate }}
+                </div>
+                }
+              </div>
+
+              <!-- Phân tách -->
+              <p-divider></p-divider>
+
+              <!-- Nhân viên lâu năm nhất -->
+              <div class="newest-longest-item">
+                <h6 class="text-muted fw-semibold mb-2">
+                  <i class="pi pi-heart me-1 text-danger"></i>
+                  {{ 'DEPARTMENT.STATS_LONGEST' | translate }}
+                </h6>
+                @if (longestServingEmployee(); as emp) {
+                <div class="d-flex align-items-center gap-3 p-2 rounded border bg-light-soft">
+                  @if (emp.avatarUrl) {
+                  <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
+                  } @else {
+                  <div class="avatar-initials">
+                    {{ getInitials(emp.firstName, emp.lastName) }}
+                  </div>
+                  }
+                  <div class="flex-grow-1 min-w-0">
+                    <a [routerLink]="['/employees', emp._id]" [queryParams]="{ departmentId: department()?._id }"
+                      class="fw-semibold text-main text-decoration-none text-truncate d-block">
+                      {{ emp.firstName }} {{ emp.lastName }}
+                    </a>
+                    <span class="text-muted small text-truncate d-block">
+                      {{ (languageService.getPositionTranslation(emp.position) | translate) || ('DEPARTMENT.NO_POSITION'
+                      | translate) }}
+                    </span>
+                  </div>
+                  <div class="text-end shrink-0 ps-2">
+                    <span class="text-muted small d-block">{{ 'DEPARTMENT.STATS_JOINED' | translate }}</span>
+                    <span class="fw-medium text-main small">{{ emp.hireDate | date: 'dd/MM/yyyy' }}</span>
+                  </div>
+                </div>
+                } @else {
+                <div class="text-muted small text-center py-3 border rounded bg-light-soft">
+                  {{ 'DEPARTMENT.STATS_EMPTY' | translate }}
+                </div>
+                }
+              </div>
+            </div>
+          </p-card>
+        </div>
+
+        <!-- Cột bên phải: Phân bố theo chức vụ -->
+        <div class="col-lg-6">
+          <p-card styleClass="detail-card h-100">
+            <div class="d-flex flex-column h-100">
+              <h6 class="fw-semibold text-main mb-3">
+                <i class="pi pi-chart-bar me-1 text-accent"></i>
+                {{ 'DEPARTMENT.STATS_POSITION_DIST' | translate }}
+              </h6>
+              <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+                @if (hasPositionData()) {
+                <div class="chart-container w-100" style="height: 180px;">
+                  <p-chart [type]="positionChartType()" [data]="positionChartData()" [options]="positionChartOptions()"
+                    height="180px" styleClass="w-100"></p-chart>
+                </div>
+                } @else {
+                <div class="text-muted small text-center py-4 w-100">
+                  {{ 'DEPARTMENT.STATS_EMPTY' | translate }}
+                </div>
+                }
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">
+            {{ 'DEPARTMENT.DETAIL_EMPLOYEES_TITLE' | translate: { count: employees().length } }}
+          </h5>
+          <p-button (click)="openAddEmployeeModal()" [label]="'DEPARTMENT.ADD_EMPLOYEE_BTN' | translate"
+            icon="pi pi-plus" [outlined]="true" size="small"></p-button>
+        </div>
+
+        @if (isLoadingEmployees()) {
+        <app-spinner></app-spinner>
         }
 
-        <!-- BƯỚC 2: CHỌN NHÂN VIÊN HIỆN CÓ ĐỂ CHUYỂN PHÒNG -->
-        @if (activeSubTab() === 'transfer') {
-          <div class="py-2">
-            <div class="d-flex align-items-center gap-2 mb-3">
-              <p-button
-                type="button"
-                icon="pi pi-arrow-left"
-                [text]="true"
-                severity="secondary"
-                (onClick)="goBackToChooseSubTab()"
-                styleClass="back-btn-custom"
-                [title]="'COMMON.BACK' | translate"
-              ></p-button>
-              <span class="fw-semibold text-main">{{
-                'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate
-              }}</span>
-            </div>
+        @if (!isLoadingEmployees() && employees().length > 0) {
+        <p-table [columns]="cols" [value]="employees()" styleClass="p-datatable-sm p-datatable-hoverable">
+          <ng-template #header let-columns>
+            <tr>
+              <th style="width: 50px"></th>
+              @for (col of columns; track col.field) {
+              <th>{{ col.header | translate }}</th>
+              }
+              @if (authService.isAdmin()) {
+              <th style="width: 120px" class="text-center">
+                {{ 'DEPARTMENT.COL_ACTIONS_EMP' | translate }}
+              </th>
+              }
+            </tr>
+          </ng-template>
+          <ng-template #body let-emp let-columns="columns">
+            <tr>
+              <td>
+                @if (emp.avatarUrl) {
+                <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
+                } @else {
+                <div class="avatar-initials">
+                  {{ getInitials(emp.firstName, emp.lastName) }}
+                </div>
+                }
+              </td>
+              @for (col of columns; track col.field) {
+              <td>
+                @switch (col.field) {
+                @case ('fullName') {
+                <a [routerLink]="['/employees', emp._id]" [queryParams]="{ departmentId: department()?._id }"
+                  class="text-decoration-none">
+                  {{ emp.firstName }} {{ emp.lastName }}
+                </a>
+                }
+                @case ('status') {
+                <span class="badge" [class.badge-success]="emp.status === 'ACTIVE'"
+                  [class.badge-secondary]="emp.status === 'INACTIVE'">
+                  {{
+                  emp.status === 'ACTIVE'
+                  ? ('COMMON.ACTIVE' | translate)
+                  : ('COMMON.INACTIVE' | translate)
+                  }}
+                </span>
+                }
+                @default {
+                {{
+                col.field === 'position'
+                ? (languageService.getPositionTranslation(emp[col.field]) | translate)
+                : emp[col.field]
+                }}
+                }
+                }
+              </td>
+              }
+              @if (authService.isAdmin()) {
+              <td class="action-column text-center">
+                <p-button icon="pi pi-ellipsis-v" [text]="true" severity="secondary" size="small"
+                  styleClass="action-btn-circle" (click)="menuItems = getEmployeeMenuItems(emp); menu.toggle($event)"
+                  [title]="'COMMON.ACTIONS' | translate"></p-button>
+              </td>
+              }
+            </tr>
+          </ng-template>
+        </p-table>
+        }
 
-            <p class="text-muted small mb-3">
-              {{ 'DEPARTMENT.TRANSFER_IN_PROMPT' | translate }}
-              <strong>{{ languageService.getDepartmentName(department()?.name) }}</strong
-              >:
-            </p>
+        @if (!isLoadingEmployees() && employees().length === 0) {
+        <p class="text-muted mb-0">
+          {{ 'DEPARTMENT.EMPTY_EMPLOYEES' | translate }}
+        </p>
+        }
+      </div>
+    </div>
 
-            <div class="mb-3">
-              <label class="form-label small text-muted">{{
-                'DEPARTMENT.SEARCH_EMP_LABEL' | translate
-              }}</label>
-              <div class="input-group">
-                <input
-                  pInputText
-                  type="text"
-                  class="form-control"
-                  [placeholder]="'DEPARTMENT.SEARCH_EMP_PLACEHOLDER' | translate"
-                  [(ngModel)]="searchOtherEmployeeText"
-                  (keydown.enter)="triggerSearchOtherEmployees()"
-                />
-                <p-button
-                  icon="pi pi-search"
-                  [outlined]="true"
-                  severity="secondary"
-                  (click)="triggerSearchOtherEmployees()"
-                  [title]="'COMMON.SEARCH' | translate"
-                ></p-button>
+    <!-- PrimeNG Dialog: Chuyển phòng ban -->
+    <p-dialog [header]="'DEPARTMENT.TRANSFER_DIALOG_TITLE' | translate" [visible]="isTransferModalOpen()"
+      (onHide)="closeTransferModal()" [modal]="true" [style]="{ width: '420px' }" [resizable]="false"
+      [draggable]="false" appendTo="body">
+      @if (selectedEmployeeForTransfer(); as emp) {
+      <div class="pt-2">
+        <p class="mb-2">
+          {{ 'DEPARTMENT.TRANSFER_SELECT_NEW_DEPT' | translate }}
+          <strong>{{ emp.firstName }} {{ emp.lastName }}</strong>:
+        </p>
+        <div class="mb-3">
+          <label class="form-label small text-muted">{{ 'DEPARTMENT.TRANSFER_CURRENT_DEPT' | translate }}
+            {{ languageService.getDepartmentName(department()?.name) }}</label>
+          <app-custom-select [options]="transferOptions()" [placeholder]="'DEPARTMENT.TRANSFER_PLACEHOLDER' | translate"
+            [ngModel]="selectedTargetDepartmentId()" (ngModelChange)="selectedTargetDepartmentId.set($event)">
+          </app-custom-select>
+        </div>
+      </div>
+      }
+      <ng-template #footer>
+        <p-button type="button" [label]="'COMMON.CANCEL' | translate" severity="secondary"
+          (click)="closeTransferModal()"></p-button>
+        <p-button type="button" [label]="'DEPARTMENT.TRANSFER_CONFIRM_BTN' | translate"
+          [disabled]="!selectedTargetDepartmentId()" (click)="confirmTransferDepartment(selectedTargetDepartmentId())"
+          styleClass="ms-2"></p-button>
+      </ng-template>
+    </p-dialog>
+
+    <!-- PrimeNG Dialog: Thêm nhân viên vào phòng ban -->
+    <p-dialog [header]="'DEPARTMENT.ADD_EMPLOYEE_DIALOG_TITLE' | translate" [visible]="isAddEmployeeModalOpen()"
+      (onHide)="closeAddEmployeeModal()" [modal]="true" [style]="{ width: '520px' }" [resizable]="false"
+      [draggable]="false" appendTo="body">
+      <!-- BƯỚC 1: CHỌN PHƯƠNG THỨC -->
+      @if (activeSubTab() === 'choose') {
+      <div class="py-2">
+        <p class="text-muted small mb-3">
+          {{ 'DEPARTMENT.ADD_METHOD_TITLE' | translate }}
+          <strong>{{ department()?.name }}</strong>:
+        </p>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <a [routerLink]="['/employees/new']" [queryParams]="{ departmentId: department()?._id }"
+              (click)="closeAddEmployeeModal()"
+              class="card h-100 text-center text-decoration-none p-3 border hover-card-action">
+              <div class="fs-2 text-primary mb-2">
+                <i class="pi pi-user-plus"></i>
               </div>
-            </div>
+              <h6 class="fw-semibold text-main mb-1">
+                {{ 'DEPARTMENT.ADD_METHOD_NEW_TITLE' | translate }}
+              </h6>
+              <p class="text-muted small mb-0">
+                {{ 'DEPARTMENT.ADD_METHOD_NEW_DESC' | translate }}
+                {{ languageService.getDepartmentName(department()?.name) }}
+              </p>
+            </a>
+          </div>
 
-            <div class="mb-4">
-              <label class="form-label small text-muted">{{
-                'DEPARTMENT.SEARCH_RESULTS' | translate
-              }}</label>
-              @if (searchedOtherEmployees().length > 0) {
-                <div
-                  class="list-group scrollable-list-container custom-scrollbar"
-                >
-                  @for (emp of searchedOtherEmployees(); track emp._id) {
-                    <p-button
-                      type="button"
-                      [styleClass]="
+          <div class="col-md-6">
+            <div (click)="activeSubTab.set('transfer')" class="card h-100 text-center p-3 border hover-card-action">
+              <div class="fs-2 text-success mb-2">
+                <i class="pi pi-users"></i>
+              </div>
+              <h6 class="fw-semibold text-main mb-1">
+                {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate }}
+              </h6>
+              <p class="text-muted small mb-0">
+                {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_DESC' | translate }}
+                {{ languageService.getDepartmentName(department()?.name) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+          <p-button type="button" [label]="'COMMON.CLOSE' | translate" severity="secondary"
+            (click)="closeAddEmployeeModal()"></p-button>
+        </div>
+      </div>
+      }
+
+      <!-- BƯỚC 2: CHỌN NHÂN VIÊN HIỆN CÓ ĐỂ CHUYỂN PHÒNG -->
+      @if (activeSubTab() === 'transfer') {
+      <div class="py-2">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <p-button type="button" icon="pi pi-arrow-left" [text]="true" severity="secondary"
+            (onClick)="goBackToChooseSubTab()" styleClass="back-btn-custom"
+            [title]="'COMMON.BACK' | translate"></p-button>
+          <span class="fw-semibold text-main">{{
+            'DEPARTMENT.ADD_METHOD_TRANSFER_TITLE' | translate
+            }}</span>
+        </div>
+
+        <p class="text-muted small mb-3">
+          {{ 'DEPARTMENT.TRANSFER_IN_PROMPT' | translate }}
+          <strong>{{ languageService.getDepartmentName(department()?.name) }}</strong>:
+        </p>
+
+        <div class="mb-3">
+          <label class="form-label small text-muted">{{
+            'DEPARTMENT.SEARCH_EMP_LABEL' | translate
+            }}</label>
+          <div class="input-group">
+            <input pInputText type="text" class="form-control"
+              [placeholder]="'DEPARTMENT.SEARCH_EMP_PLACEHOLDER' | translate" [(ngModel)]="searchOtherEmployeeText"
+              (keydown.enter)="triggerSearchOtherEmployees()" />
+            <p-button icon="pi pi-search" [outlined]="true" severity="secondary" (click)="triggerSearchOtherEmployees()"
+              [title]="'COMMON.SEARCH' | translate"></p-button>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label small text-muted">{{
+            'DEPARTMENT.SEARCH_RESULTS' | translate
+            }}</label>
+          @if (searchedOtherEmployees().length > 0) {
+          <div class="list-group scrollable-list-container custom-scrollbar">
+            @for (emp of searchedOtherEmployees(); track emp._id) {
+            <p-button type="button" [styleClass]="
                         'list-group-item-btn' +
                         (selectedEmployeeToTransferInId() === emp._id ? ' active' : '')
-                      "
-                      (onClick)="selectedEmployeeToTransferInId.set(emp._id!)"
-                    >
-                      <div class="d-flex justify-content-between align-items-center w-100">
-                        <div class="text-start">
-                          <strong class="d-block">{{ emp.firstName }} {{ emp.lastName }}</strong>
-                          <span
-                            class="small text-muted"
-                            [class.text-light-active]="selectedEmployeeToTransferInId() === emp._id"
-                          >
-                            {{
-                              'DEPARTMENT.EMP_INFO'
-                                | translate
-                                  : {
-                                      dept: languageService.getDepartmentName(emp.department),
-                                      position:
-                                        (languageService.getPositionTranslation(emp.position)
-                                          | translate) || ('DEPARTMENT.NO_POSITION' | translate),
-                                    }
-                            }}
-                          </span>
-                        </div>
-                        @if (selectedEmployeeToTransferInId() === emp._id) {
-                          <span class="badge bg-white text-primary">{{
-                            'DEPARTMENT.SELECTED_BADGE' | translate
-                          }}</span>
-                        }
-                      </div>
-                    </p-button>
-                  }
+                      " (onClick)="selectedEmployeeToTransferInId.set(emp._id!)">
+              <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="text-start">
+                  <strong class="d-block">{{ emp.firstName }} {{ emp.lastName }}</strong>
+                  <span class="small text-muted"
+                    [class.text-light-active]="selectedEmployeeToTransferInId() === emp._id">
+                    {{
+                    'DEPARTMENT.EMP_INFO'
+                    | translate
+                    : {
+                    dept: languageService.getDepartmentName(emp.department),
+                    position:
+                    (languageService.getPositionTranslation(emp.position)
+                    | translate) || ('DEPARTMENT.NO_POSITION' | translate),
+                    }
+                    }}
+                  </span>
                 </div>
-              }
-              @if (searchedOtherEmployees().length === 0) {
-                <div class="text-muted small text-center py-3 border rounded">
-                  {{ 'DEPARTMENT.SEARCH_RESULTS_EMPTY' | translate }}
-                </div>
-              }
-            </div>
-
-            <div class="d-flex justify-content-end gap-2">
-              <p-button
-                type="button"
-                [label]="'COMMON.CANCEL' | translate"
-                severity="secondary"
-                (click)="goBackToChooseSubTab()"
-              ></p-button>
-              <p-button
-                type="button"
-                [label]="'DEPARTMENT.CONFIRM_TRANSFER_IN_BTN' | translate"
-                [disabled]="!selectedEmployeeToTransferInId()"
-                (click)="confirmTransferIn()"
-              ></p-button>
-            </div>
+                @if (selectedEmployeeToTransferInId() === emp._id) {
+                <span class="badge bg-white text-primary">{{
+                  'DEPARTMENT.SELECTED_BADGE' | translate
+                  }}</span>
+                }
+              </div>
+            </p-button>
+            }
           </div>
-        }
-      </p-dialog>
+          }
+          @if (searchedOtherEmployees().length === 0) {
+          <div class="text-muted small text-center py-3 border rounded">
+            {{ 'DEPARTMENT.SEARCH_RESULTS_EMPTY' | translate }}
+          </div>
+          }
+        </div>
 
-      <!-- PrimeNG Menu Overlay dùng chung cho hành động trên bảng nhân viên -->
-      <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
-    </div>
+        <div class="d-flex justify-content-end gap-2">
+          <p-button type="button" [label]="'COMMON.CANCEL' | translate" severity="secondary"
+            (click)="goBackToChooseSubTab()"></p-button>
+          <p-button type="button" [label]="'DEPARTMENT.CONFIRM_TRANSFER_IN_BTN' | translate"
+            [disabled]="!selectedEmployeeToTransferInId()" (click)="confirmTransferIn()"></p-button>
+        </div>
+      </div>
+      }
+    </p-dialog>
+
+    <!-- PrimeNG Menu Overlay dùng chung cho hành động trên bảng nhân viên -->
+    <p-menu #menu [model]="menuItems" [popup]="true" appendTo="body"></p-menu>
+  </div>
   }
 </div>

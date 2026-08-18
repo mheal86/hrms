@@ -33,173 +33,175 @@ $icon-font-sm: 1rem;
   width: 100%;
   z-index: 999;
 
-// ─── Navbar ──────────────────────────────────────────────────
-.app-navbar {
-  background: var(--bg-sidebar);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
-  height: $navbar-height;
-  transition: background-color 0.3s ease;
-}
-
-// ─── Brand ───────────────────────────────────────────────────
-.navbar-brand {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-weight: 800;
-  color: var(--nav-text-active);
-  letter-spacing: -0.02em;
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-
-  span {
-    color: var(--nav-brand-accent);
-  }
-}
-
-// ─── User Info ───────────────────────────────────────────────
-.navbar-user-text {
-  color: var(--nav-text-hover);
-  font-weight: 500;
-  font-size: 0.9rem;
-}
-
-.navbar-user-role {
-  color: var(--nav-text-muted);
-  font-size: 0.78rem;
-}
-
-// ─── Theme Icons ─────────────────────────────────────────────
-.sun-icon,
-.moon-icon {
-  font-size: $icon-font-lg;
-  animation: rotateIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.logout-icon {
-  font-size: $icon-font-sm;
-}
-
-@keyframes rotateIn {
-  from {
-    transform: rotate(-60deg) scale(0.7);
-    opacity: 0;
-  }
-  to {
-    transform: rotate(0) scale(1);
-    opacity: 1;
-  }
-}
-
-// ─── Language Switcher ───────────────────────────────────────
-.lang-switcher-wrapper {
-  position: relative;
-}
-
-.lang-option {
-  font-size: 0.82rem;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-// ─── PrimeNG Overrides ───────────────────────────────────────
-  ::ng-deep {
+  // ─── Navbar ──────────────────────────────────────────────────
   .app-navbar {
-    // Hamburger & Sidebar Trigger share same shape
-    .hamburger-btn.p-button,
-    .hamburger-btn .p-button,
-    .sidebar-trigger-btn.p-button,
-    .sidebar-trigger-btn .p-button {
-      @include nav-icon-btn;
-      color: var(--nav-text-muted);
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    height: $navbar-height;
+    transition: background-color 0.3s ease;
+  }
 
-      &:hover {
-        color: var(--nav-text-active);
-        background-color: var(--nav-item-hover-bg);
-      }
+  // ─── Brand ───────────────────────────────────────────────────
+  .navbar-brand {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 800;
+    color: var(--nav-text-active);
+    letter-spacing: -0.02em;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
+
+    span {
+      color: var(--nav-brand-accent);
+    }
+  }
+
+  // ─── User Info ───────────────────────────────────────────────
+  .navbar-user-text {
+    color: var(--nav-text-hover);
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+
+  .navbar-user-role {
+    color: var(--nav-text-muted);
+    font-size: 0.78rem;
+  }
+
+  // ─── Theme Icons ─────────────────────────────────────────────
+  .sun-icon,
+  .moon-icon {
+    font-size: $icon-font-lg;
+    animation: rotateIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .logout-icon {
+    font-size: $icon-font-sm;
+  }
+
+  @keyframes rotateIn {
+    from {
+      transform: rotate(-60deg) scale(0.7);
+      opacity: 0;
     }
 
-    // Sidebar trigger has transparent hover bg
-    .sidebar-trigger-btn.p-button:hover,
-    .sidebar-trigger-btn:hover .p-button {
-      background-color: transparent;
+    to {
+      transform: rotate(0) scale(1);
+      opacity: 1;
     }
+  }
 
-    // Logout button
-    .logout-btn.p-button,
-    .logout-btn .p-button {
-      @include flex-center;
-      display: inline-flex;
-      width: $nav-btn-size;
-      height: $nav-btn-size;
-      padding: 8px;
-      border-radius: $nav-btn-radius;
-      border: 1px solid var(--nav-danger);
-      color: var(--nav-text-active);
-      background-color: var(--nav-danger);
-      transition: all 0.25s ease-in-out;
+  // ─── Language Switcher ───────────────────────────────────────
+  .lang-switcher-wrapper {
+    position: relative;
+  }
 
-      &:hover {
-        background: var(--nav-danger-hover);
-        border-color: var(--nav-danger-hover);
-        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
-        transform: translateY(-1.5px);
-      }
-    }
+  .lang-option {
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
 
-    // Theme toggle
-    .theme-toggle-btn.p-button,
-    .theme-toggle-btn.p-button.p-button-secondary {
-      @include flex-center;
-      display: inline-flex;
-      width: $nav-btn-size;
-      height: $nav-btn-size;
-      padding: 0;
-      border-radius: 50%;
-      background: transparent;
-      border: none;
-      color: var(--nav-text-muted);
-      transition: all 0.3s $easing-spring;
+  // ─── PrimeNG Overrides ───────────────────────────────────────
+  ::ng-deep {
+    .app-navbar {
 
-      &:hover {
-        background-color: var(--nav-item-hover-bg);
-        color: var(--nav-text-active);
-        transform: rotate(20deg);
-      }
-
-      &:active {
-        transform: scale(0.9) rotate(20deg);
-      }
-    }
-
-    // Language dropdown
-    .lang-select.p-select.p-component {
-      background: var(--nav-bg-glass);
-      border: 1px solid var(--nav-border-light);
-      border-radius: $nav-btn-radius;
-      height: 34px;
-      min-width: 110px;
-      color: var(--nav-text-slate);
-      transition: all 0.2s ease;
-
-      &:hover {
-        background: var(--nav-bg-glass-hover);
-        border-color: rgba(255, 255, 255, 0.25);
-      }
-
-      .p-select-label {
-        color: var(--nav-text-slate);
-        font-size: 0.82rem;
-        font-weight: 500;
-        padding: 0 0.5rem;
-        line-height: 34px;
-      }
-
-      .p-select-dropdown {
+      // Hamburger & Sidebar Trigger share same shape
+      .hamburger-btn.p-button,
+      .hamburger-btn .p-button,
+      .sidebar-trigger-btn.p-button,
+      .sidebar-trigger-btn .p-button {
+        @include nav-icon-btn;
         color: var(--nav-text-muted);
-        width: 28px;
+
+        &:hover {
+          color: var(--nav-text-active);
+          background-color: var(--nav-item-hover-bg);
+        }
+      }
+
+      // Sidebar trigger has transparent hover bg
+      .sidebar-trigger-btn.p-button:hover,
+      .sidebar-trigger-btn:hover .p-button {
+        background-color: transparent;
+      }
+
+      // Logout button
+      .logout-btn.p-button,
+      .logout-btn .p-button {
+        @include flex-center;
+        display: inline-flex;
+        width: $nav-btn-size;
+        height: $nav-btn-size;
+        padding: 8px;
+        border-radius: $nav-btn-radius;
+        border: 1px solid var(--nav-danger);
+        color: var(--nav-text-active);
+        background-color: var(--nav-danger);
+        transition: all 0.25s ease-in-out;
+
+        &:hover {
+          background: var(--nav-danger-hover);
+          border-color: var(--nav-danger-hover);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+          transform: translateY(-1.5px);
+        }
+      }
+
+      // Theme toggle
+      .theme-toggle-btn.p-button,
+      .theme-toggle-btn.p-button.p-button-secondary {
+        @include flex-center;
+        display: inline-flex;
+        width: $nav-btn-size;
+        height: $nav-btn-size;
+        padding: 0;
+        border-radius: 50%;
+        background: transparent;
+        border: none;
+        color: var(--nav-text-muted);
+        transition: all 0.3s $easing-spring;
+
+        &:hover {
+          background-color: var(--nav-item-hover-bg);
+          color: var(--nav-text-active);
+          transform: rotate(20deg);
+        }
+
+        &:active {
+          transform: scale(0.9) rotate(20deg);
+        }
+      }
+
+      // Language dropdown
+      .lang-select.p-select.p-component {
+        background: var(--nav-bg-glass);
+        border: 1px solid var(--nav-border-light);
+        border-radius: $nav-btn-radius;
+        height: 34px;
+        min-width: 110px;
+        color: var(--nav-text-slate);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: var(--nav-bg-glass-hover);
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .p-select-label {
+          color: var(--nav-text-slate);
+          font-size: 0.82rem;
+          font-weight: 500;
+          padding: 0 0.5rem;
+          line-height: 34px;
+        }
+
+        .p-select-dropdown {
+          color: var(--nav-text-muted);
+          width: 28px;
+        }
       }
     }
   }
-}
 }

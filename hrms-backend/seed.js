@@ -25,5 +25,4 @@ const seed = async () => {
   console.log('Seed data created: username=admin, password=admin123');
   mongoose.connection.close();
 };
-
 seed();

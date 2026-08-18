@@ -31,7 +31,9 @@ $nav-avatar-gradient: linear-gradient(135deg, var(--nav-active-bg-start) 0%, var
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 
-  &::-webkit-scrollbar { width: 4px; }
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
 
   &::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.1);

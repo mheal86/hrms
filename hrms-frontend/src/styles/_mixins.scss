@@ -53,3 +53,19 @@
     }
   }
 }
+
+// ─── Avatar Mixins ───
+@mixin avatar-base($size) {
+  width: $size;
+  height: $size;
+  border-radius: $radius-round;
+}
+
+@mixin avatar-initials($size, $font-size) {
+  @include avatar-base($size);
+  @include flex-center;
+  background: $avatar-gradient;
+  color: var(--text-on-primary);
+  font-size: $font-size;
+  font-weight: 600;
+}

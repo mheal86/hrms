@@ -9,7 +9,41 @@ describe('SidebarState', () => {
     service = TestBed.inject(SidebarState);
   });
 
-  it('should be created', () => {
-    expect(service).toBeTruthy();
+  afterEach(() => {
+    TestBed.resetTestingModule();
+  });
+
+  describe('toggle', () => {
+    it('should toggle isOpen state to true then false', () => {
+      expect(service.isOpen()).toBe(false);
+      
+      service.toggle();
+      expect(service.isOpen()).toBe(true);
+      
+      service.toggle();
+      expect(service.isOpen()).toBe(false);
+    });
+  });
+
+  describe('close', () => {
+    it('should set isOpen to false', () => {
+      service.isOpen.set(true);
+      
+      service.close();
+      
+      expect(service.isOpen()).toBe(false);
+    });
+  });
+
+  describe('toggleDesktop', () => {
+    it('should toggle isDesktopCollapsed state to true then false', () => {
+      expect(service.isDesktopCollapsed()).toBe(false);
+      
+      service.toggleDesktop();
+      expect(service.isDesktopCollapsed()).toBe(true);
+      
+      service.toggleDesktop();
+      expect(service.isDesktopCollapsed()).toBe(false);
+    });
   });
 });

@@ -1,25 +1,12 @@
 <nav class="navbar app-navbar px-4 py-0 d-flex justify-content-between">
   <div class="d-flex align-items-center gap-3">
-    <p-button
-      class="d-md-none"
-      icon="pi pi-bars"
-      [text]="true"
-      severity="secondary"
-      (onClick)="sidebarState.toggle()"
-      styleClass="hamburger-btn"
-      [attr.aria-label]="'NAVBAR.TOGGLE_SIDEBAR' | translate"
-    ></p-button>
+    <p-button class="d-md-none" icon="pi pi-bars" [text]="true" severity="secondary" (onClick)="sidebarState.toggle()"
+      styleClass="hamburger-btn" [attr.aria-label]="'NAVBAR.TOGGLE_SIDEBAR' | translate"></p-button>
 
     <!-- Nút toggle sidebar cho Desktop bằng PrimeNG -->
-    <p-button
-      class="d-none d-md-inline-block sidebar-trigger-btn"
-      [class.collapsed]="sidebarState.isDesktopCollapsed()"
-      icon="pi pi-chevron-left"
-      [text]="true"
-      severity="secondary"
-      (onClick)="sidebarState.toggleDesktop()"
-      [attr.aria-label]="'NAVBAR.TOGGLE_SIDEBAR' | translate"
-    ></p-button>
+    <p-button class="d-none d-md-inline-block sidebar-trigger-btn" [class.collapsed]="sidebarState.isDesktopCollapsed()"
+      icon="pi pi-chevron-left" [text]="true" severity="secondary" (onClick)="sidebarState.toggleDesktop()"
+      [attr.aria-label]="'NAVBAR.TOGGLE_SIDEBAR' | translate"></p-button>
 
     <a routerLink="/dashboard" class="navbar-brand mb-0 h1 text-decoration-none">
       {{ 'NAVBAR.BRAND' | translate }}
@@ -27,62 +14,44 @@
   </div>
 
   @if (authService.getUser(); as user) {
-    <div class="d-flex align-items-center gap-2">
-      <!-- Language Switcher Dropdown -->
-      <div class="lang-switcher-wrapper d-none d-sm-flex align-items-center">
-        <p-select
-          [options]="languageService.languages"
-          optionLabel="label"
-          optionValue="code"
-          [ngModel]="languageService.currentLang()"
-          (ngModelChange)="onLangChange($event)"
-          styleClass="lang-select"
-          panelStyleClass="lang-select-overlay"
-          [panelStyle]="{ 'z-index': '99999', 'margin-top': '4px' }"
-          [placeholder]="'NAVBAR.LANGUAGE' | translate"
-          appendTo="body"
-        >
-          <ng-template #selectedItem let-lang>
-            <span class="lang-option">{{ lang.label }}</span>
-          </ng-template>
-          <ng-template #item let-lang>
-            <span class="lang-option">{{ lang.label }}</span>
-          </ng-template>
-        </p-select>
-      </div>
-
-      <!-- Theme Toggle -->
-      <p-button
-        styleClass="theme-toggle-btn"
-        [text]="true"
-        severity="secondary"
-        (onClick)="toggleTheme()"
-        [title]="(isDarkMode ? 'NAVBAR.LIGHT_MODE' : 'NAVBAR.DARK_MODE') | translate"
-      >
-        <!-- Icon Mặt trời (khi ở chế độ Tối) -->
-        @if (isDarkMode) {
-          <i class="pi pi-sun sun-icon"></i>
-        }
-        <!-- Icon Mặt trăng (khi ở chế độ Sáng) -->
-        @if (!isDarkMode) {
-          <i class="pi pi-moon moon-icon"></i>
-        }
-      </p-button>
-
-      <span class="navbar-user-text d-none d-sm-inline">
-        {{ user.username }}
-      </span>
-
-      <p-button
-        [outlined]="true"
-        severity="secondary"
-        size="small"
-        styleClass="logout-btn d-flex align-items-center justify-content-center"
-        (click)="onLogout()"
-        [title]="'NAVBAR.LOGOUT' | translate"
-      >
-        <i class="pi pi-sign-out logout-icon"></i>
-      </p-button>
+  <div class="d-flex align-items-center gap-2">
+    <!-- Language Switcher Dropdown -->
+    <div class="lang-switcher-wrapper d-none d-sm-flex align-items-center">
+      <p-select [options]="languageService.languages" optionLabel="label" optionValue="code"
+        [ngModel]="languageService.currentLang()" (ngModelChange)="onLangChange($event)" styleClass="lang-select"
+        panelStyleClass="lang-select-overlay" [panelStyle]="{ 'z-index': '99999', 'margin-top': '4px' }"
+        [placeholder]="'NAVBAR.LANGUAGE' | translate" appendTo="body">
+        <ng-template #selectedItem let-lang>
+          <span class="lang-option">{{ lang.label }}</span>
+        </ng-template>
+        <ng-template #item let-lang>
+          <span class="lang-option">{{ lang.label }}</span>
+        </ng-template>
+      </p-select>
     </div>
+
+    <!-- Theme Toggle -->
+    <p-button styleClass="theme-toggle-btn" [text]="true" severity="secondary" (onClick)="toggleTheme()"
+      [title]="(isDarkMode ? 'NAVBAR.LIGHT_MODE' : 'NAVBAR.DARK_MODE') | translate">
+      <!-- Icon Mặt trời (khi ở chế độ Tối) -->
+      @if (isDarkMode) {
+      <i class="pi pi-sun sun-icon"></i>
+      }
+      <!-- Icon Mặt trăng (khi ở chế độ Sáng) -->
+      @if (!isDarkMode) {
+      <i class="pi pi-moon moon-icon"></i>
+      }
+    </p-button>
+
+    <span class="navbar-user-text d-none d-sm-inline">
+      {{ user.username }}
+    </span>
+
+    <p-button [outlined]="true" severity="secondary" size="small"
+      styleClass="logout-btn d-flex align-items-center justify-content-center" (click)="onLogout()"
+      [title]="'NAVBAR.LOGOUT' | translate">
+      <i class="pi pi-sign-out logout-icon"></i>
+    </p-button>
+  </div>
   }
 </nav>

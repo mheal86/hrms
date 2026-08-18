@@ -1,45 +1,22 @@
-// ─── Variables ───────────────────────────────────────────────
-$avatar-size-lg: 120px;
-$border-radius-circle: 50%;
-$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-$shadow-indigo-sm: 0 8px 24px rgba(79, 70, 229, 0.35);
-$shadow-indigo-md: 0 12px 32px rgba(79, 70, 229, 0.45);
+@use '../../../../styles/mixins' as m;
+@use '../../../../styles/variables' as v;
 
-// ─── Mixins ──────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-// ─── Avatar ──────────────────────────────────────────────────
-.avatar-initials-lg {
-  @include flex-center;
-  width: $avatar-size-lg;
-  height: $avatar-size-lg;
-  border-radius: $border-radius-circle;
-  background: $avatar-gradient;
-  color: var(--text-on-primary);
-  font-size: 36px;
-  font-weight: 700;
-  margin: 0 auto;
-  box-shadow: $shadow-indigo-sm;
-  transition: box-shadow 0.3s ease;
+.avatar-initials-lg,
+.avatar-img {
+  @include m.avatar-base(120px);
+  box-shadow: v.$shadow-indigo-sm;
+  transition: v.$transition-slow;
 
   &:hover {
-    box-shadow: $shadow-indigo-md;
+    box-shadow: v.$shadow-indigo-md;
   }
+}
+
+.avatar-initials-lg {
+  @include m.avatar-initials(120px, 36px);
+  margin: 0 auto;
 }
 
 .avatar-img {
-  width: $avatar-size-lg;
-  height: $avatar-size-lg;
-  border-radius: $border-radius-circle;
   object-fit: cover;
-  box-shadow: $shadow-indigo-sm;
-  transition: box-shadow 0.3s ease;
-
-  &:hover {
-    box-shadow: $shadow-indigo-md;
-  }
 }

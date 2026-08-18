@@ -1,0 +1,41 @@
+@use '../variables' as v;
+@use '../mixins' as m;
+
+// ─── Modal Animations ───
+@keyframes backdropFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// ─── Modal Layouts ───
+.modal-backdrop-custom {
+  @include m.flex-center;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: v.$z-modal;
+  animation: backdropFadeIn 0.2s ease;
+
+  .dark-theme & {
+    background: rgba(0, 0, 0, 0.75);
+  }
+}
+
+.modal-box {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 28px;
+  border-radius: 16px;
+  min-width: 380px;
+  max-width: 95%;
+  box-shadow: var(--shadow-modal);
+  animation: modalSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}

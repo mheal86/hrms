@@ -1,33 +1,12 @@
+@use '../../../../styles/mixins' as m;
+@use '../../../../styles/variables' as v;
+
 // ─── Variables ───────────────────────────────────────────────
 $avatar-size-sm: 32px;
 $avatar-size-lg: 36px;
-$border-radius-circle: 50%;
-$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
 $transition-fast: 0.2s ease;
 $nav-btn-size: 36px;
 $nav-btn-radius: 8px;
-
-// ─── Mixins ──────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin avatar-circle($size) {
-  width: $size;
-  height: $size;
-  border-radius: $border-radius-circle;
-}
-
-@mixin avatar-initials($size, $font-size) {
-  @include avatar-circle($size);
-  @include flex-center;
-  background: $avatar-gradient;
-  color: var(--text-on-primary);
-  font-size: $font-size;
-  font-weight: 600;
-}
 
 @mixin nav-icon-btn($size: $nav-btn-size) {
   width: $size;
@@ -41,12 +20,12 @@ $nav-btn-radius: 8px;
 
 // ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  @include avatar-circle($avatar-size-sm);
+  @include m.avatar-base($avatar-size-sm);
   object-fit: cover;
 }
 
 .avatar-initials {
-  @include avatar-initials($avatar-size-lg, 13px);
+  @include m.avatar-initials($avatar-size-lg, 13px);
 }
 
 .sort-icon {
@@ -63,16 +42,90 @@ $nav-btn-radius: 8px;
   max-width: 320px;
 }
 
-.filter-select-dept  { width: 200px; display: inline-block; }
-.filter-select-status{ width: 180px; display: inline-block; }
+.filter-select-dept,
+.filter-select-status {
+  display: inline-block;
+}
+
+.filter-select-dept {
+  width: 200px;
+}
+
+.filter-select-status {
+  width: 180px;
+}
 
 // ─── PrimeNG Overrides ───────────────────────────────────────
 :host ::ng-deep {
   .text-danger {
     .p-menuitem-link {
+
       .p-menuitem-text,
       .p-menuitem-icon {
         color: var(--color-error);
+      }
+    }
+  }
+
+  // ─── Excel Import Dialog ──────────────────────────────────────
+  .import-dialog {
+    .drag-drop-zone {
+      border: 2px dashed var(--color-primary-active);
+      border-radius: 12px;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      background: var(--surface-card);
+      cursor: pointer;
+      transition: $transition-fast;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      &:hover,
+      &.drag-over {
+        background: var(--surface-hover);
+        border-color: var(--color-primary);
+      }
+
+      .excel-icon {
+        font-size: 3rem;
+        color: #217346;
+      }
+
+      .drag-drop-text {
+        font-size: 0.95rem;
+        color: var(--text-main);
+        font-weight: 500;
+      }
+    }
+
+    .file-info-bar {
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+
+      .file-name {
+        color: var(--text-main);
+      }
+    }
+
+    .import-progress-bar {
+      height: 6px;
+      border-radius: 3px;
+    }
+
+    .import-preview-table-container {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .table-danger-light {
+      background-color: rgba(239, 68, 68, 0.08);
+
+      td {
+        background-color: transparent;
       }
     }
   }

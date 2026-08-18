@@ -16,8 +16,8 @@ export class User {
     return path ? `${this.apiUrl}/${path}` : this.apiUrl;
   }
 
-  create(payload: CreateUserPayload): Observable<unknown> {
-    return this.http.post(this.getUrl(), payload);
+  create(payload: CreateUserPayload): Observable<{ success?: boolean }> {
+    return this.http.post<{ success?: boolean }>(this.getUrl(), payload);
   }
 
   checkUsername(username: string): Observable<{ exists: boolean }> {
@@ -30,7 +30,7 @@ export class User {
     return this.http.get<UserAccountData>(this.getUrl(`by-employee/${employeeId}`));
   }
 
-  update(userId: string, payload: UpdateUserPayload): Observable<unknown> {
-    return this.http.put(this.getUrl(userId), payload);
+  update(userId: string, payload: UpdateUserPayload): Observable<{ success?: boolean }> {
+    return this.http.put<{ success?: boolean }>(this.getUrl(userId), payload);
   }
 }

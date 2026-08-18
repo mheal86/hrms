@@ -23,6 +23,10 @@ export class Navbar implements OnInit {
   isDarkMode = false;
 
   ngOnInit() {
+    this.initTheme();
+  }
+
+  initTheme() {
     const theme = localStorage.getItem('theme') || 'light';
     this.isDarkMode = theme === 'dark';
     this.applyTheme();

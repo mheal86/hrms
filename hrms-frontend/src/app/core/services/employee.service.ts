@@ -62,4 +62,10 @@ export class Employee {
   getHistory(id: string): Observable<EmployeeHistory[]> {
     return this.http.get<EmployeeHistory[]>(this.getUrl(`${id}/history`));
   }
+
+  importEmployees(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<any>(this.getUrl('import'), formData);
+  }
 }

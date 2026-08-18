@@ -4,7 +4,6 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 
 describe('Forbidden', () => {
-  let component: Forbidden;
   let fixture: ComponentFixture<Forbidden>;
 
   beforeEach(async () => {
@@ -17,11 +16,18 @@ describe('Forbidden', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(Forbidden);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  afterEach(() => {
+    fixture.destroy();
+    TestBed.resetTestingModule();
+  });
+
+  it('should render 403 header and show translation messages in DOM', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.forbidden-code')?.textContent).toBe('403');
+    expect(compiled.querySelector('h1')?.textContent).toBe('FORBIDDEN.TITLE');
+    expect(compiled.querySelector('p')?.textContent).toBe('FORBIDDEN.MESSAGE');
   });
 });

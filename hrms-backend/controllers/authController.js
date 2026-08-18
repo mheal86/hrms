@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { logActivity } = require('../utils/auditLogger');
 
 // POST /api/auth/login
 exports.login = async (req, res) => {
