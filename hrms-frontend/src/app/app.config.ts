@@ -15,6 +15,7 @@ import { FormlyFieldCustomSelect } from './shared/custom-select-type/custom-sele
 import { FormlyFieldDatePicker } from './shared/custom-datepicker-type/custom-datepicker-type';
 import { routes } from './app.routes';
 import { authInterceptorInterceptor } from './core/interceptors/auth-interceptor-interceptor';
+import { demoBackendInterceptor } from './core/interceptors/demo-backend-interceptor';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TitleStrategy } from '@angular/router';
@@ -50,7 +51,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     { provide: TitleStrategy, useClass: CustomTitleStrategy },
-    provideHttpClient(withInterceptors([authInterceptorInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptorInterceptor, demoBackendInterceptor])),
     { provide: LOCALE_ID, useValue: 'vi' },
     provideAnimationsAsync(),
     providePrimeNG({
@@ -66,7 +67,7 @@ export const appConfig: ApplicationConfig = {
     provideTranslateService({
       fallbackLang: 'vi',
       loader: provideTranslateHttpLoader({
-        prefix: '/i18n/',
+        prefix: './i18n/',
         suffix: '.json',
       }),
     }),

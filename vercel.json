@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd hrms-frontend && npm install --no-audit --no-fund",
+  "buildCommand": "cd hrms-frontend && npm run build",
+  "outputDirectory": "hrms-frontend/dist/hrms-frontend/browser",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

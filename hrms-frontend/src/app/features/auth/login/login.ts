@@ -78,6 +78,12 @@ export class Login implements OnInit, OnDestroy {
     ];
   }
 
+  loginDemo(username: string, password: string) {
+    this.loginModel = { username, password };
+    this.loginForm.patchValue({ username, password });
+    this.onSubmit();
+  }
+
   onSubmit() {
     if (this.isLoading()) return;
     if (this.loginForm.invalid) {
