@@ -1,4 +1,4 @@
-<div class="page-fade">
+<div class="page-fade"><header class="page-intro"><h1>{{ 'SIDEBAR.PROFILE' | translate }}</h1></header>
   @if (isLoading()) {
   <app-spinner></app-spinner>
   }
@@ -7,19 +7,19 @@
   }
 
   @if (profileData(); as data) {
-  <div class="row">
+  <div class="row g-4">
     <div class="col-md-4">
       <div class="card text-center">
         <div class="card-body">
           @if (data.employee && data.employee.avatarUrl) {
-          <img [src]="baseUrl + data.employee.avatarUrl" class="avatar-img" />
+          <img [src]="baseUrl + data.employee.avatarUrl" class="avatar-img" alt="" />
           }
           @if (!data.employee || !data.employee.avatarUrl) {
           <div class="avatar-initials-lg">
             {{ getInitials(data.employee?.firstName, data.employee?.lastName, data.username) }}
           </div>
           }
-          <h5>
+          <h5 class="mt-3 mb-2">
             {{
             data.employee
             ? data.employee.firstName + ' ' + data.employee.lastName
@@ -142,6 +142,65 @@
           }
         </div>
       </div>
+
+      @if (data.employee) {
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="mb-3 text-main">{{ 'PROFILE.WORK_HISTORY' | translate }}</h5>
+          @if (history().length > 0) {
+          <ul class="timeline list-unstyled mb-0">
+            @for (h of history(); track h._id) {
+            <li class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div>
+                <div class="fw-semibold text-main">
+                  @if (h.fromDepartment) {
+                  {{ languageService.getDepartmentName(h.fromDepartment) }}
+                  <i class="pi pi-arrow-right mx-1 text-muted small"></i>
+                  }
+                  <span class="text-primary">{{ languageService.getDepartmentName(h.toDepartment) }}</span>
+                </div>
+                <div class="text-muted small">{{ h.transferDate | date: 'dd/MM/yyyy' }}</div>
+              </div>
+            </li>
+            }
+          </ul>
+          } @else {
+          <p class="text-muted mb-0 small">{{ 'PROFILE.WORK_HISTORY_EMPTY' | translate }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 text-main">{{ 'PROFILE.COLLEAGUES' | translate }}</h5>
+            <a routerLink="/employees" class="small text-primary text-decoration-none">
+              {{ 'PROFILE.VIEW_ALL' | translate }}
+            </a>
+          </div>
+          @if (colleagues().length > 0) {
+          <div class="colleague-grid">
+            @for (c of colleagues(); track c._id) {
+            <a [routerLink]="['/employees', c._id]" class="colleague-chip">
+              @if (c.avatarUrl) {
+              <img [src]="baseUrl + c.avatarUrl" class="colleague-avatar" alt="" />
+              } @else {
+              <span class="colleague-avatar colleague-initials">{{ getInitials(c.firstName, c.lastName) }}</span>
+              }
+              <span class="colleague-info">
+                <span class="colleague-name">{{ c.firstName }} {{ c.lastName }}</span>
+                <span class="colleague-role">{{ (languageService.getPositionTranslation(c.position) | translate) || '-' }}</span>
+              </span>
+            </a>
+            }
+          </div>
+          } @else {
+          <p class="text-muted mb-0 small">{{ 'PROFILE.COLLEAGUES_EMPTY' | translate }}</p>
+          }
+        </div>
+      </div>
+      }
     </div>
   </div>
   }

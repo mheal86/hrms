@@ -1,4 +1,8 @@
 <div class="page-fade">
+  <header class="page-intro">
+    <h1>{{ 'DASHBOARD.TITLE' | translate }}</h1>
+    <p>{{ 'DASHBOARD.SUBTITLE' | translate }}</p>
+  </header>
   @if (isLoading()) {
   <app-spinner></app-spinner>
   }
@@ -7,36 +11,19 @@
   }
 
   @if (summary(); as data) {
-  <div class="row g-2">
-    @for (card of statCards; track card.label) {
-    <div class="col-md-4">
-      <div class="card stat-card">
-        <div class="card-body d-flex align-items-center gap-3 p-3">
-          <div class="stat-icon" [ngClass]="card.iconClass">
-            <i [class]="card.icon"></i>
-          </div>
-          <div>
-            <h6 class="card-title text-muted mb-1">
-              {{ card.label | translate }}
-            </h6>
-            <p class="fs-4 fw-bold mb-0">
-              @if (card.hasSubValue) {
-              {{ card.active }}
-              <span class="fs-6 text-muted fw-normal">/ {{ card.total }}</span>
-              } @else {
-              {{ card.value }}
-              }
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-    }
-
-    <div class="col-lg-7 mt-3">
+<div class="summary-strip">
+@for (card of statCards; track card.label) {
+<div class="summary-cell"><div class="summary-label"><i [class]="card.icon"></i><span>{{ card.label | translate }}</span></div><div class="summary-value"><span class="stat-number">{{ card.hasSubValue ? card.active : card.value }}</span>@if (card.hasSubValue) {<span class="stat-total">/ {{ card.total }}</span>}</div></div>
+}
+</div>
+<div class="row g-4">
+    <div class="col-lg-7">
       <div class="card h-100 chart-card">
-        <div class="card-body d-flex flex-column p-3">
-          <h6 class="mb-2 fw-semibold">{{ 'DASHBOARD.CHART_TITLE' | translate }}</h6>
+        <div class="card-body d-flex flex-column p-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="mb-0 section-title">{{ 'DASHBOARD.CHART_TITLE' | translate }}</h6>
+            <span class="badge badge-primary">{{ data.employeesByDepartment.length }} {{ 'COMMON.DEPARTMENTS' | translate }}</span>
+          </div>
           <div class="row align-items-center flex-grow-1">
             <!-- Left side: Doughnut Chart -->
             <div class="col-sm-6">
@@ -55,10 +42,9 @@
                   let i = $index
                   ) {
                   <div class="legend-item">
-                    <div class="d-flex align-items-center gap-2">
-                      <span class="d-inline-block rounded-circle flex-shrink-0" [style.width.px]="10"
-                        [style.height.px]="10" [style.background-color]="chartColors()[i]"></span>
-                      <span class="legend-label">{{ languageService.getDepartmentName(item.departmentName) }}</span>
+                    <div class="d-flex align-items-center gap-2 min-w-0">
+                      <span class="legend-color-dot flex-shrink-0" [style.background-color]="chartColors()[i]"></span>
+                      <span class="legend-label text-truncate">{{ languageService.getDepartmentName(item.departmentName) }}</span>
                     </div>
                     <span class="legend-value fw-semibold">{{ item.totalCount }}</span>
                   </div>
@@ -71,10 +57,12 @@
       </div>
     </div>
 
-    <div class="col-lg-5 mt-3">
+    <div class="col-lg-5">
       <div class="card h-100">
-        <div class="card-body d-flex flex-column p-3">
-          <h6 class="mb-2 fw-semibold">{{ 'DASHBOARD.TABLE_TITLE' | translate }}</h6>
+        <div class="card-body d-flex flex-column p-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="mb-0 section-title">{{ 'DASHBOARD.TABLE_TITLE' | translate }}</h6>
+          </div>
           <div class="table-responsive scrollable-table-container dashboard-table-container flex-grow-1">
             <p-table [columns]="cols" [value]="data.employeesByDepartment" styleClass="p-datatable-sm">
               <ng-template #header let-columns>
@@ -88,11 +76,11 @@
                 <tr>
                   @for (col of columns; track col.field) {
                   <td [class.text-center]="col.field !== 'departmentName'">
-                    {{
-                    col.field === 'departmentName'
-                    ? languageService.getDepartmentName(item[col.field])
-                    : item[col.field]
-                    }}
+                    @if (col.field === 'departmentName') {
+                    <span class="fw-medium text-main">{{ languageService.getDepartmentName(item[col.field]) }}</span>
+                    } @else {
+                    <span class="text-secondary">{{ item[col.field] }}</span>
+                    }
                   </td>
                   }
                 </tr>
@@ -104,12 +92,15 @@
     </div>
 
     @if (authService.isAdmin()) {
-    <div class="col-12 mt-3">
+    <div class="col-12">
       <div class="card">
-        <div class="card-body p-3">
-          <div class="d-flex justify-content-between align-items-center mb-2">
-            <h6 class="mb-0 fw-semibold">{{ 'DASHBOARD.RECENT_EMPLOYEES' | translate }}</h6>
-            <p-button routerLink="/employees" [label]="'DASHBOARD.VIEW_ALL' | translate" [outlined]="true"
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div>
+              <h6 class="mb-1 section-title">{{ 'DASHBOARD.RECENT_EMPLOYEES' | translate }}</h6>
+              <p class="text-muted small mb-0">{{ 'DASHBOARD.RECENT_SUBTITLE' | translate }}</p>
+            </div>
+            <p-button routerLink="/employees" [label]="'DASHBOARD.VIEW_ALL' | translate" icon="pi pi-arrow-right" iconPos="right" [outlined]="true"
               size="small"></p-button>
           </div>
 
@@ -118,60 +109,65 @@
           }
 
           @if (!isLoadingRecent() && recentEmployees().length > 0) {
-          <p-table [columns]="recentCols" [value]="recentEmployees()" styleClass="p-datatable-sm">
-            <ng-template #header let-columns>
-              <tr>
-                <th style="width: 50px"></th>
-                @for (col of columns; track col.field) {
-                <th>{{ col.header | translate }}</th>
-                }
-              </tr>
-            </ng-template>
-            <ng-template #body let-emp let-columns="columns">
-              <tr>
-                <td>
-                  @if (emp.avatarUrl) {
-                  <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" />
-                  } @else {
-                  <div class="avatar-initials">
-                    {{ getInitials(emp.firstName, emp.lastName) }}
-                  </div>
+          <div class="table-responsive recent-employees-table">
+            <p-table [columns]="recentCols" [value]="recentEmployees()" styleClass="p-datatable-sm">
+              <ng-template #header let-columns>
+                <tr>
+                  <th style="width: 50px"></th>
+                  @for (col of columns; track col.field) {
+                  <th>{{ col.header | translate }}</th>
                   }
-                </td>
-                @for (col of columns; track col.field) {
-                <td>
-                  @switch (col.field) {
-                  @case ('fullName') {
-                  <a [routerLink]="['/employees', emp._id]" class="text-decoration-none">
-                    {{ emp.firstName }} {{ emp.lastName }}
-                  </a>
+                </tr>
+              </ng-template>
+              <ng-template #body let-emp let-columns="columns">
+                <tr>
+                  <td>
+                    @if (emp.avatarUrl) {
+                    <img [src]="baseUrl + emp.avatarUrl" class="avatar-sm" alt="" width="32" height="32" />
+                    } @else {
+                    <div class="avatar-initials">
+                      {{ getInitials(emp.firstName, emp.lastName) }}
+                    </div>
+                    }
+                  </td>
+                  @for (col of columns; track col.field) {
+                  <td>
+                    @switch (col.field) {
+                    @case ('fullName') {
+                    <a [routerLink]="['/employees', emp._id]" class="fw-semibold text-main text-decoration-none">
+                      {{ emp.firstName }} {{ emp.lastName }}
+                    </a>
+                    }
+                    @case ('department') {
+                    <span class="text-secondary">{{ languageService.getDepartmentName(emp.department) }}</span>
+                    }
+                    @case ('status') {
+                    <span class="badge" [class.badge-success]="emp.status === 'ACTIVE'"
+                      [class.badge-secondary]="emp.status === 'INACTIVE'">
+                      {{
+                      emp.status === 'ACTIVE'
+                      ? ('COMMON.ACTIVE' | translate)
+                      : ('COMMON.INACTIVE' | translate)
+                      }}
+                    </span>
+                    }
+                    @default {
+                    <span class="text-secondary">{{ emp[col.field] }}</span>
+                    }
+                    }
+                  </td>
                   }
-                  @case ('department') {
-                  {{ languageService.getDepartmentName(emp.department) }}
-                  }
-                  @case ('status') {
-                  <span class="badge" [class.badge-success]="emp.status === 'ACTIVE'"
-                    [class.badge-secondary]="emp.status === 'INACTIVE'">
-                    {{
-                    emp.status === 'ACTIVE'
-                    ? ('COMMON.ACTIVE' | translate)
-                    : ('COMMON.INACTIVE' | translate)
-                    }}
-                  </span>
-                  }
-                  @default {
-                  {{ emp[col.field] }}
-                  }
-                  }
-                </td>
-                }
-              </tr>
-            </ng-template>
-          </p-table>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
           }
 
           @if (!isLoadingRecent() && recentEmployees().length === 0) {
-          <p class="text-muted mb-0">{{ 'DASHBOARD.NO_EMPLOYEES' | translate }}</p>
+          <div class="text-center py-4 text-muted">
+            <i class="pi pi-users fs-3 mb-2 d-block opacity-50"></i>
+            <p class="mb-0">{{ 'DASHBOARD.NO_EMPLOYEES' | translate }}</p>
+          </div>
           }
         </div>
       </div>

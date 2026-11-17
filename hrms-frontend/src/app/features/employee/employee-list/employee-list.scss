@@ -2,39 +2,52 @@
 @use '../../../../styles/variables' as v;
 
 // ─── Variables ───────────────────────────────────────────────
-$avatar-size-sm: 32px;
-$avatar-size-lg: 36px;
-$transition-fast: 0.2s ease;
-$nav-btn-size: 36px;
-$nav-btn-radius: 8px;
-
-@mixin nav-icon-btn($size: $nav-btn-size) {
-  width: $size;
-  height: $size;
-  padding: 6px;
-  border-radius: $nav-btn-radius;
-  background: transparent;
-  border: none;
-  transition: all $transition-fast;
-}
+$avatar-size: 36px;
+$transition-fast: 0.15s ease;
 
 // ─── Avatar ──────────────────────────────────────────────────
 .avatar-sm {
-  @include m.avatar-base($avatar-size-sm);
+  @include m.avatar-base($avatar-size);
   object-fit: cover;
+  box-shadow: var(--shadow-sm);
+  display: block;
+  margin: 0 auto;
 }
 
 .avatar-initials {
-  @include m.avatar-initials($avatar-size-lg, 13px);
+  @include m.avatar-initials($avatar-size, 13px);
+  margin: 0 auto;
+}
+
+.employee-name-link {
+  color: var(--text-main);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary);
+  }
 }
 
 .sort-icon {
-  font-size: 0.8rem;
-  margin-left: 0.25rem;
+  font-size: 0.75rem;
+  margin-left: 0.35rem;
+  transition: color 0.15s ease;
 }
 
 .sortable-header {
   cursor: pointer;
+  user-select: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary);
+
+    .sort-icon {
+      color: var(--color-primary);
+    }
+  }
 }
 
 // ─── Filter Controls ─────────────────────────────────────────
@@ -48,18 +61,38 @@ $nav-btn-radius: 8px;
 }
 
 .filter-select-dept {
-  width: 200px;
+  width: 220px;
+  min-width: 220px;
 }
 
 .filter-select-status {
-  width: 180px;
+  width: 190px;
+  min-width: 190px;
+}
+
+.status-toggle {
+  min-height: 32px;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    border-color: currentColor;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .search-input-group,
+  .filter-select-dept,
+  .filter-select-status {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
 }
 
 // ─── PrimeNG Overrides ───────────────────────────────────────
 :host ::ng-deep {
   .text-danger {
     .p-menuitem-link {
-
       .p-menuitem-text,
       .p-menuitem-icon {
         color: var(--color-error);
@@ -70,13 +103,13 @@ $nav-btn-radius: 8px;
   // ─── Excel Import Dialog ──────────────────────────────────────
   .import-dialog {
     .drag-drop-zone {
-      border: 2px dashed var(--color-primary-active);
-      border-radius: 12px;
+      border: 2px dashed var(--color-primary-light, #{v.$indigo-400});
+      border-radius: 14px;
       padding: 2.5rem 1.5rem;
       text-align: center;
       background: var(--surface-card);
       cursor: pointer;
-      transition: $transition-fast;
+      transition: all $transition-fast;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -86,11 +119,12 @@ $nav-btn-radius: 8px;
       &.drag-over {
         background: var(--surface-hover);
         border-color: var(--color-primary);
+        box-shadow: none;
       }
 
       .excel-icon {
         font-size: 3rem;
-        color: #217346;
+        color: #107c41;
       }
 
       .drag-drop-text {
@@ -101,13 +135,14 @@ $nav-btn-radius: 8px;
     }
 
     .file-info-bar {
-      padding: 0.5rem 0.75rem;
+      padding: 0.6rem 0.85rem;
       border-radius: 8px;
-      background: var(--bg-secondary);
+      background: var(--surface-card);
       border: 1px solid var(--border-color);
 
       .file-name {
         color: var(--text-main);
+        font-size: 0.875rem;
       }
     }
 
@@ -117,15 +152,15 @@ $nav-btn-radius: 8px;
     }
 
     .import-preview-table-container {
-      max-height: 300px;
+      max-height: 280px;
       overflow-y: auto;
     }
 
     .table-danger-light {
-      background-color: rgba(239, 68, 68, 0.08);
+      background-color: rgba(239, 68, 68, 0.06);
 
       td {
-        background-color: transparent;
+        background-color: transparent !important;
       }
     }
   }

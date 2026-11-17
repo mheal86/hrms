@@ -65,7 +65,7 @@
   @include avatar-base($size);
   @include flex-center;
   background: $avatar-gradient;
-  color: var(--text-on-primary);
+  color: var(--color-primary);
   font-size: $font-size;
   font-weight: 600;
 }

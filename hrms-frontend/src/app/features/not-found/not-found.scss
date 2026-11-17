@@ -11,4 +11,25 @@
   @include flex-col-center;
   min-height: 70vh;
   text-align: center;
+  gap: 0.5rem;
+
+  .not-found-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background-color: var(--color-primary-subtle);
+    border: 1px solid rgba(11, 113, 102, 0.2);
+    color: var(--color-primary);
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .display-1 {
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
 }

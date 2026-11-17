@@ -1,5 +1,5 @@
 // ─── Variables ───────────────────────────────────────────────
-$input-height: 42px;
+$input-height: 40px;
 $border-radius-input: 8px;
 
 // ─── Host & PrimeNG Overrides ─────────────────────────────────
@@ -17,13 +17,17 @@ $border-radius-input: 8px;
       color: var(--input-text);
       display: flex;
       align-items: center;
-      transition: all 0.2s ease;
+      transition: border-color 160ms ease, background-color 160ms ease;
 
       .p-select-label {
         color: var(--input-text);
         background: transparent;
-        padding: 10px 14px;
-        font-size: 0.9rem;
+        padding: 0 12px;
+        line-height: 38px;
+        font-size: 0.875rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .p-select-placeholder {

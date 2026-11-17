@@ -1,41 +1,40 @@
+@use '../../../../styles/variables' as v;
+@use '../../../../styles/mixins' as m;
+
 // ─── Variables ───────────────────────────────────────────────
-$avatar-size-lg: 120px;
-$border-radius-circle: 50%;
+$avatar-size-lg: 110px;
 $panel-width: 320px;
 
-// ─── Mixin ───────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin avatar-circle($size) {
-  width: $size;
-  height: $size;
-  border-radius: $border-radius-circle;
-}
-
 // ─── Avatar ──────────────────────────────────────────────────
-.avatar-initials-lg {
-  @include avatar-circle($avatar-size-lg);
-  @include flex-center;
-  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-  color: var(--text-on-primary);
-  font-size: 36px;
-  font-weight: 600;
+.avatar-initials-lg,
+.avatar-img {
+  @include m.avatar-base($avatar-size-lg);
+  box-shadow: none;
+  border: 1px solid var(--border-color);
+  transition: v.$transition-normal;
   margin: 0 auto;
+
+}
+
+.avatar-initials-lg {
+  @include m.avatar-initials($avatar-size-lg, 32px);
 }
 
 .avatar-img {
-  @include avatar-circle($avatar-size-lg);
   object-fit: cover;
 }
 
 // ─── Detail Table ────────────────────────────────────────────
 .detail-table {
   td:first-child {
-    width: 150px;
+    width: 160px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  td:last-child {
+    color: var(--text-main);
+    font-weight: 500;
   }
 }
 
@@ -43,7 +42,6 @@ $panel-width: 320px;
 :host ::ng-deep {
   .custom-password-dialog {
     .p-password {
-
       &,
       input {
         width: 100%;
@@ -61,11 +59,11 @@ $panel-width: 320px;
   }
 
   .p-password-overlay {
-    background: var(--bg-secondary);
+    background: var(--surface-card);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 14px 16px;
-    box-shadow: var(--shadow-card, 0 4px 12px rgba(15, 23, 42, 0.08));
+    box-shadow: var(--shadow-card);
     min-width: $panel-width;
     max-width: $panel-width;
 
@@ -77,7 +75,7 @@ $panel-width: 320px;
     .p-progressbar {
       .p-progressbar-value {
         background: var(--color-primary);
-        transition: width 0.3s ease;
+        transition: background-color 160ms ease;
       }
     }
   }
@@ -102,18 +100,18 @@ $panel-width: 320px;
 
   .badge-strength {
     color: #fff;
-    border-radius: 4px;
+    border-radius: 9999px;
+    padding: 2px 8px;
   }
 
   .strength-progress {
     height: 5px;
-    background-color: var(--divider, #cbd5e1);
+    background-color: var(--divider);
     border-radius: 3px;
   }
 
   .strength-progress-bar {
     transition:
-      width 0.3s ease,
       background-color 0.3s ease;
     border-radius: 3px;
   }
@@ -122,3 +120,18 @@ $panel-width: 320px;
     font-size: 0.8rem;
   }
 }
+
+.timeline { position: relative; padding-left: 4px; }
+.timeline-item { position: relative; display: flex; gap: 14px; padding: 0 0 18px 0; }
+.timeline-item:not(:last-child)::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: 0; width: 2px; background: var(--divider); }
+.timeline-dot { flex: none; width: 12px; height: 12px; margin-top: 5px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 0 4px var(--color-primary-subtle); }
+.timeline-item:last-child { padding-bottom: 0; }
+
+.colleague-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.colleague-chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; text-decoration: none; color: inherit; transition: background var(--motion-duration), border-color var(--motion-duration); }
+.colleague-chip:hover { background: var(--surface-hover); border-color: var(--color-primary); }
+.colleague-avatar { flex: none; width: 36px; height: 36px; border-radius: 50%; object-fit: cover; }
+.colleague-initials { display: grid; place-items: center; background: var(--color-primary-subtle); color: var(--color-primary); font-size: .75rem; font-weight: 600; }
+.colleague-info { display: flex; flex-direction: column; min-width: 0; }
+.colleague-name { font-weight: 600; color: var(--text-main); font-size: .875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.colleague-role { color: var(--text-muted); font-size: .75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

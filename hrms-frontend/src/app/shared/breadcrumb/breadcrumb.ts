@@ -11,6 +11,7 @@ const LABEL_MAP: Record<string, string> = {
   departments: 'SIDEBAR.DEPARTMENTS',
   employees: 'SIDEBAR.EMPLOYEES',
   profile: 'SIDEBAR.PROFILE',
+  'audit-logs': 'SIDEBAR.AUDIT_LOGS',
   new: 'COMMON.ADD',
   edit: 'COMMON.EDIT',
 };
@@ -53,7 +54,9 @@ export class Breadcrumb implements OnInit, OnDestroy {
 
   buildBreadcrumb = (url: string) => {
     const cleanUrl = url.split('?')[0];
-    const segments = cleanUrl.split('/').filter((s) => s && !this.isLikelyId(s));
+    const rawSegments = cleanUrl.split('/').filter(Boolean);
+    const hasId = rawSegments.some((s) => this.isLikelyId(s));
+    const segments = rawSegments.filter((s) => !this.isLikelyId(s));
 
     let path = '';
     const items: MenuItem[] = segments.map((segment) => {
@@ -64,6 +67,12 @@ export class Breadcrumb implements OnInit, OnDestroy {
         routerLink: path,
       };
     });
+
+    if (hasId && !rawSegments.includes('edit')) {
+      items.push({
+        label: this.translate.instant('COMMON.DETAILS'),
+      });
+    }
 
     this.items.set(items);
   };

@@ -3,17 +3,20 @@
 
 .form-control,
 .form-select {
+  height: 40px;
   background-color: var(--input-bg);
   color: var(--input-text);
   border: 1px solid var(--input-border);
-  border-radius: $radius-lg; // 8px
+  border-radius: $radius-md; // 8px
+  font-size: $font-normal;
   transition:
-    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.2s ease;
 
   &:focus {
     border-color: var(--input-focus-border);
-    box-shadow: 0 0 0 4px var(--input-focus-ring);
+    box-shadow: 0 0 0 3px var(--input-focus-ring);
     background-color: var(--input-bg);
     outline: none;
   }
@@ -39,69 +42,67 @@
     }
   }
 
-  .dark-theme & {
-    color: var(--input-text);
-    background-color: var(--input-bg);
-    border-color: var(--input-border);
-  }
 }
 
 .form-control {
-  padding: #{$space-md} #{$space-xl}; // 10px 14px
+  padding: 8px 14px;
 }
 
 .form-select {
-  padding: 10px 36px 10px 14px;
+  padding: 8px 36px 8px 14px;
   appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 14px center;
   background-size: 12px 12px;
 
   .dark-theme & {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
   }
 }
 
 input[type='file'].form-control {
-  padding: #{$space-sm} #{$space-lg}; // 8px 12px
+  padding: 5px 12px;
   cursor: pointer;
+  height: auto;
 
   &::file-selector-button {
-    background-color: var(--input-disabled-bg);
+    background-color: var(--surface-hover);
     color: var(--text-secondary);
-    border: none;
+    border: 1px solid var(--border-color);
     border-radius: $radius-sm; // 6px
-    padding: 4px 12px;
+    padding: 5px 14px;
     font-weight: 500;
     margin-right: #{$space-sm};
     transition: #{$transition-normal};
 
     &:hover {
       background-color: var(--border-color);
+      color: var(--text-main);
     }
   }
 }
 
 .form-label {
-  font-weight: 600;
+  font-weight: 500;
   color: var(--text-main);
   margin-bottom: 6px;
-  font-size: $font-normal; // 0.875rem
+  font-size: $font-sm;
 }
 
 .invalid-feedback {
   color: var(--color-error);
-  font-size: $font-md; // 0.8rem
+  font-size: $font-xs;
   font-weight: 500;
+  margin-top: 4px;
 }
 
 /* ─── Date Input ─── */
 input[type='date'] {
   position: relative;
-  padding-left: 38px;
+  padding-left: 36px;
 
   &::-webkit-calendar-picker-indicator {
     position: absolute;
@@ -111,10 +112,8 @@ input[type='date'] {
     cursor: pointer;
     margin: 0;
     padding: 0;
-    transition:
-      filter #{$transition-slow},
-      opacity #{$transition-normal};
     opacity: 0.6;
+    transition: opacity #{$transition-normal};
 
     &:hover {
       opacity: 1;
@@ -152,7 +151,7 @@ input[type='date'] {
     padding: 4px;
     display: flex;
     align-items: center;
-    border-radius: $radius-xs; // 4px
+    border-radius: $radius-xs;
     transition: color #{$transition-normal};
     z-index: 5;
 
@@ -173,5 +172,7 @@ input[type='date'] {
 }
 
 textarea.form-control {
+  height: auto;
+  min-height: 80px;
   @include custom-scrollbar;
 }

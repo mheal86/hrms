@@ -50,6 +50,7 @@ export class Login implements OnInit, OnDestroy {
           label: this.translate.instant('AUTH.USERNAME_LABEL'),
           placeholder: this.translate.instant('AUTH.USERNAME_PLACEHOLDER'),
           required: true,
+          attributes: { autocomplete: 'username', autocapitalize: 'none', spellcheck: 'false' },
         },
         validation: {
           messages: {
@@ -66,6 +67,7 @@ export class Login implements OnInit, OnDestroy {
           label: this.translate.instant('AUTH.PASSWORD_LABEL'),
           placeholder: this.translate.instant('AUTH.PASSWORD_PLACEHOLDER'),
           required: true,
+          attributes: { autocomplete: 'current-password' },
         },
         validation: {
           messages: {
@@ -77,6 +79,7 @@ export class Login implements OnInit, OnDestroy {
   }
 
   onSubmit() {
+    if (this.isLoading()) return;
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -101,7 +104,9 @@ export class Login implements OnInit, OnDestroy {
           const rawMessage = err.error?.message;
           let translatedMessageKey = 'AUTH.ERROR_FAILED';
 
-          if (rawMessage === 'Invalid username or password') {
+          if (err.status === 0) {
+            translatedMessageKey = 'AUTH.ERROR_CONNECTION';
+          } else if (rawMessage === 'Invalid username or password') {
             translatedMessageKey = 'AUTH.ERROR_INVALID';
           } else if (rawMessage === 'Username and password are required') {
             translatedMessageKey = 'AUTH.ERROR_REQUIRED';

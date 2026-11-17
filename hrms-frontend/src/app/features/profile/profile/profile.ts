@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import {
   ReactiveFormsModule,
   FormBuilder,
@@ -13,6 +14,8 @@ import { Spinner } from '../../../shared/spinner/spinner';
 import { Notification } from '../../../core/services/notification';
 import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { Auth } from '../../../core/services/auth';
+import { Employee as EmployeeService } from '../../../core/services/employee.service';
+import { EmployeeHistory, Employee as EmployeeModel } from '../../../core/models/employee-model';
 import { Dialog } from 'primeng/dialog';
 import { Button } from 'primeng/button';
 import { TableModule } from 'primeng/table';
@@ -34,6 +37,7 @@ import { phoneValidator, addressValidator, validatePhone, validateAddress, clean
     TableModule,
     TranslatePipe,
     FormlyModule,
+    RouterLink,
   ],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
@@ -43,6 +47,7 @@ export class Profile implements OnInit, OnDestroy {
   profileService = inject(ProfileService);
   notificationService = inject(Notification);
   authService = inject(Auth);
+  employeeService = inject(EmployeeService);
   translate = inject(TranslateService);
   languageService = inject(LanguageService);
 
@@ -50,6 +55,8 @@ export class Profile implements OnInit, OnDestroy {
   getInitials = getInitials;
   profileData = signal<ProfileData | undefined>(undefined);
   isLoading = signal(false);
+  history = signal<EmployeeHistory[]>([]);
+  colleagues = signal<EmployeeModel[]>([]);
   errorMessage = signal('');
 
   isEditMode = signal(false);
@@ -203,6 +210,7 @@ export class Profile implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => {
           this.profileData.set(data);
+          this.loadWorkInfo(data);
           this.profileModel = {
             phone: data.employee?.phone || '',
             address: data.employee?.address || '',
@@ -212,6 +220,31 @@ export class Profile implements OnInit, OnDestroy {
           this.errorMessage.set(err.error?.message || this.translate.instant('PROFILE.LOAD_ERROR'));
         },
       });
+  }
+
+  // Lịch sử công tác và đồng nghiệp cùng phòng của chính tài khoản đang đăng nhập
+  private loadWorkInfo(data: ProfileData) {
+    const emp = data.employee;
+    if (!emp?._id) {
+      this.history.set([]);
+      this.colleagues.set([]);
+      return;
+    }
+    this.employeeService
+      .getHistory(emp._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({ next: (h) => this.history.set(h), error: () => this.history.set([]) });
+
+    const deptId = typeof emp.department === 'object' ? (emp.department as any)?._id : emp.department;
+    if (deptId) {
+      this.employeeService
+        .getAll(1, 9, '', 'firstName', 'asc', deptId, 'ACTIVE')
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (res) => this.colleagues.set(res.data.filter((c) => c._id !== emp._id)),
+          error: () => this.colleagues.set([]),
+        });
+    }
   }
 
   enterEditMode() {

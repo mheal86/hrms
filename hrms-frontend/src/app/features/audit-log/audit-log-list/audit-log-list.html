@@ -1,10 +1,14 @@
 <div class="page-fade list-layout-container">
-  <div class="mb-3 d-flex flex-wrap gap-2 align-items-center justify-content-between">
-    <div class="d-flex gap-2 flex-wrap flex-grow-1 align-items-center">
+  <header class="page-intro">
+    <h1>{{ 'SIDEBAR.AUDIT_LOGS' | translate }}</h1>
+    <p>{{ 'AUDIT.LIST_SUBTITLE' | translate }}</p>
+  </header>
+  <div class="list-toolbar">
+    <div class="list-filters">
       <!-- Search Input -->
       <div class="input-group search-input-group">
         <input pInputText type="text" class="form-control" [placeholder]="'AUDIT.SEARCH_PLACEHOLDER' | translate"
-          [(ngModel)]="searchTerm" (keydown.enter)="resetAndLoad()" />
+          [attr.aria-label]="'AUDIT.SEARCH_PLACEHOLDER' | translate" [(ngModel)]="searchTerm" (keydown.enter)="resetAndLoad()" />
         <p-button icon="pi pi-search" [outlined]="true" severity="secondary" (click)="resetAndLoad()"
           styleClass="search-btn" [title]="'COMMON.SEARCH' | translate"></p-button>
       </div>
@@ -21,13 +25,13 @@
 
       <!-- Date Range Calendar -->
       <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true" [showIcon]="true"
-        iconDisplay="input" (ngModelChange)="onDateRangeChange($event)"
+        iconDisplay="input" appendTo="body" [ariaLabel]="'AUDIT.FILTER_DATE_RANGE' | translate" (ngModelChange)="onDateRangeChange($event)"
         [placeholder]="'AUDIT.FILTER_DATE_RANGE' | translate" styleClass="filter-calendar"
         dateFormat="yy-mm-dd"></p-datepicker>
 
       <!-- Clear Filters Button -->
       <p-button icon="pi pi-filter-slash" [outlined]="true" severity="secondary" (click)="clearFilters()"
-        styleClass="clear-filter-btn" [title]="'COMMON.CANCEL' | translate"></p-button>
+        styleClass="clear-filter-btn" [ariaLabel]="'COMMON.CLEAR_FILTERS' | translate" [title]="'COMMON.CLEAR_FILTERS' | translate"></p-button>
     </div>
   </div>
 
@@ -45,7 +49,9 @@
         <tr>
           @for (col of columns; track col.field) {
           @if (col.sortable) {
-          <th class="sortable-header" (click)="onSort(col.field)" style="cursor: pointer; user-select: none;">
+          <th class="sortable-header" tabindex="0" (click)="onSort(col.field)" (keydown.enter)="onSort(col.field)"
+            (keydown.space)="$event.preventDefault(); onSort(col.field)"
+            [attr.aria-sort]="sortField === col.field ? (sortOrder === 'asc' ? 'ascending' : 'descending') : 'none'">
             {{ col.header | translate }}
             <i [ngClass]="
                       'pi ' +
@@ -100,8 +106,8 @@
   </div>
   }
 
-  @if (!isLoading() && logs().length === 0) {
-  <div class="text-center py-5 bg-card rounded shadow-sm">
+  @if (!isLoading() && !errorMessage() && logs().length === 0) {
+  <div class="empty-state">
     <i class="pi pi-history text-muted" style="font-size: 3rem"></i>
     <p class="mt-3 text-muted fw-semibold">{{ 'COMMON.NO_DATA' | translate }}</p>
   </div>

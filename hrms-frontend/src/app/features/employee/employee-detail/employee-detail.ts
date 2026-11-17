@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { Employee } from '../../../core/services/employee.service';
@@ -46,7 +46,6 @@ import { Select } from 'primeng/select';
     TranslatePipe,
     FormlyModule,
     TableModule,
-    RouterLink,
     Menu,
     Dialog,
     Tabs,
@@ -162,7 +161,9 @@ export class EmployeeDetail implements OnInit, OnDestroy {
     if (id) {
       this.loadEmployee(id);
       this.loadHistory(id);
-      this.loadAuditLogs(id);
+      if (this.authService.isAdmin()) {
+        this.loadAuditLogs(id);
+      }
     }
 
     this.loadDepartments();
@@ -270,6 +271,7 @@ export class EmployeeDetail implements OnInit, OnDestroy {
               placeholder: '0912345678',
               maxLength: 10,
             },
+            expressions: { 'props.disabled': () => !this.isEditingPersonal() },
             hooks: { onInit: setupNumericInputHook(this.destroy$) },
             validators: {
               phone: {
@@ -282,6 +284,7 @@ export class EmployeeDetail implements OnInit, OnDestroy {
             key: 'address',
             type: 'input',
             props: { label: this.translate.instant('EMPLOYEE.FIELD_ADDRESS') },
+            expressions: { 'props.disabled': () => !this.isEditingPersonal() },
             validators: {
               address: {
                 expression: (c: AbstractControl) => validateAddress(c.value),
@@ -308,6 +311,7 @@ export class EmployeeDetail implements OnInit, OnDestroy {
               placeholder: this.translate.instant('FORM.POSITION_PLACEHOLDER'),
               options: this.positionOptions,
             },
+            expressions: { 'props.disabled': () => !this.isEditingDepartment() },
           },
           {
             className: 'col-md-6',
@@ -319,6 +323,7 @@ export class EmployeeDetail implements OnInit, OnDestroy {
               placeholder: this.translate.instant('FORM.DEPARTMENT_PLACEHOLDER'),
               options: this.departmentOptions,
             },
+            expressions: { 'props.disabled': () => !this.isEditingDepartment() },
           },
         ],
       },
@@ -372,6 +377,11 @@ export class EmployeeDetail implements OnInit, OnDestroy {
       .subscribe({
         next: (data) => this.history.set(data),
         error: (err) => {
+          // User thường không được xem lịch sử phòng ban của người khác
+          if (err.status === 403) {
+            this.history.set([]);
+            return;
+          }
           this.errorMessage.set(err.error?.message || this.translate.instant('EMPLOYEE.LOAD_ERROR'));
         },
       });
@@ -447,6 +457,8 @@ export class EmployeeDetail implements OnInit, OnDestroy {
   }
 
   cancelEditPersonal() {
+    const emp = this.employee();
+    if (emp) this.syncPersonalModel(emp);
     this.isEditingPersonal.set(false);
   }
 
@@ -492,6 +504,8 @@ export class EmployeeDetail implements OnInit, OnDestroy {
   }
 
   cancelEditDepartment() {
+    const emp = this.employee();
+    if (emp) this.syncDepartmentModel(emp);
     this.isEditingDepartment.set(false);
   }
 

@@ -4,7 +4,7 @@
 
 // ─── Color Palette ───
 
-// Indigo
+// Indigo (Brand Primary)
 $indigo-50: #eef2ff;
 $indigo-100: #e0e7ff;
 $indigo-200: #c7d2fe;
@@ -14,11 +14,11 @@ $indigo-500: #6366f1;
 $indigo-600: #4f46e5;
 $indigo-700: #4338ca;
 $indigo-800: #3730a3;
-$indigo-900: #2e2a87;
+$indigo-900: #312e81;
 $indigo-950: #1e1b4b;
-$indigo-dark: #0f0e2a;
+$indigo-dark: #0f1225;
 
-// Slate
+// Slate (Neutrals)
 $slate-50: #f8fafc;
 $slate-100: #f1f5f9;
 $slate-200: #e2e8f0;
@@ -29,72 +29,90 @@ $slate-600: #475569;
 $slate-700: #334155;
 $slate-800: #1e293b;
 $slate-900: #0f172a;
-$slate-dark: #0b0f1a;
+$slate-950: #090d16;
+$slate-dark: #0b0f19;
 
-// Emerald/Teal
-$emerald-50: #f0fdf4;
+// Emerald/Teal (Success & Fresh Accents)
+$emerald-50: #ecfdf5;
+$emerald-100: #d1fae5;
+$emerald-200: #a7f3d0;
 $emerald-300: #6ee7b7;
+$emerald-400: #34d399;
+$emerald-500: #10b981;
 $emerald-600: #059669;
 $emerald-700: #047857;
 $emerald-800: #065f46;
-$emerald-850: #036c4e;
-$emerald-900: #025b42;
+$emerald-900: #064e3b;
 
+$teal-50: #f0fdfa;
+$teal-100: #ccfbf1;
 $teal-200: #99f6e4;
+$teal-300: #5eead4;
 $teal-400: #2dd4bf;
 $teal-500: #14b8a6;
 $teal-600: #0d9488;
 $teal-700: #0f766e;
+$teal-800: #115e59;
 
-// Amber/Orange
+// Amber/Orange (Warning & Pending)
 $amber-50: #fffbeb;
+$amber-100: #fef3c7;
+$amber-200: #fde68a;
 $amber-300: #fcd34d;
 $amber-400: #fbbf24;
 $amber-500: #f59e0b;
 $amber-600: #d97706;
 $amber-700: #b45309;
 $amber-800: #92400e;
-$amber-850: #9e4907;
-$amber-900: #883e06;
+$amber-900: #78350f;
 
 $orange-400: #fb923c;
 $orange-500: #f97316;
 
 $rust-50: #fff7ed;
+$rust-100: #ffedd5;
 $rust-300: #fdba74;
 $rust-700: #c2410c;
 $rust-800: #9a3412;
 
-// Rose/Red
+// Rose/Red (Danger & Error)
 $rose-50: #fff1f2;
-$rose-200: #fda4af;
-$rose-300: #fca5a5;
+$rose-100: #ffe4e6;
+$rose-200: #fecdd3;
+$rose-300: #fda4af;
+$rose-400: #fb7185;
+$rose-500: #f43f5e;
 $rose-600: #e11d48;
 $rose-700: #be123c;
 $rose-800: #9f1239;
-$rose-850: #a20f32;
-$rose-900: #880d2a;
+$rose-900: #881337;
 
 $red-500: #ef4444;
 $red-600: #dc2626;
 
-// Sky/Blue
+// Sky/Blue (Info)
 $sky-50: #f0f9ff;
+$sky-100: #e0f2fe;
+$sky-200: #bae6fd;
 $sky-300: #7dd3fc;
 $sky-400: #38bdf8;
 $sky-500: #0ea5e9;
+$sky-600: #0284c7;
 $sky-700: #0369a1;
 $sky-800: #075985;
 
+$blue-500: #3b82f6;
 $blue-600: #2563eb;
 $blue-700: #1d4ed8;
 
-// Pink/Violet/Purple
+// Pink/Violet/Purple (Roles & Charts)
 $pink-400: #f472b6;
 $pink-500: #ec4899;
+$pink-600: #db2777;
 
 $violet-400: #a78bfa;
 $violet-500: #8b5cf6;
+$violet-600: #7c3aed;
 
 $purple-100: #ede9fe;
 $purple-200: #ddd6fe;
@@ -128,36 +146,42 @@ $radius-lg: 10px;
 $radius-xl: 12px;
 $radius-xxl: 16px;
 $radius-round: 50%;
+$radius-pill: 9999px;
 
 // ─── Typography ───
 $font-base: 'Inter', system-ui, -apple-system, sans-serif;
 
-$font-xs: 0.72rem;
-$font-sm: 0.78rem;
-$font-md: 0.8rem;
+$font-xs: 0.75rem;
+$font-sm: 0.8125rem;
+$font-md: 0.875rem;
 $font-normal: 0.875rem;
-$font-lg: 0.95rem;
+$font-lg: 0.9375rem;
 $font-xl: 1rem;
 $font-xxl: 1.125rem;
+$font-2xl: 1.125rem;
 $font-3xl: 1.25rem;
 
 // ─── Z-index ───
-$z-sticky: 9;
+$z-sticky: 10;
 $z-dropdown: 100;
 $z-modal: 1050;
 $z-overlay: 9999;
 $z-toast: 9999999;
 
 // ─── Transitions ───
-$transition-fast: all 0.15s ease;
-$transition-normal: all 0.2s ease;
-$transition-slow: all 0.3s ease;
+$transition-fast: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+$transition-normal: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+$transition-slow: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 $transition-layout: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
 // ─── Avatar Gradient ───
-$avatar-gradient: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
+$avatar-gradient: var(--color-primary-subtle);
 
-// ─── Shadow Tokens ───
-$shadow-indigo-sm: 0 8px 24px rgba(79, 70, 229, 0.35);
-$shadow-indigo-md: 0 12px 32px rgba(79, 70, 229, 0.45);
-
+// ─── Shadow Tokens (Subtle, Layered & Modern) ───
+$shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+$shadow-card: 0 1px 3px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+$shadow-card-hover: 0 8px 20px rgba(15, 23, 42, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
+$shadow-modal: 0 20px 40px rgba(15, 23, 42, 0.16), 0 1px 3px rgba(15, 23, 42, 0.08);
+$shadow-dropdown: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.1);
+$shadow-indigo-sm: 0 4px 14px rgba(11, 113, 102, 0.25);
+$shadow-indigo-md: 0 8px 24px rgba(11, 113, 102, 0.35);

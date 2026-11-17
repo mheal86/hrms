@@ -339,6 +339,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             props: {
               label: this.translate.instant('FORM.USERNAME'),
               required: true,
+              attributes: { autocomplete: 'off', autocapitalize: 'none', spellcheck: 'false' },
             },
             expressions: {
               'props.disabled': () => this.isEditMode(),
@@ -379,6 +380,7 @@ export class EmployeeForm implements OnInit, OnDestroy {
             type: 'input',
             props: {
               type: 'password',
+              attributes: { autocomplete: 'new-password' },
             },
             expressions: {
               'props.label': () => this.existingAccount()

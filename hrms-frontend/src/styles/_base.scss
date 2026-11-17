@@ -1,275 +1,8 @@
 @use "variables" as *;
 @use "mixins" as *;
 
-:root {
-  /* ═══ Typography Base ═══ */
-  --font-base: #{$font-base};
-
-  /* ═══ Brand Colors ═══ */
-  --color-primary: #{$indigo-700};
-  --color-primary-hover: #{$indigo-800};
-  --color-primary-active: #{$indigo-900};
-  --color-primary-subtle: #{$indigo-50};
-  --color-primary-light: #{$indigo-500};
-  --color-secondary: #{$slate-600};
-  --color-accent: #{$teal-600};
-  --color-accent-hover: #{$teal-700};
-
-  /* ═══ Bootstrap Variable Overrides (Light Mode) ═══ */
-  --bs-primary: var(--color-primary);
-  --bs-primary-rgb: 67, 56, 202;
-  --bs-secondary-color: var(--text-muted);
-
-  /* ═══ Status Colors ═══ */
-  --color-success: #{$emerald-800};
-  --color-success-bg: #{$emerald-50};
-  --color-success-border: #{$emerald-300};
-  --color-warning: #{$amber-800};
-  --color-warning-bg: #{$amber-50};
-  --color-warning-border: #{$amber-300};
-  --color-error: #{$rose-800};
-  --color-error-bg: #{$rose-50};
-  --color-error-border: #{$rose-300};
-  --color-info: #{$sky-800};
-  --color-info-bg: #{$sky-50};
-  --color-info-border: #{$sky-300};
-  --color-pending: #{$rust-800};
-  --color-pending-bg: #{$rust-50};
-  --color-pending-border: #{$rust-300};
-
-  /* ═══ Backgrounds ═══ */
-  --bg-primary: #dbeafe;
-  --bg-secondary: #f0f7ff;
-  --bg-sidebar: #{$indigo-950};
-  --bg-header: #{$indigo-950};
-  --surface-card: #f0f7ff;
-  --surface-hover: #e0effe;
-  --surface-selected: #bfdbfe;
-
-  /* ═══ Borders ═══ */
-  --border-color: #{$slate-300};
-  --border-strong: #{$slate-400};
-  --divider: #{$slate-100};
-
-  /* ═══ Typography ═══ */
-  --text-main: #{$slate-900};
-  --text-secondary: #{$slate-600};
-  --text-muted: #{$slate-500};
-  --text-disabled: #{$slate-400};
-  --text-inverse: #{$white};
-  --text-on-primary: #{$white};
-
-  /* ═══ Navigation & Sidebar (Dark Context) ═══ */
-  --nav-text-muted: #{$indigo-300};
-  --nav-text-hover: #{$indigo-100};
-  --nav-text-active: #{$white};
-  --nav-brand-accent: #{$indigo-400};
-  --nav-item-hover-bg: rgba(255, 255, 255, 0.08);
-  --nav-active-bg-start: #{$indigo-600};
-  --nav-active-bg-end: #{$indigo-500};
-  --nav-danger: #{$red-500};
-  --nav-danger-hover: #{$red-600};
-  --nav-border-light: rgba(255, 255, 255, 0.15);
-  --nav-border-lighter: rgba(255, 255, 255, 0.06);
-  --nav-bg-glass: rgba(255, 255, 255, 0.08);
-  --nav-bg-glass-hover: rgba(255, 255, 255, 0.14);
-  --nav-text-slate: #{$slate-200};
-
-  /* ═══ Table ═══ */
-  --table-header-bg: #1e3a8a;
-  --table-header-text: #{$white};
-  --table-row-odd: #{$slate-50};
-  --table-row-even: #e8f0fe;
-  --table-row-hover: #dbeafe;
-  --table-row-selected: #bfdbfe;
-  --table-border: #bfdbfe;
-
-  /* ═══ Chart Colors (Light Mode) ═══ */
-  --chart-1: #{$indigo-600};
-  --chart-2: #{$sky-500};
-  --chart-3: #{$emerald-600};
-  --chart-4: #{$amber-500};
-  --chart-5: #{$pink-500};
-  --chart-6: #{$violet-500};
-  --chart-7: #{$orange-500};
-  --chart-8: #{$teal-500};
-  --chart-9: #{$red-500};
-  --chart-10: #{$slate-500};
-
-  /* ═══ Form ═══ */
-  --input-bg: #{$white};
-  --input-border: #{$slate-400};
-  --input-text: #{$slate-900};
-  --input-placeholder: #{$slate-500};
-  --input-focus-border: #{$indigo-700};
-  --input-focus-ring: rgba(67, 56, 202, 0.15);
-  --input-error-border: #{$rose-800};
-  --input-disabled-bg: #{$slate-200};
-  --input-disabled-text: #{$slate-500};
-
-  /* ═══ Button Tokens (Light) ═══ */
-  --btn-primary-bg: #{$indigo-700};
-  --btn-primary-hover: #{$indigo-800};
-  --btn-primary-active: #{$indigo-900};
-  --btn-primary-text: #{$white};
-
-  --btn-success-bg: #{$emerald-700};
-  --btn-success-hover: #{$emerald-800};
-  --btn-success-active: #{$emerald-900};
-  --btn-success-text: #{$white};
-
-  --btn-warning-bg: #{$amber-700};
-  --btn-warning-hover: #{$amber-850};
-  --btn-warning-active: #{$amber-900};
-  --btn-warning-text: #{$white};
-
-  --btn-danger-bg: #{$rose-700};
-  --btn-danger-hover: #{$rose-850};
-  --btn-danger-active: #{$rose-900};
-  --btn-danger-text: #{$white};
-
-  --btn-accent-bg: #{$teal-600};
-  --btn-accent-hover: #{$teal-700};
-  --btn-accent-border: #{$teal-600};
-
-  /* ═══ Shadows ═══ */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
-  --shadow-card: 0 4px 12px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-card-hover: 0 12px 28px rgba(15, 23, 42, 0.1), 0 4px 8px rgba(15, 23, 42, 0.06);
-  --shadow-modal: 0 24px 64px rgba(15, 23, 42, 0.15);
-  --shadow-dropdown: 0 8px 24px rgba(15, 23, 42, 0.08);
-
-  /* Legacy aliases */
-  --card-shadow: var(--shadow-card);
-  --card-shadow-hover: var(--shadow-card-hover);
-}
-
-.dark-theme {
-  /* ═══ Brand Colors ═══ */
-  --color-primary: #{$indigo-300};
-  --color-primary-hover: #{$indigo-200};
-  --color-primary-active: #{$indigo-100};
-  --color-primary-subtle: rgba(79, 70, 229, 0.1);
-  --color-primary-light: #{$indigo-400};
-  --color-secondary: #{$slate-300};
-  --color-accent: #{$teal-400};
-  --color-accent-hover: #{$teal-200};
-
-  /* ═══ Bootstrap Variable Overrides (Dark Mode) ═══ */
-  --bs-primary: var(--color-primary);
-  --bs-primary-rgb: 165, 180, 252;
-  --bs-secondary-color: var(--text-muted);
-
-  /* ═══ Status Colors ═══ */
-  --color-success: #34d399;
-  --color-success-bg: rgba(5, 150, 105, 0.15);
-  --color-success-border: #{$emerald-600};
-  --color-warning: #{$amber-400};
-  --color-warning-bg: rgba(245, 158, 11, 0.15);
-  --color-warning-border: #{$amber-700};
-  --color-error: #{$rose-200};
-  --color-error-bg: rgba(225, 29, 72, 0.15);
-  --color-error-border: #{$rose-700};
-  --color-info: #{$sky-300};
-  --color-info-bg: rgba(14, 165, 233, 0.15);
-  --color-info-border: #{$sky-700};
-  --color-pending: #{$rust-300};
-  --color-pending-bg: rgba(251, 146, 60, 0.15);
-  --color-pending-border: #{$rust-700};
-
-  /* ═══ Backgrounds ═══ */
-  --bg-primary: #{$slate-dark};
-  --bg-secondary: #{$slate-800};
-  --bg-sidebar: #{$indigo-dark};
-  --bg-header: #{$indigo-dark};
-  --surface-card: #{$slate-800};
-  --surface-hover: #2a354f;
-  --surface-selected: #{$indigo-900};
-
-  /* ═══ Borders ═══ */
-  --border-color: #{$slate-600};
-  --border-strong: #{$slate-50};
-  --divider: #{$slate-800};
-
-  /* ═══ Typography ═══ */
-  --text-main: #{$slate-100};
-  --text-secondary: #{$slate-300};
-  --text-muted: #{$slate-400};
-  --text-disabled: #{$slate-500};
-  --text-inverse: #{$slate-900};
-  --text-on-primary: #{$white};
-
-  /* ═══ Table ═══ */
-  --table-header-bg: #{$indigo-dark};
-  --table-header-text: #{$slate-300};
-  --table-row-odd: #{$slate-800};
-  --table-row-even: #162030;
-  --table-row-hover: #25234d;
-  --table-row-selected: #{$indigo-900};
-  --table-border: #334155;
-
-  /* ═══ Chart Colors (Dark Mode) ═══ */
-  --chart-1: #{$indigo-400};
-  --chart-2: #{$sky-400};
-  --chart-3: #{$emerald-300};
-  --chart-4: #{$amber-400};
-  --chart-5: #{$pink-400};
-  --chart-6: #{$violet-400};
-  --chart-7: #{$orange-400};
-  --chart-8: #{$teal-400};
-  --chart-9: #{$rose-200};
-  --chart-10: #{$slate-400};
-
-  /* ═══ Form ═══ */
-  --input-bg: #{$slate-800};
-  --input-border: #{$slate-600};
-  --input-text: #{$slate-100};
-  --input-placeholder: #{$slate-400};
-  --input-focus-border: #{$indigo-400};
-  --input-focus-ring: rgba(129, 140, 248, 0.2);
-  --input-error-border: #{$rose-200};
-  --input-disabled-bg: #{$slate-900};
-  --input-disabled-text: #{$slate-600};
-
-  /* ═══ Button Tokens (Dark) ═══ */
-  --btn-primary-bg: #{$indigo-600};
-  --btn-primary-hover: #{$indigo-500};
-  --btn-primary-active: #{$indigo-700};
-  --btn-primary-text: #{$white};
-
-  --btn-success-bg: #{$emerald-700};
-  --btn-success-hover: #{$emerald-600};
-  --btn-success-active: #{$emerald-800};
-  --btn-success-text: #{$white};
-
-  --btn-warning-bg: #{$amber-700};
-  --btn-warning-hover: #{$amber-600};
-  --btn-warning-active: #{$amber-800};
-  --btn-warning-text: #{$white};
-
-  --btn-danger-bg: #{$rose-700};
-  --btn-danger-hover: #{$rose-600};
-  --btn-danger-active: #{$rose-800};
-  --btn-danger-text: #{$white};
-
-  --btn-accent-bg: #{$teal-600};
-  --btn-accent-hover: #{$teal-500};
-  --btn-accent-border: #{$teal-500};
-
-  /* ═══ Shadows ═══ */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
-  --shadow-card-hover: 0 20px 48px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
-  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.5);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   ACCESSIBILITY & BASE STYLES
-   ═══════════════════════════════════════════════════════════════ */
-
 :focus-visible {
-  outline: 2px solid var(--color-primary-light, #{$indigo-400});
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--input-focus-ring);
 }
@@ -283,6 +16,9 @@ body {
   font-family: var(--font-base);
   background-color: var(--bg-primary);
   color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   transition:
     background-color #{$transition-normal},
     color #{$transition-normal},
@@ -293,20 +29,20 @@ body {
 
 main {
   background-color: var(--bg-primary);
-  margin-top: #{$space-5xl}; // 56px
-  margin-left: 220px;
-  transition: #{$transition-layout};
+  margin-top: var(--navbar-height);
+  margin-left: var(--sidebar-width);
+  transition: background-color 160ms ease;
   min-width: 0;
 
   @include tablet-up {
     &.sidebar-collapsed-layout {
-      margin-left: 70px;
+      margin-left: var(--sidebar-collapsed-width);
     }
   }
 
   @include mobile {
     margin-left: 0;
-    margin-top: #{$space-5xl};
+    margin-top: var(--navbar-height);
   }
 }
 
@@ -319,6 +55,15 @@ h6 {
   font-weight: 700;
   color: var(--text-main);
   letter-spacing: -0.02em;
+}
+
+/* Numerical Data Alignment Utility */
+td,
+.tabular-nums,
+.stat-value,
+.badge,
+.p-tag {
+  font-variant-numeric: tabular-nums;
 }
 
 /* ─── Dark Mode Table Overrides ─── */
@@ -353,13 +98,13 @@ h6 {
 
 /* ─── Global List Group item overrides ─── */
 .list-group-item {
-  background-color: #{$white};
+  background-color: var(--bg-secondary);
   color: var(--text-main);
-  border-color: #{$slate-300};
+  border-color: var(--border-color);
   transition: #{$transition-normal};
 
   &:hover {
-    background-color: #{$slate-100};
+    background-color: var(--surface-hover);
     color: var(--text-main);
     cursor: pointer;
   }
@@ -375,18 +120,18 @@ h6 {
   }
 
   .dark-theme & {
-    background-color: #{$slate-800};
+    background-color: var(--bg-secondary);
     color: var(--text-main);
-    border-color: #{$slate-600};
+    border-color: var(--border-color);
 
     &:hover {
-      background-color: #{$slate-700};
+      background-color: var(--surface-hover);
       color: var(--text-main);
     }
 
     &.active {
-      background-color: var(--surface-selected);
-      border-color: var(--color-primary-light);
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
       color: #{$white};
 
       .text-muted {
@@ -401,12 +146,53 @@ h6 {
 }
 
 a:not(.btn) {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: var(--color-primary-hover);
+  }
+
   .dark-theme & {
-    color: var(--color-accent);
+    color: var(--color-primary);
 
     &:hover {
-      color: var(--color-accent-hover);
+      color: var(--color-primary-hover);
     }
+  }
+}
+
+/* Profile names carry the reading hierarchy in either theme. */
+body a.employee-name-link:not(.btn),
+body a.text-main:not(.btn) {
+  color: var(--text-main);
+
+  &:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+::selection {
+  background: var(--surface-selected);
+  color: var(--text-main);
+}
+
+input,
+textarea {
+  caret-color: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -447,6 +233,7 @@ select option {
   border-color: var(--border-color);
   color: var(--text-main);
   border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-modal);
   transition:
     background-color #{$transition-slow},
     color #{$transition-slow},
@@ -454,6 +241,10 @@ select option {
 }
 
 .modal-content {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-main);
+
   .dark-theme & {
     background-color: var(--bg-secondary);
     border-color: var(--border-color);

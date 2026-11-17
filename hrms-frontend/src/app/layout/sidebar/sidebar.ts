@@ -17,8 +17,8 @@ export class Sidebar {
 
   menuItems = [
     { link: '/dashboard', icon: 'pi pi-home', label: 'SIDEBAR.DASHBOARD', adminOnly: false },
-    { link: '/departments', icon: 'pi pi-building', label: 'SIDEBAR.DEPARTMENTS', adminOnly: true },
-    { link: '/employees', icon: 'pi pi-users', label: 'SIDEBAR.EMPLOYEES', adminOnly: true },
+    { link: '/departments', icon: 'pi pi-building', label: 'SIDEBAR.DEPARTMENTS', adminOnly: false },
+    { link: '/employees', icon: 'pi pi-users', label: 'SIDEBAR.EMPLOYEES', adminOnly: false },
     { link: '/audit-logs', icon: 'pi pi-history', label: 'SIDEBAR.AUDIT_LOGS', adminOnly: true },
     { link: '/profile', icon: 'pi pi-user', label: 'SIDEBAR.PROFILE', adminOnly: false },
   ];

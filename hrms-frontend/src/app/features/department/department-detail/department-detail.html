@@ -11,13 +11,15 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
       <p-button routerLink="/departments" [label]="'COMMON.BACK' | translate" icon="pi pi-arrow-left" [outlined]="true"
         severity="secondary" size="small"></p-button>
+      @if (authService.isAdmin()) {
       <p-button [routerLink]="['/departments/edit', dept._id]" [label]="'DEPARTMENT.EDIT_DEPT_BTN' | translate"
         icon="pi pi-pencil" size="small"></p-button>
+      }
     </div>
 
     <div class="card mb-3">
-      <div class="card-body">
-        <h4 class="mb-1">{{ languageService.getDepartmentName(dept.name) }}</h4>
+      <div class="card-body p-4">
+        <h4 class="mb-1 fw-bold text-main">{{ languageService.getDepartmentName(dept.name) }}</h4>
         <p class="text-muted mb-0">
           {{
           languageService.getDepartmentDesc(dept.name, dept.description) ||
@@ -35,7 +37,7 @@
       </h5>
 
       <!-- Hàng thống kê chính: 4 cards -->
-      <div class="row g-3 mb-4">
+      <div class="row g-0 mb-4 department-metrics">
         <!-- Tổng số nhân viên -->
         <div class="col-lg-3 col-md-6 col-sm-6">
           <p-card styleClass="stat-card">
@@ -204,9 +206,9 @@
               </h6>
               <div class="flex-grow-1 d-flex align-items-center justify-content-center">
                 @if (hasPositionData()) {
-                <div class="chart-container w-100" style="height: 180px;">
+                <div class="chart-container w-100" style="height: 230px;">
                   <p-chart [type]="positionChartType()" [data]="positionChartData()" [options]="positionChartOptions()"
-                    height="180px" styleClass="w-100"></p-chart>
+                    height="230px" styleClass="w-100"></p-chart>
                 </div>
                 } @else {
                 <div class="text-muted small text-center py-4 w-100">
@@ -221,13 +223,15 @@
     </div>
 
     <div class="card">
-      <div class="card-body">
+      <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="mb-0">
+          <h5 class="mb-0 section-title">
             {{ 'DEPARTMENT.DETAIL_EMPLOYEES_TITLE' | translate: { count: employees().length } }}
           </h5>
+          @if (authService.isAdmin()) {
           <p-button (click)="openAddEmployeeModal()" [label]="'DEPARTMENT.ADD_EMPLOYEE_BTN' | translate"
             icon="pi pi-plus" [outlined]="true" size="small"></p-button>
+          }
         </div>
 
         @if (isLoadingEmployees()) {
@@ -368,7 +372,7 @@
           </div>
 
           <div class="col-md-6">
-            <div (click)="activeSubTab.set('transfer')" class="card h-100 text-center p-3 border hover-card-action">
+            <button type="button" (click)="activeSubTab.set('transfer')" class="card h-100 text-center p-3 border hover-card-action w-100">
               <div class="fs-2 text-success mb-2">
                 <i class="pi pi-users"></i>
               </div>
@@ -379,7 +383,7 @@
                 {{ 'DEPARTMENT.ADD_METHOD_TRANSFER_DESC' | translate }}
                 {{ languageService.getDepartmentName(department()?.name) }}
               </p>
-            </div>
+            </button>
           </div>
         </div>
 

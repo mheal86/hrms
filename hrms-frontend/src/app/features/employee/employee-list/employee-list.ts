@@ -113,7 +113,7 @@ export class EmployeeList implements OnInit, OnDestroy {
   currentPage = signal(1);
   totalPages = signal(1);
   total = signal(0);
-  pageSize = 7;
+  pageSize = 10;
   first = 0;
   sortField = 'createdAt';
   sortOrder: 'asc' | 'desc' = 'desc';

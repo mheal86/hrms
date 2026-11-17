@@ -1,5 +1,7 @@
 {
   "COMMON": {
+    "DEPARTMENTS": "departments",
+    "CLEAR_FILTERS": "Clear filters",
     "SAVE": "Save",
     "CANCEL": "Cancel",
     "EDIT": "Edit",
@@ -9,6 +11,7 @@
     "ADD": "Add",
     "CLOSE": "Close",
     "CONFIRM": "Confirm",
+    "DETAILS": "Details",
     "SAVING": "Saving...",
     "LOADING": "Loading...",
     "VIEW_ALL": "View all",
@@ -68,6 +71,7 @@
     "AUDIT_LOGS": "Audit Logs"
   },
   "AUTH": {
+    "ERROR_CONNECTION": "Unable to connect to the server. Please try again later.",
     "TITLE": "HRMS",
     "SUBTITLE": "Human Resource Management System",
     "USERNAME_LABEL": "Username",
@@ -80,7 +84,9 @@
     "LOGGING_IN": "Logging in...",
     "ERROR_INVALID": "Invalid username or password",
     "ERROR_REQUIRED": "Username and password are required",
-    "ERROR_FAILED": "Login failed"
+    "ERROR_FAILED": "Login failed",
+    "WORKSPACE_TITLE": "People management, clear and connected.",
+    "WORKSPACE_DESCRIPTION": "Employee records, departments and activity history in one workspace."
   },
   "ROUTE_TITLE": {
     "LOGIN": "Login",
@@ -99,11 +105,14 @@
     "AUDIT_LOGS": "Audit Logs"
   },
   "DASHBOARD": {
+    "TITLE": "Workforce overview",
+    "SUBTITLE": "Keep track of your workforce, departments and recent employee profiles.",
+    "RECENT_SUBTITLE": "The most recently added employee profiles.",
     "EMPLOYEES_CARD": "Staff (Active / Total)",
     "DEPARTMENTS_CARD": "Departments",
     "ACCOUNTS_CARD": "Accounts",
     "CHART_TITLE": "Employees by Department",
-    "TABLE_TITLE": "Employees by Department",
+    "TABLE_TITLE": "Monthly Headcount Change",
     "RECENT_EMPLOYEES": "Recent Employees",
     "COL_DEPT": "Department",
     "COL_LAST_MONTH": "Last Month",
@@ -116,6 +125,9 @@
     "VIEW_ALL": "View all"
   },
   "EMPLOYEE": {
+    "CHECK_ACCOUNT_ERROR": "Unable to check the employee account. Please try again.",
+    "LIST_SUBTITLE": "Find employee profiles and manage the people in your organization.",
+    "TOGGLE_STATUS": "Change employment status for {{name}}",
     "ADD_TITLE": "Add New Employee",
     "EDIT_TITLE": "Edit Employee",
     "ADD_BTN": "Add Employee",
@@ -217,6 +229,8 @@
     "DEPT_MANAGER_VAL": "HR Department Manager"
   },
   "DEPARTMENT": {
+    "DELETE_EMP_ERROR": "Unable to delete the employee. Please try again.",
+    "LIST_SUBTITLE": "Manage departments and organizational information.",
     "ADD_TITLE": "Add New Department",
     "EDIT_TITLE": "Edit Department",
     "ADD_BTN": "Add Department",
@@ -286,6 +300,11 @@
     "STATS_NO_GENDER": "Not specified"
   },
   "PROFILE": {
+    "WORK_HISTORY": "Work history",
+    "WORK_HISTORY_EMPTY": "No department changes recorded yet.",
+    "COLLEAGUES": "Colleagues in my department",
+    "COLLEAGUES_EMPTY": "No other active colleagues in this department.",
+    "VIEW_ALL": "View all",
     "TITLE": "Personal Information",
     "EDIT_BTN": "Edit",
     "CHANGE_PASSWORD_BTN": "Change Password",
@@ -408,6 +427,7 @@
     "PR": "Responsible for communications, event organization, and brand promotion"
   },
   "AUDIT": {
+    "LIST_SUBTITLE": "Track changes and inspect activity across the system.",
     "TITLE": "Audit Logs",
     "SUBTITLE": "Track changes and user activity in HRMS",
     "SEARCH_PLACEHOLDER": "Search by user, action, target...",
@@ -502,6 +522,7 @@
     "STATUS_VALID": "Valid",
     "STATUS_INVALID": "Invalid",
     "ERRORS": {
+      "LOAD_EMAIL_FAILED": "Unable to load email addresses to check for duplicates. Please try again.",
       "INVALID_FORMAT": "File format is invalid. Only .xlsx and .xls are supported.",
       "EMPTY_FILE": "The file has no data.",
       "REQUIRED_FULL_NAME": "Full Name is required.",

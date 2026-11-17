@@ -1,8 +1,12 @@
 <div class="page-fade list-layout-container">
-  <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+  <header class="page-intro">
+    <h1>{{ 'SIDEBAR.DEPARTMENTS' | translate }}</h1>
+    <p>{{ 'DEPARTMENT.LIST_SUBTITLE' | translate }}</p>
+  </header>
+  <div class="list-toolbar">
     <div class="input-group search-input-group">
       <input pInputText type="text" class="form-control" [placeholder]="'DEPARTMENT.SEARCH_PLACEHOLDER' | translate"
-        [(ngModel)]="searchTerm" (keydown.enter)="onSearchTrigger()" />
+        [attr.aria-label]="'DEPARTMENT.SEARCH_PLACEHOLDER' | translate" [(ngModel)]="searchTerm" (keydown.enter)="onSearchTrigger()" />
       <p-button icon="pi pi-search" [outlined]="true" severity="secondary" (click)="onSearchTrigger()"
         [title]="'COMMON.SEARCH' | translate"></p-button>
     </div>
@@ -24,10 +28,10 @@
       <ng-template #header let-columns>
         <tr>
           @for (col of columns; track col.field) {
-          <th>{{ col.header | translate }}</th>
+          <th [style.width]="col.field === 'name' ? '280px' : null">{{ col.header | translate }}</th>
           }
           @if (authService.isAdmin()) {
-          <th class="text-center" style="width: 130px">
+          <th class="text-center" style="width: 120px">
             {{ 'DEPARTMENT.COL_ACTIONS' | translate }}
           </th>
           }
@@ -38,13 +42,13 @@
           @for (col of columns; track col.field) {
           <td>
             @if (col.field === 'name') {
-            <a [routerLink]="['/departments', dept._id]" class="text-decoration-none">{{
+            <a [routerLink]="['/departments', dept._id]" class="fw-semibold text-main text-decoration-none">{{
               languageService.getDepartmentName(dept.name)
               }}</a>
             } @else if (col.field === 'description') {
-            {{ languageService.getDepartmentDesc(dept.name, dept.description) }}
+            <span class="text-secondary">{{ languageService.getDepartmentDesc(dept.name, dept.description) }}</span>
             } @else {
-            {{ dept[col.field] }}
+            <span class="text-secondary">{{ dept[col.field] }}</span>
             }
           </td>
           }
@@ -67,11 +71,11 @@
       'DEPARTMENT.TOTAL_COUNT' | translate: { count: total() }
       }}</span>
     <p-paginator (onPageChange)="onPageChange($event)" [first]="first" [rows]="pageSize" [totalRecords]="total()"
-      [rowsPerPageOptions]="[5, 10, 20, 30]" styleClass="border-none bg-transparent p-0" />
+      [rowsPerPageOptions]="[5, 10, 20, 50]" styleClass="border-none bg-transparent p-0" />
   </div>
   }
 
-  @if (!isLoading() && departments().length === 0) {
+  @if (!isLoading() && !errorMessage() && departments().length === 0) {
   <div class="empty-state">
     <i class="pi pi-building text-muted"></i>
     <p class="mt-3 text-muted">{{ 'DEPARTMENT.EMPTY_STATE' | translate }}</p>

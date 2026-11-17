@@ -1,9 +1,9 @@
 <div class="page-fade">
-  <h3>
+  <header class="page-intro"><h1>
     {{
     isEditMode() ? ('DEPARTMENT.EDIT_TITLE' | translate) : ('DEPARTMENT.ADD_TITLE' | translate)
     }}
-  </h3>
+  </h1></header>
 
   @if (isLoading()) {
   <app-spinner></app-spinner>

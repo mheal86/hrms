@@ -1,22 +1,21 @@
-@use '../../../../styles/mixins' as m;
-@use '../../../../styles/variables' as v;
-
-.avatar-initials-lg,
-.avatar-img {
-  @include m.avatar-base(120px);
-  box-shadow: v.$shadow-indigo-sm;
-  transition: v.$transition-slow;
-
-  &:hover {
-    box-shadow: v.$shadow-indigo-md;
-  }
-}
-
-.avatar-initials-lg {
-  @include m.avatar-initials(120px, 36px);
-  margin: 0 auto;
-}
-
-.avatar-img {
-  object-fit: cover;
-}
+.employee-detail-container { width: 100%; max-width: 1320px; margin: 0 auto; }
+.profile-hero-card { background: var(--surface-card); border-radius: 12px; box-shadow: none; }
+.avatar-wrapper { position: relative; display: inline-flex; flex-shrink: 0; }
+.avatar-initials-lg, .avatar-img { width: 80px; height: 80px; border-radius: 14px; object-fit: cover; box-shadow: none; border: 1px solid var(--border-color); }
+.avatar-initials-lg { display: grid; place-items: center; color: var(--color-primary); background: var(--color-primary-subtle); font-size: 1.625rem; font-weight: 600; }
+.status-indicator { position: absolute; bottom: -3px; right: -3px; width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--surface-card); }
+.status-active { background: var(--color-success); }
+.status-inactive { background: var(--text-disabled); }
+.hero-meta-items { gap: 20px !important; }
+.hero-meta-pill { display: inline-flex; align-items: center; gap: 7px; font-size: .8125rem; }
+.hero-meta-pill i { font-size: .875rem; }
+.meta-dot { display: none; }
+.info-card { border: 1px solid var(--border-color); border-radius: 12px; background: var(--surface-card); box-shadow: none; }
+.info-card .card-header { border-color: var(--border-color); }
+.info-card h5 { font-size: 1rem; font-weight: 700 !important; }
+.info-list { display: flex; flex-direction: column; }
+.info-item { display: flex; align-items: baseline; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--divider); }
+.info-item:first-child { padding-top: 0; }
+.info-item:last-child { border-bottom: 0; padding-bottom: 0; }
+.info-label { width: 136px; flex: 0 0 136px; color: var(--text-muted); font-size: .875rem; }
+.info-value { flex: 1; min-width: 0; color: var(--text-main); font-size: .875rem; font-weight: 500; overflow-wrap: anywhere; }

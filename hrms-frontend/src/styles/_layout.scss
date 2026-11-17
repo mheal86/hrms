@@ -22,7 +22,7 @@
 /* ─── Pagination ─── */
 .pagination {
   .page-link {
-    background-color: var(--bg-secondary);
+    background-color: var(--surface-card);
     color: var(--color-primary);
     border-color: var(--border-color);
     font-weight: 500;
@@ -31,7 +31,7 @@
     &:hover {
       background-color: var(--color-primary-subtle);
       color: var(--color-primary-hover);
-      border-color: rgba(79, 70, 229, 0.3);
+      border-color: rgba(11, 113, 102, 0.3);
     }
 
     .dark-theme & {
@@ -43,8 +43,8 @@
     &.active .page-link {
       background-color: var(--color-primary);
       border-color: var(--color-primary);
-      color: var(--text-on-primary);
-      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(11, 113, 102, 0.3);
     }
 
     &.disabled .page-link {
@@ -58,45 +58,26 @@
 /* ─── Avatar ─── */
 .avatar-initials,
 .avatar-initials-lg {
-  background: linear-gradient(135deg, var(--color-primary-active) 0%, var(--color-primary) 100%);
-  color: var(--text-on-primary);
-  transition: background #{$transition-slow};
+  background: var(--color-primary-subtle);
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: none;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
 }
 
 /* ─── Animations ─── */
 .page-fade {
-  animation: fadeInPage 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: none;
 }
 
 @keyframes fadeInPage {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-.table tbody tr {
-  animation: fadeInRow 0.3s cubic-bezier(0.16, 1, 0.3, 1) backwards;
-
-  @for $i from 1 through 10 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.02}s;
-    }
-  }
-}
-
-@keyframes fadeInRow {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 
@@ -122,7 +103,7 @@
   border: none;
   color: var(--text-secondary);
   padding: 6px 10px;
-  border-radius: $radius-sm; // 6px
+  border-radius: $radius-sm;
   cursor: pointer;
   transition:
     background-color #{$transition-normal},
@@ -155,25 +136,26 @@
   margin-top: 4px;
   background-color: var(--surface-card);
   border: 1px solid var(--border-color);
-  border-radius: $radius-lg; // 8px
+  border-radius: $radius-md;
   box-shadow: var(--shadow-dropdown);
-  min-width: 130px;
-  padding: 6px 0;
-  z-index: $z-dropdown; // 100
+  min-width: 140px;
+  padding: 6px;
+  z-index: $z-dropdown;
   animation: dropdownFadeIn 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 
   .dropdown-item {
     width: 100%;
-    padding: 8px 16px;
+    padding: 8px 12px;
     display: flex;
     align-items: center;
     gap: 8px;
     background: none;
     border: none;
+    border-radius: $radius-sm;
     color: var(--text-secondary);
     text-align: left;
     text-decoration: none;
-    font-size: $font-normal; // 0.875rem
+    font-size: $font-normal;
     cursor: pointer;
     transition:
       background-color #{$transition-fast},
@@ -197,6 +179,33 @@
   }
 }
 
+/* ─── Empty State ─── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 24px;
+  background-color: var(--surface-card);
+  border: 1px dashed var(--border-color);
+  border-radius: $radius-xl;
+  text-align: center;
+  box-shadow: none;
+
+  i {
+    font-size: 2.75rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: $font-normal;
+    color: var(--text-muted);
+    margin: 0;
+  }
+}
+
 /* ─── Scrollbars & Layout ─── */
 .custom-scrollbar {
   @include custom-scrollbar;
@@ -213,18 +222,36 @@
 }
 
 @mixin list-layout-desktop {
-  .list-layout-container {
-    height: calc(100vh - 138px);
+  main:has(.list-layout-container) {
     display: flex;
     flex-direction: column;
-    overflow: visible;
+    height: calc(100dvh - var(--navbar-height));
+    overflow: hidden;
 
-    > div:first-child {
+    > app-breadcrumb {
+      flex: 0 0 auto;
+    }
+
+    > :has(> .list-layout-container) {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+  }
+
+  .list-layout-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+
+    > .page-intro,
+    > .list-toolbar {
       flex: 0 0 auto;
     }
 
     .scrollable-table-container {
-      flex: 1 1 0;
+      flex: 0 1 auto;
       min-height: 0;
       max-height: none;
       overflow-y: auto;
@@ -232,6 +259,93 @@
 
     .paginator-row {
       flex: 0 0 auto;
+      margin-top: auto !important;
+      padding-top: 16px;
+      background: var(--bg-primary);
+    }
+  }
+}
+
+.page-intro {
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0 0 6px;
+    font-size: 1.75rem;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-normal;
+    line-height: 1.6;
+    max-width: 75ch;
+  }
+}
+
+.list-toolbar,
+.list-filters,
+.list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.list-toolbar {
+  justify-content: space-between;
+  margin-bottom: 16px;
+  row-gap: 16px;
+
+  .search-input-group {
+    width: 320px;
+    max-width: 100%;
+  }
+}
+
+.list-filters {
+  flex: 1 1 650px;
+}
+
+.list-actions {
+  flex-shrink: 0;
+}
+
+.page-intro-with-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+@media (max-width: 767.98px) {
+  .page-intro {
+    margin-bottom: 20px;
+  }
+
+  .list-filters {
+    flex-basis: 100%;
+  }
+
+  .list-toolbar .search-input-group {
+    width: 100%;
+  }
+
+  .list-actions {
+    gap: 8px;
+  }
+
+  .paginator-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 12px;
+
+    p-paginator {
+      max-width: 100%;
     }
   }
 }

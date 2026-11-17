@@ -4,6 +4,7 @@
 .dialog-pre-container {
   border: 1px solid var(--border-color);
   background-color: var(--input-bg);
+  border-radius: v.$radius-md;
 }
 
 .details-dialog-pre {
@@ -37,78 +38,77 @@
       }
 
       .p-datatable-table {
-        border-collapse: separate;
-        border-spacing: 0;
+        border-collapse: collapse;
         width: 100%;
       }
 
       .p-datatable-thead > tr > th {
         background-color: var(--table-header-bg);
         color: var(--table-header-text);
-        font-weight: 600;
-        font-size: v.$font-sm;
-        padding: v.$space-sm v.$space-md;
-        border-style: solid;
-        border-color: var(--border-color);
-        border-width: 0 0 1px 1px;
+        font-weight: 700;
+        font-size: .8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 10px 14px;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
       }
 
       .p-datatable-tbody > tr > td {
-        padding: v.$space-sm v.$space-md;
+        padding: 10px 14px;
         font-size: v.$font-sm;
         color: var(--text-main);
         vertical-align: middle;
-        border-style: solid;
-        border-color: var(--border-color);
-        border-width: 0 0 1px 1px;
-      }
-
-      .p-datatable-thead > tr > th:first-child,
-      .p-datatable-tbody > tr > td:first-child {
-        border-left-width: 0;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
       }
 
       .p-datatable-tbody > tr:last-child > td {
-        border-bottom-width: 0;
+        border-bottom: none;
       }
 
       .diff-field {
-        font-weight: 500;
+        font-weight: 600;
         color: var(--text-secondary);
-        background-color: var(--bg-secondary);
+        background-color: var(--surface-hover);
+        width: 30%;
       }
 
       .diff-before {
         color: var(--color-error);
         background-color: var(--color-error-bg);
-        opacity: 0.85;
+        text-decoration: line-through;
+        font-weight: 500;
       }
 
       .diff-after {
         color: var(--color-success);
         background-color: var(--color-success-bg);
-        font-weight: 500;
+        font-weight: 600;
       }
     }
   }
 
   .details-pair-item {
-    padding: v.$space-sm 0;
-    border-bottom: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: v.$radius-md;
+    background-color: var(--surface-hover);
 
     .pair-label {
       color: var(--text-muted);
       font-size: v.$font-xs;
       font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
 
     .pair-value {
       color: var(--text-main);
       font-size: v.$font-sm;
       font-weight: 600;
-      margin-top: 4px;
+      margin-top: 2px;
       word-break: break-all;
-      min-height: 20px;
     }
   }
 }

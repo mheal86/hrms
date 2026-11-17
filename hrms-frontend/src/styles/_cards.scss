@@ -1,19 +1,28 @@
 @use "variables" as *;
 
 %card-base {
-  background-color: var(--bg-secondary);
+  background-color: var(--surface-card);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-card);
-  border-radius: $radius-xxl; // 12px
-  transition: all 0.25s ease;
+  border-radius: $radius-xl; // 12px
   color: var(--text-main);
-
-  &:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
-  }
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card {
   @extend %card-base;
+
+  &.card-interactive,
+  &.hover-card-action {
+    cursor: pointer;
+    transition: box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--color-primary-light, #{$indigo-400});
+    }
+  }
 }

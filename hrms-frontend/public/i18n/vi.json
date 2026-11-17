@@ -1,5 +1,7 @@
 {
   "COMMON": {
+    "DEPARTMENTS": "phòng ban",
+    "CLEAR_FILTERS": "Xóa bộ lọc",
     "SAVE": "Lưu",
     "CANCEL": "Hủy",
     "EDIT": "Chỉnh sửa",
@@ -9,6 +11,7 @@
     "ADD": "Thêm",
     "CLOSE": "Đóng",
     "CONFIRM": "Xác nhận",
+    "DETAILS": "Chi tiết",
     "SAVING": "Đang lưu...",
     "LOADING": "Đang tải...",
     "VIEW_ALL": "Xem tất cả",
@@ -68,6 +71,7 @@
     "AUDIT_LOGS": "Nhật ký hoạt động"
   },
   "AUTH": {
+    "ERROR_CONNECTION": "Không kết nối được máy chủ. Vui lòng thử lại sau.",
     "TITLE": "HRMS",
     "SUBTITLE": "Hệ thống quản lý nhân sự",
     "USERNAME_LABEL": "Tên đăng nhập",
@@ -80,7 +84,9 @@
     "LOGGING_IN": "Đang đăng nhập...",
     "ERROR_INVALID": "Tài khoản hoặc mật khẩu không chính xác",
     "ERROR_REQUIRED": "Tên đăng nhập và mật khẩu không được để trống",
-    "ERROR_FAILED": "Đăng nhập thất bại"
+    "ERROR_FAILED": "Đăng nhập thất bại",
+    "WORKSPACE_TITLE": "Quản lý nhân sự, rõ ràng và kết nối.",
+    "WORKSPACE_DESCRIPTION": "Hồ sơ nhân viên, cơ cấu phòng ban và lịch sử hoạt động trong một không gian làm việc."
   },
   "ROUTE_TITLE": {
     "LOGIN": "Đăng nhập",
@@ -99,11 +105,14 @@
     "AUDIT_LOGS": "Nhật ký hoạt động"
   },
   "DASHBOARD": {
+    "TITLE": "Tổng quan nhân sự",
+    "SUBTITLE": "Theo dõi nhân sự, phòng ban và những hồ sơ mới nhất.",
+    "RECENT_SUBTITLE": "Các hồ sơ nhân viên được thêm gần đây.",
     "EMPLOYEES_CARD": "Nhân sự (Hoạt động / Tổng)",
     "DEPARTMENTS_CARD": "Phòng ban",
     "ACCOUNTS_CARD": "Tài khoản",
     "CHART_TITLE": "Biểu đồ nhân viên theo phòng ban",
-    "TABLE_TITLE": "Nhân viên theo phòng ban",
+    "TABLE_TITLE": "Biến động nhân sự theo tháng",
     "RECENT_EMPLOYEES": "Nhân viên mới nhất",
     "COL_DEPT": "Phòng ban",
     "COL_LAST_MONTH": "Tháng trước",
@@ -116,6 +125,9 @@
     "VIEW_ALL": "Xem tất cả"
   },
   "EMPLOYEE": {
+    "CHECK_ACCOUNT_ERROR": "Không thể kiểm tra tài khoản của nhân viên. Vui lòng thử lại.",
+    "LIST_SUBTITLE": "Tra cứu hồ sơ và quản lý nhân viên trong tổ chức.",
+    "TOGGLE_STATUS": "Đổi trạng thái làm việc của {{name}}",
     "ADD_TITLE": "Thêm nhân viên mới",
     "EDIT_TITLE": "Sửa nhân viên",
     "ADD_BTN": "Thêm nhân viên",
@@ -217,6 +229,8 @@
     "DEPT_MANAGER_VAL": "Trưởng phòng Nhân sự"
   },
   "DEPARTMENT": {
+    "DELETE_EMP_ERROR": "Không thể xóa nhân viên. Vui lòng thử lại.",
+    "LIST_SUBTITLE": "Quản lý các phòng ban và thông tin tổ chức.",
     "ADD_TITLE": "Thêm phòng ban mới",
     "EDIT_TITLE": "Sửa phòng ban",
     "ADD_BTN": "Thêm phòng ban",
@@ -286,6 +300,11 @@
     "STATS_NO_GENDER": "Không xác định"
   },
   "PROFILE": {
+    "WORK_HISTORY": "Lịch sử công tác",
+    "WORK_HISTORY_EMPTY": "Chưa có thay đổi phòng ban nào.",
+    "COLLEAGUES": "Đồng nghiệp cùng phòng ban",
+    "COLLEAGUES_EMPTY": "Chưa có đồng nghiệp đang làm việc khác trong phòng ban.",
+    "VIEW_ALL": "Xem tất cả",
     "TITLE": "Thông tin cá nhân",
     "EDIT_BTN": "Chỉnh sửa",
     "CHANGE_PASSWORD_BTN": "Đổi mật khẩu",
@@ -408,6 +427,7 @@
     "PR": "Phòng chịu trách nhiệm truyền thông, tổ chức sự kiện và quảng bá phát triển thương hiệu"
   },
   "AUDIT": {
+    "LIST_SUBTITLE": "Theo dõi các thay đổi và xem chi tiết hoạt động trong hệ thống.",
     "TITLE": "Nhật ký hoạt động",
     "SUBTITLE": "Theo dõi lịch sử thay đổi của hệ thống HRMS",
     "SEARCH_PLACEHOLDER": "Tìm theo người dùng, hành động, đối tượng...",
@@ -502,6 +522,7 @@
     "STATUS_VALID": "Hợp lệ",
     "STATUS_INVALID": "Có lỗi",
     "ERRORS": {
+      "LOAD_EMAIL_FAILED": "Không tải được danh sách email để kiểm tra trùng lặp. Vui lòng thử lại.",
       "INVALID_FORMAT": "File không đúng định dạng. Chỉ hỗ trợ file .xlsx và .xls.",
       "EMPTY_FILE": "File không có dữ liệu.",
       "REQUIRED_FULL_NAME": "Họ tên là bắt buộc.",

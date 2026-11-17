@@ -5,34 +5,36 @@
     .p-breadcrumb {
       background: transparent;
       border: none;
-      padding: 0 0 15px 0;
+      padding: 0 0 14px 0;
 
       .p-breadcrumb-item-link {
-        color: var(--color-primary);
+        color: var(--text-muted);
         font-weight: 500;
-        transition: color 0.2s ease;
+        font-size: 0.85rem;
+        transition: color 0.15s ease;
 
         &:hover {
-          color: var(--color-primary-hover);
-          text-decoration: underline;
+          color: var(--color-primary);
+          text-decoration: none;
         }
       }
 
       .p-breadcrumb-item {
         &:last-child {
-
           .p-breadcrumb-item-link,
           span {
             color: var(--text-main);
-            font-weight: 800;
+            font-weight: 600;
             pointer-events: none;
+            letter-spacing: -0.01em;
           }
         }
       }
 
       .p-breadcrumb-separator {
-        color: var(--text-muted);
+        color: var(--border-strong);
         margin: 0 8px;
+        font-size: 0.75rem;
       }
     }
   }

@@ -240,6 +240,7 @@ export class DepartmentDetail implements OnInit, OnDestroy {
     const baseOptions: any = {
       responsive: true,
       maintainAspectRatio: false,
+      animation: false,
       plugins: {
         legend: {
           display: !isBar,

@@ -1,4 +1,4 @@
-<div class="page-fade">
+<div class="page-fade employee-detail-container">
   @if (isLoading()) {
   <app-spinner></app-spinner>
   }
@@ -7,42 +7,82 @@
   }
 
   @if (employee(); as emp) {
-  <!-- 1. Employee Header at the top (full-width) -->
-  <div class="card mb-4">
-    <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between gap-4 p-4">
-      <div class="d-flex flex-column flex-sm-row align-items-center gap-4 text-center text-sm-start">
-        @if (emp.avatarUrl) {
-        <img [src]="baseUrl + emp.avatarUrl" class="avatar-img m-0" alt="Avatar" />
-        } @else {
-        <div class="avatar-initials-lg m-0">
-          {{ getInitials(emp.firstName, emp.lastName) }}
-        </div>
-        }
-        <div>
-          <h3 class="mb-1 text-main fw-bold">{{ emp.firstName }} {{ emp.lastName }}</h3>
-          <p class="text-secondary mb-2 fw-medium">
-            <i class="pi pi-briefcase me-1 text-primary"></i>
-            {{ (languageService.getPositionTranslation(emp.position) | translate) || '-' }}
-            <span class="mx-2 text-muted">•</span>
-            <i class="pi pi-building me-1 text-primary"></i>
-            {{ languageService.getDepartmentName(emp.department) }}
-          </p>
-          <p
-            class="text-muted mb-3 small d-flex align-items-center gap-2 justify-content-center justify-content-sm-start">
-            <i class="pi pi-envelope text-secondary"></i>
-            <span>{{ emp.email }}</span>
-          </p>
-          <p-tag [severity]="emp.status === 'ACTIVE' ? 'success' : 'secondary'"
-            [value]="emp.status === 'ACTIVE' ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate)"
-            [rounded]="true"></p-tag>
-        </div>
-      </div>
+  <!-- 0. Top Navigation & Action Row -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <p-button type="button" (click)="goBack()" [label]="'COMMON.BACK' | translate" icon="pi pi-arrow-left"
+      [outlined]="true" severity="secondary" size="small"></p-button>
 
-      <div class="d-flex flex-column flex-sm-row gap-2 align-self-stretch align-self-md-center justify-content-center">
-        <p-button type="button" [label]="'COMMON.ACTIONS' | translate" icon="pi pi-cog" size="small"
-          (click)="menu.toggle($event)"></p-button>
-        <p-button type="button" (click)="goBack()" [label]="'COMMON.BACK' | translate" icon="pi pi-arrow-left"
-          [outlined]="true" severity="secondary" size="small"></p-button>
+    <div class="d-flex align-items-center gap-2">
+      @if (authService.isAdmin() && isActiveEmployee()) {
+      <p-button type="button" [label]="'EMPLOYEE.TRANSFER_TITLE' | translate" icon="pi pi-arrows-h" [outlined]="true"
+        severity="warn" size="small" (click)="openTransferDialog()"></p-button>
+      }
+      @if (authService.isAdmin()) {
+      <p-button type="button" [label]="'COMMON.ACTIONS' | translate" icon="pi pi-cog" size="small"
+        (click)="menu.toggle($event)"></p-button>
+      }
+    </div>
+  </div>
+
+  <!-- 1. Employee Header at the top (full-width) -->
+  <div class="card mb-4 profile-hero-card">
+    <div class="card-body p-4">
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-4">
+        <div class="d-flex flex-column flex-sm-row align-items-center gap-4 text-center text-sm-start flex-grow-1">
+          <div class="avatar-wrapper position-relative">
+            @if (emp.avatarUrl) {
+            <img [src]="baseUrl + emp.avatarUrl" class="avatar-img m-0" alt="Avatar" />
+            } @else {
+            <div class="avatar-initials-lg m-0">
+              {{ getInitials(emp.firstName, emp.lastName) }}
+            </div>
+            }
+            <span class="status-indicator" [class.status-active]="emp.status === 'ACTIVE'"
+              [class.status-inactive]="emp.status === 'INACTIVE'"></span>
+          </div>
+
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2 justify-content-center justify-content-sm-start">
+              <h3 class="mb-0 text-main fw-bold">{{ emp.firstName }} {{ emp.lastName }}</h3>
+              <p-tag [severity]="emp.status === 'ACTIVE' ? 'success' : 'secondary'"
+                [value]="emp.status === 'ACTIVE' ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate)"
+                [rounded]="true"></p-tag>
+            </div>
+
+            <div class="text-secondary mb-3 fw-medium d-flex flex-wrap align-items-center gap-2 justify-content-center justify-content-sm-start">
+              <span>
+                <i class="pi pi-briefcase me-1 text-primary"></i>
+                {{ (languageService.getPositionTranslation(emp.position) | translate) || '-' }}
+              </span>
+              <span class="text-muted">•</span>
+              <span>
+                <i class="pi pi-building me-1 text-primary"></i>
+                {{ languageService.getDepartmentName(emp.department) }}
+              </span>
+            </div>
+
+            <div class="d-flex flex-wrap align-items-center gap-3 text-muted small justify-content-center justify-content-sm-start hero-meta-items">
+              <span class="hero-meta-pill">
+                <i class="pi pi-envelope text-primary"></i>
+                <span class="text-secondary">{{ emp.email }}</span>
+              </span>
+              @if (emp.phone) {
+              <span class="meta-dot text-muted">•</span>
+              <span class="hero-meta-pill">
+                <i class="pi pi-phone text-primary"></i>
+                <span class="text-secondary">{{ emp.phone }}</span>
+              </span>
+              }
+              @if (emp.hireDate) {
+              <span class="meta-dot text-muted">•</span>
+              <span class="hero-meta-pill">
+                <i class="pi pi-calendar text-primary"></i>
+                <span class="text-secondary">{{ 'EMPLOYEE.FIELD_HIRE_DATE' | translate }}: {{ emp.hireDate | date: 'dd/MM/yyyy' }}</span>
+              </span>
+              }
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -50,10 +90,20 @@
   <!-- 2. Tabs and content using PrimeNG p-tabs -->
   <p-tabs [value]="activeTab()" (valueChange)="onTabChange($event)">
     <p-tablist>
-      <p-tab value="0">{{ 'EMPLOYEE.TAB_OVERVIEW' | translate }}</p-tab>
-      <p-tab value="1">{{ 'EMPLOYEE.TAB_PERSONAL' | translate }}</p-tab>
-      <p-tab value="2">{{ 'EMPLOYEE.TAB_DEPARTMENT' | translate }}</p-tab>
-      <p-tab value="3">{{ 'EMPLOYEE.TAB_ACTIVITY' | translate }}</p-tab>
+      <p-tab value="0">
+        <i class="pi pi-th-large me-2"></i>{{ 'EMPLOYEE.TAB_OVERVIEW' | translate }}
+      </p-tab>
+      <p-tab value="1">
+        <i class="pi pi-user me-2"></i>{{ 'EMPLOYEE.TAB_PERSONAL' | translate }}
+      </p-tab>
+      <p-tab value="2">
+        <i class="pi pi-briefcase me-2"></i>{{ 'EMPLOYEE.TAB_DEPARTMENT' | translate }}
+      </p-tab>
+      @if (authService.isAdmin()) {
+      <p-tab value="3">
+        <i class="pi pi-history me-2"></i>{{ 'EMPLOYEE.TAB_ACTIVITY' | translate }}
+      </p-tab>
+      }
     </p-tablist>
 
     <p-tabpanels styleClass="p-0">
@@ -63,85 +113,64 @@
           <div class="row g-4">
             <!-- Contact Info Card -->
             <div class="col-md-6">
-              <div class="card h-full shadow-sm">
-                <div class="card-body p-4">
-                  <h5 class="card-title fw-bold text-main mb-3 pb-2 border-bottom d-flex align-items-center gap-2">
+              <div class="card h-100 shadow-sm info-card">
+                <div class="card-header bg-transparent py-3 px-4 border-bottom">
+                  <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
                     <i class="pi pi-phone text-primary"></i>
                     {{ 'EMPLOYEE.CONTACT_INFO' | translate }}
                   </h5>
-                  <p-table [value]="[emp]" styleClass="p-datatable-sm detail-table border-0">
-                    <ng-template #body let-e>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0" style="width: 140px">
-                          {{ 'EMPLOYEE.FIELD_EMAIL' | translate }}
-                        </td>
-                        <td class="text-main border-0">{{ e.email }}</td>
-                      </tr>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0">
-                          {{ 'EMPLOYEE.FIELD_PHONE' | translate }}
-                        </td>
-                        <td class="text-main border-0">{{ e.phone || '-' }}</td>
-                      </tr>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0">
-                          {{ 'EMPLOYEE.FIELD_ADDRESS' | translate }}
-                        </td>
-                        <td class="text-main border-0">{{ e.address || '-' }}</td>
-                      </tr>
-                    </ng-template>
-                  </p-table>
+                </div>
+                <div class="card-body p-4">
+                  <div class="info-list">
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_EMAIL' | translate }}</span>
+                      <span class="info-value text-main fw-medium">{{ emp.email }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_PHONE' | translate }}</span>
+                      <span class="info-value">{{ emp.phone || '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_ADDRESS' | translate }}</span>
+                      <span class="info-value">{{ emp.address || '-' }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Work Info Card -->
             <div class="col-md-6">
-              <div class="card h-full shadow-sm">
-                <div class="card-body p-4">
-                  <h5 class="card-title fw-bold text-main mb-3 pb-2 border-bottom d-flex align-items-center gap-2">
+              <div class="card h-100 shadow-sm info-card">
+                <div class="card-header bg-transparent py-3 px-4 border-bottom">
+                  <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
                     <i class="pi pi-briefcase text-primary"></i>
                     {{ 'EMPLOYEE.TAB_DEPARTMENT' | translate }}
                   </h5>
-                  <p-table [value]="[emp]" styleClass="p-datatable-sm detail-table border-0">
-                    <ng-template #body let-e>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0" style="width: 140px">
-                          {{ 'EMPLOYEE.FIELD_DEPARTMENT' | translate }}
-                        </td>
-                        <td class="text-main border-0">{{ languageService.getDepartmentName(e.department) }}</td>
-                      </tr>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0">
-                          {{ 'EMPLOYEE.FIELD_POSITION' | translate }}
-                        </td>
-                        <td class="text-main border-0">
-                          {{ (languageService.getPositionTranslation(e.position) | translate) || '-' }}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0">
-                          {{ 'EMPLOYEE.FIELD_HIRE_DATE' | translate }}
-                        </td>
-                        <td class="text-main border-0">{{ e.hireDate ? (e.hireDate | date: 'dd/MM/yyyy') : '-' }}</td>
-                      </tr>
-                      <tr>
-                        <td class="fw-bold text-secondary border-0">
-                          {{ 'EMPLOYEE.FIELD_STATUS' | translate }}
-                        </td>
-                        <td class="text-main border-0">
-                          <span class="badge" [class.badge-success]="e.status === 'ACTIVE'"
-                            [class.badge-secondary]="e.status === 'INACTIVE'">
-                            {{
-                            e.status === 'ACTIVE'
-                            ? ('COMMON.ACTIVE' | translate)
-                            : ('COMMON.INACTIVE' | translate)
-                            }}
-                          </span>
-                        </td>
-                      </tr>
-                    </ng-template>
-                  </p-table>
+                </div>
+                <div class="card-body p-4">
+                  <div class="info-list">
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_DEPARTMENT' | translate }}</span>
+                      <span class="info-value fw-semibold text-primary">{{ languageService.getDepartmentName(emp.department) }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_POSITION' | translate }}</span>
+                      <span class="info-value">{{ (languageService.getPositionTranslation(emp.position) | translate) || '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_HIRE_DATE' | translate }}</span>
+                      <span class="info-value">{{ emp.hireDate ? (emp.hireDate | date: 'dd/MM/yyyy') : '-' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">{{ 'EMPLOYEE.FIELD_STATUS' | translate }}</span>
+                      <span class="info-value">
+                        <p-tag [severity]="emp.status === 'ACTIVE' ? 'success' : 'secondary'"
+                          [value]="emp.status === 'ACTIVE' ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate)"
+                          [rounded]="true"></p-tag>
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -152,33 +181,50 @@
       <!-- Tab 1: Personal Info Formly Form -->
       <p-tabpanel value="1">
         <div class="pt-3">
-          <form [formGroup]="personalForm" (ngSubmit)="savePersonalInfo()">
-            <fieldset [disabled]="!isEditingPersonal()">
-              <formly-form [form]="personalForm" [fields]="personalFields" [model]="personalModel"></formly-form>
-            </fieldset>
-            @if (isEditingPersonal()) {
-            <div class="d-flex gap-2 mt-3 justify-content-end">
-              <p-button type="button" [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [outlined]="true"
-                severity="secondary" size="small" (click)="cancelEditPersonal()"></p-button>
-              <p-button type="submit" [label]="'COMMON.SAVE' | translate" icon="pi pi-check" severity="success"
-                size="small" [loading]="isSavingPersonal()"></p-button>
-            </div>
-            } @else {
-            @if (isActiveEmployee()) {
-            <div class="d-flex mt-3 justify-content-end">
+          <div class="card shadow-sm info-card">
+            <div class="card-header bg-transparent py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+              <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
+                <i class="pi pi-user text-primary"></i>
+                {{ 'EMPLOYEE.TAB_PERSONAL' | translate }}
+              </h5>
+              @if (!isEditingPersonal() && isActiveEmployee() && authService.isAdmin()) {
               <p-button type="button" [label]="'COMMON.EDIT' | translate" icon="pi pi-pencil" size="small"
                 (click)="startEditPersonal()"></p-button>
+              }
             </div>
-            }
-            }
-          </form>
+            <div class="card-body p-4">
+              <form [formGroup]="personalForm" (ngSubmit)="savePersonalInfo()">
+                <fieldset [disabled]="!isEditingPersonal()">
+                  <formly-form [form]="personalForm" [fields]="personalFields" [model]="personalModel"></formly-form>
+                </fieldset>
+                @if (isEditingPersonal()) {
+                <div class="d-flex gap-2 mt-4 justify-content-end">
+                  <p-button type="button" [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [outlined]="true"
+                    severity="secondary" size="small" (click)="cancelEditPersonal()"></p-button>
+                  <p-button type="submit" [label]="'COMMON.SAVE' | translate" icon="pi pi-check" severity="success"
+                    size="small" [loading]="isSavingPersonal()"></p-button>
+                </div>
+                }
+              </form>
+            </div>
+          </div>
         </div>
       </p-tabpanel>
 
       <!-- Tab 2: Department/Work Info Formly Form & Transfer History -->
       <p-tabpanel value="2">
-        <div class="pt-3">
-          <div class="card mb-4 shadow-sm">
+        <div class="pt-3 d-flex flex-column gap-4">
+          <div class="card shadow-sm info-card">
+            <div class="card-header bg-transparent py-3 px-4 border-bottom d-flex justify-content-between align-items-center">
+              <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
+                <i class="pi pi-briefcase text-primary"></i>
+                {{ 'EMPLOYEE.TAB_DEPARTMENT' | translate }}
+              </h5>
+              @if (!isEditingDepartment() && isActiveEmployee() && authService.isAdmin()) {
+              <p-button type="button" [label]="'COMMON.EDIT' | translate" icon="pi pi-pencil" size="small"
+                (click)="startEditDepartment()"></p-button>
+              }
+            </div>
             <div class="card-body p-4">
               <form [formGroup]="departmentForm" (ngSubmit)="saveDepartmentInfo()">
                 <fieldset [disabled]="!isEditingDepartment()">
@@ -186,36 +232,31 @@
                     [model]="departmentModel"></formly-form>
                 </fieldset>
                 @if (isEditingDepartment()) {
-                <div class="d-flex gap-2 mt-3 justify-content-end">
+                <div class="d-flex gap-2 mt-4 justify-content-end">
                   <p-button type="button" [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [outlined]="true"
                     severity="secondary" size="small" (click)="cancelEditDepartment()"></p-button>
                   <p-button type="submit" [label]="'COMMON.SAVE' | translate" icon="pi pi-check" severity="success"
                     size="small" [loading]="isSavingDepartment()"></p-button>
                 </div>
-                } @else {
-                @if (isActiveEmployee()) {
-                <div class="d-flex mt-3 justify-content-end">
-                  <p-button type="button" [label]="'COMMON.EDIT' | translate" icon="pi pi-pencil" size="small"
-                    (click)="startEditDepartment()"></p-button>
-                </div>
-                }
                 }
               </form>
             </div>
           </div>
 
           <!-- Transfer History inside Work tab -->
-          <div class="card shadow-sm">
-            <div class="card-body p-4">
-              <h5 class="card-title fw-bold text-main mb-3 d-flex align-items-center gap-2">
+          <div class="card shadow-sm info-card">
+            <div class="card-header bg-transparent py-3 px-4 border-bottom">
+              <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
                 <i class="pi pi-history text-primary"></i>
                 {{ 'EMPLOYEE.HISTORY_TITLE' | translate }}
               </h5>
+            </div>
+            <div class="card-body p-4">
               @if (isLoadingHistory()) {
               <app-spinner></app-spinner>
               } @else if (history().length > 0) {
               <div class="table-responsive">
-                <p-table [columns]="historyCols" [value]="history()" styleClass="p-datatable-sm">
+                <p-table [columns]="historyCols" [value]="history()" styleClass="p-datatable-sm p-datatable-hoverable">
                   <ng-template #header let-columns>
                     <tr>
                       @for (col of columns; track col.field) {
@@ -230,22 +271,16 @@
                         @switch (col.field) {
                         @case ('fromDepartment') {
                         @if (h.fromDepartment) {
-                        <span>{{
-                          languageService.getDepartmentName(h.fromDepartment)
-                          }}</span>
+                        <span>{{ languageService.getDepartmentName(h.fromDepartment) }}</span>
                         } @else {
-                        <span class="text-muted small">{{
-                          'EMPLOYEE.HISTORY_INITIAL' | translate
-                          }}</span>
+                        <span class="text-muted small">{{ 'EMPLOYEE.HISTORY_INITIAL' | translate }}</span>
                         }
                         }
                         @case ('toDepartment') {
-                        <strong class="text-primary">{{
-                          languageService.getDepartmentName(h.toDepartment)
-                          }}</strong>
+                        <strong class="text-primary">{{ languageService.getDepartmentName(h.toDepartment) }}</strong>
                         }
                         @case ('transferDate') {
-                        {{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}
+                        <span class="font-monospace">{{ h.transferDate | date: 'dd/MM/yyyy HH:mm' }}</span>
                         }
                         }
                       </td>
@@ -255,9 +290,10 @@
                 </p-table>
               </div>
               } @else {
-              <p class="text-muted mb-0">
-                {{ 'EMPLOYEE.HISTORY_EMPTY' | translate }}
-              </p>
+              <div class="empty-state py-4 text-center">
+                <i class="pi pi-history text-muted fs-3"></i>
+                <p class="text-muted mt-2 mb-0">{{ 'EMPLOYEE.HISTORY_EMPTY' | translate }}</p>
+              </div>
               }
             </div>
           </div>
@@ -267,42 +303,52 @@
       <!-- Tab 3: Activity Log -->
       <p-tabpanel value="3">
         <div class="pt-3">
-          <h5 class="mb-3 text-main fw-semibold">{{ 'AUDIT.TITLE' | translate }}</h5>
-          @if (isLoadingAuditLogs()) {
-          <app-spinner></app-spinner>
-          } @else if (auditLogs().length > 0) {
-          <div class="table-responsive">
-            <p-table [value]="auditLogs()" styleClass="p-datatable-sm p-datatable-striped">
-              <ng-template #header>
-                <tr>
-                  <th style="width: 160px">{{ 'AUDIT.COL_TIME' | translate }}</th>
-                  <th style="width: 150px">{{ 'AUDIT.COL_USER' | translate }}</th>
-                  <th style="width: 200px">{{ 'AUDIT.COL_ACTION' | translate }}</th>
-                  <th>{{ 'AUDIT.COL_DETAILS' | translate }}</th>
-                </tr>
-              </ng-template>
-              <ng-template #body let-log>
-                <tr>
-                  <td class="text-main">{{ log.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
-                  <td class="text-main">{{ log.username || '-' }}</td>
-                  <td>
-                    <span class="badge" [class]="'badge-' + getActionSeverity(log.action)">
-                      {{ 'AUDIT.ACTIONS_LIST.' + log.action | translate }}
-                    </span>
-                  </td>
-                  <td>
-                    <p-button [label]="'AUDIT.COL_DETAILS' | translate" icon="pi pi-info-circle" [text]="true"
-                      size="small" (click)="openDetails(log.details)"></p-button>
-                  </td>
-                </tr>
-              </ng-template>
-            </p-table>
+          <div class="card shadow-sm info-card">
+            <div class="card-header bg-transparent py-3 px-4 border-bottom">
+              <h5 class="card-title fw-bold text-main mb-0 d-flex align-items-center gap-2">
+                <i class="pi pi-history text-primary"></i>
+                {{ 'AUDIT.TITLE' | translate }}
+              </h5>
+            </div>
+            <div class="card-body p-4">
+              @if (isLoadingAuditLogs()) {
+              <app-spinner></app-spinner>
+              } @else if (auditLogs().length > 0) {
+              <div class="table-responsive">
+                <p-table [value]="auditLogs()" styleClass="p-datatable-sm p-datatable-hoverable">
+                  <ng-template #header>
+                    <tr>
+                      <th style="width: 180px">{{ 'AUDIT.COL_TIME' | translate }}</th>
+                      <th style="width: 150px">{{ 'AUDIT.COL_USER' | translate }}</th>
+                      <th style="width: 200px">{{ 'AUDIT.COL_ACTION' | translate }}</th>
+                      <th class="text-center" style="width: 120px">{{ 'AUDIT.COL_DETAILS' | translate }}</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template #body let-log>
+                    <tr>
+                      <td class="text-main font-monospace">{{ log.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                      <td class="text-main fw-medium">{{ log.username || '-' }}</td>
+                      <td>
+                        <span class="badge" [class]="'badge-' + getActionSeverity(log.action)">
+                          {{ 'AUDIT.ACTIONS_LIST.' + log.action | translate }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <p-button [label]="'AUDIT.COL_DETAILS' | translate" icon="pi pi-info-circle" [text]="true"
+                          size="small" (click)="openDetails(log.details)"></p-button>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+              } @else {
+              <div class="empty-state py-4 text-center">
+                <i class="pi pi-inbox text-muted fs-3"></i>
+                <p class="text-muted mt-2 mb-0">{{ 'EMPLOYEE.ACTIVITY_EMPTY' | translate }}</p>
+              </div>
+              }
+            </div>
           </div>
-          } @else {
-          <p class="text-muted mb-0">
-            {{ 'EMPLOYEE.ACTIVITY_EMPTY' | translate }}
-          </p>
-          }
         </div>
       </p-tabpanel>
     </p-tabpanels>
@@ -379,9 +425,10 @@
       </div>
 
       <div>
-        <label class="fw-bold text-secondary mb-1 small">{{ 'EMPLOYEE.TRANSFER_NEW_DEPT' | translate }}</label>
+        <label for="employee-transfer-department" class="fw-bold text-secondary mb-2 small d-block">{{ 'EMPLOYEE.TRANSFER_NEW_DEPT' | translate }}</label>
         <p-select [options]="filteredDepartmentOptions()" [(ngModel)]="selectedTransferDeptId"
-          [placeholder]="'EMPLOYEE.TRANSFER_SELECT_DEPT' | translate" styleClass="w-full" appendTo="body"></p-select>
+          inputId="employee-transfer-department" [ariaLabel]="'EMPLOYEE.TRANSFER_SELECT_DEPT' | translate"
+          [placeholder]="'EMPLOYEE.TRANSFER_SELECT_DEPT' | translate" styleClass="w-100" appendTo="body"></p-select>
       </div>
     </div>
     }

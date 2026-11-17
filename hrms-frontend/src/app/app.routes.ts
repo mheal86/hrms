@@ -26,6 +26,10 @@ export const routes: Routes = [
       // ─── Routes cho mọi User (đã đăng nhập) ───
       { path: 'dashboard', component: Dashboard, title: 'ROUTE_TITLE.DASHBOARD' },
       { path: 'profile', component: Profile, title: 'ROUTE_TITLE.PROFILE' },
+
+      // Danh bạ phòng ban / nhân viên: User chỉ xem (hành động chỉnh sửa bị ẩn ở giao diện và chặn ở API)
+      { path: 'departments', component: DepartmentList, title: 'ROUTE_TITLE.DEPARTMENTS' },
+      { path: 'employees', component: EmployeeList, title: 'ROUTE_TITLE.EMPLOYEES' },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
       // ─── Routes dành riêng cho Admin (Bảo vệ toàn bộ group) ───
@@ -34,21 +38,21 @@ export const routes: Routes = [
         canActivate: [adminGuard],
         children: [
           // Departments (Thứ tự: tĩnh đứng trước động để tránh tranh chấp param)
-          { path: 'departments', component: DepartmentList, title: 'ROUTE_TITLE.DEPARTMENTS' },
           { path: 'departments/new', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_ADD' },
           { path: 'departments/edit/:id', component: DepartmentForm, title: 'ROUTE_TITLE.DEPARTMENT_EDIT' },
-          { path: 'departments/:id', component: DepartmentDetail, title: 'ROUTE_TITLE.DEPARTMENT_DETAIL' },
 
           // Employees (Thứ tự: tĩnh đứng trước động để tránh tranh chấp param)
-          { path: 'employees', component: EmployeeList, title: 'ROUTE_TITLE.EMPLOYEES' },
           { path: 'employees/new', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_ADD' },
           { path: 'employees/edit/:id', component: EmployeeForm, title: 'ROUTE_TITLE.EMPLOYEE_EDIT' },
-          { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
 
           // Audit Logs
           { path: 'audit-logs', component: AuditLogList, title: 'ROUTE_TITLE.AUDIT_LOGS' },
         ],
       },
+
+      // Trang chi tiết (đặt sau nhóm Admin để 'new'/'edit' khớp trước ':id')
+      { path: 'departments/:id', component: DepartmentDetail, title: 'ROUTE_TITLE.DEPARTMENT_DETAIL' },
+      { path: 'employees/:id', component: EmployeeDetail, title: 'ROUTE_TITLE.EMPLOYEE_DETAIL' },
     ],
   },
   { path: '**', component: NotFound, title: 'ROUTE_TITLE.NOT_FOUND' },

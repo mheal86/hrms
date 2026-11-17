@@ -1,5 +1,5 @@
 // ─── Variables ───────────────────────────────────────────────
-$input-height: 42px;
+$input-height: 40px;
 $border-radius-input: 8px;
 
 // ─── Host & PrimeNG Overrides ─────────────────────────────────
@@ -20,7 +20,7 @@ $border-radius-input: 8px;
         color: var(--input-text);
         padding: 10px 14px;
         font-size: 0.9rem;
-        transition: all 0.2s ease;
+        transition: border-color 160ms ease, background-color 160ms ease;
 
         &:focus,
         .p-focus>& {

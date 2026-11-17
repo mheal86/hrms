@@ -1,6 +1,8 @@
 @use "styles/variables" as *;
 @use "styles/mixins" as *;
+@use "styles/tokens";
 @use "styles/base";
+@use "styles/workspace";
 @use "styles/buttons";
 @use "styles/cards";
 @use "styles/table";
@@ -9,6 +11,6 @@
 @use "styles/layout";
 @use "styles/primeng";
 @use "styles/components/modals";
+@use "styles/components/audit-diff-dialog";
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import 'primeicons/primeicons.css';

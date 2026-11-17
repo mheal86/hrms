@@ -1,1 +1,25 @@
-/* PrimeNG Skeleton styles */
+:host {
+  display: block;
+
+  ::ng-deep {
+    .p-datatable {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      background-color: var(--surface-card);
+
+      .p-skeleton {
+        background-color: var(--surface-hover);
+        border-radius: 6px;
+      }
+
+      th,
+      td {
+        border-right: none !important;
+        border-left: none !important;
+        border-bottom: 1px solid var(--table-border) !important;
+        padding: 12px 16px !important;
+      }
+    }
+  }
+}

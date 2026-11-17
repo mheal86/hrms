@@ -1,7 +1,7 @@
-<div class="page-fade">
-  <h3>
+<div class="page-fade employee-form-container">
+  <header class="page-intro"><h1>
     {{ isEditMode() ? ('EMPLOYEE.EDIT_TITLE' | translate) : ('EMPLOYEE.ADD_TITLE' | translate) }}
-  </h3>
+  </h1></header>
 
   @if (isLoading()) {
     <app-spinner></app-spinner>
@@ -16,7 +16,7 @@
         <!-- Formly Dynamic Fields for Employee -->
         <formly-form [form]="form" [fields]="employeeFields" [model]="model"></formly-form>
 
-        <div class="mb-4 p-3 account-section">
+        <div class="mb-4 account-section">
           <!-- Hộp kiểm sửa tài khoản (chỉ hiện ở chế độ sửa) -->
           @if (isEditMode()) {
             <div class="form-check mb-3 d-flex align-items-center gap-2">

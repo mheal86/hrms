@@ -1,6 +1,5 @@
 // ─── Variables ───────────────────────────────────────────────
-$error-red: var(--p-red-500, #ef4444);
-$text-muted: var(--p-text-muted-color, #6b7280);
+$text-muted: var(--text-muted);
 
 // ─── Mixins ──────────────────────────────────────────────────
 @mixin flex-col-center {
@@ -17,23 +16,39 @@ $text-muted: var(--p-text-muted-color, #6b7280);
   text-align: center;
   gap: 0.75rem;
 
+  .forbidden-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background-color: var(--color-error-bg);
+    border: 1px solid var(--color-error-border);
+    color: var(--color-error);
+    font-size: 1.75rem;
+    margin-bottom: 0.25rem;
+  }
+
   .forbidden-code {
-    font-size: 6rem;
-    font-weight: 700;
+    font-size: 5rem;
+    font-weight: 800;
     line-height: 1;
-    color: $error-red;
-    letter-spacing: -0.05em;
+    color: var(--color-error);
+    letter-spacing: -0.04em;
   }
 
   .forbidden-title {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     margin: 0;
+    letter-spacing: -0.02em;
   }
 
   .forbidden-message {
     font-size: 1rem;
     color: $text-muted;
     margin: 0 0 0.5rem;
+    max-width: 450px;
   }
 }

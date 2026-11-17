@@ -15,48 +15,79 @@
   display: inline-block;
 }
 
+.sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+@media (max-width: 767.98px) {
+  .search-input-group,
+  .filter-select-user,
+  .filter-select-action,
+  p-datepicker {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+
 :host ::ng-deep {
   .filter-calendar {
     min-width: 220px;
-    height: 38px;
+    height: 40px;
 
     .p-inputtext {
-      height: 38px;
+      height: 40px;
       font-size: $font-sm;
-      border-radius: $radius-sm;
+      border-radius: $radius-md;
       background-color: var(--input-bg);
       border: 1px solid var(--input-border);
       color: var(--input-text);
+
+      &:focus {
+        border-color: var(--input-focus-border);
+        box-shadow: 0 0 0 3px var(--input-focus-ring);
+      }
     }
   }
 
   .user-chip {
-    background: var(--bg-secondary);
+    background: var(--surface-hover);
     border: 1px solid var(--border-color);
-    color: var(--text-muted);
+    color: var(--text-main);
     font-size: $font-xs;
-    padding: $space-xs $space-sm;
+    border-radius: 9999px;
+    padding: 3px 10px;
 
     .p-chip-icon {
       font-size: $font-sm;
+      color: var(--color-primary);
     }
   }
 
   .action-tag {
     font-weight: 600;
     font-size: $font-xs;
-    padding: $space-xs $space-md;
-    border-radius: $radius-sm;
+    padding: 4px 10px;
+    border-radius: 9999px;
     display: inline-flex;
     align-items: center;
     gap: $space-xs;
-    text-transform: uppercase;
+    letter-spacing: 0;
   }
 
   .details-btn {
     padding: 0;
-    width: 28px;
-    height: 28px;
-    border-radius: $radius-round;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+
+    &:hover {
+      background-color: var(--surface-hover);
+      color: var(--color-primary);
+    }
   }
 }

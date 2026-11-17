@@ -1,0 +1,52 @@
+/* Shared composition of the personnel register. */
+body {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  --bs-body-color: var(--text-main);
+  --bs-body-bg: var(--bg-primary);
+  --bs-border-color: var(--border-color);
+}
+main.p-3 { padding: var(--page-inset) !important; }
+body .shadow-sm { box-shadow: none !important; }
+.page-intro { margin-bottom: 24px; }
+.page-intro h1 { font-size: 1.75rem; font-weight: 650; letter-spacing: -0.025em; }
+.page-intro p { font-size: 0.875rem; }
+.list-toolbar {
+  padding: 14px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--surface-card);
+  margin-bottom: 16px;
+}
+.list-layout-container .paginator-row {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+body .card { box-shadow: none; }
+body .card-header, body .card-header:first-child { background: transparent; border-color: var(--border-color); border-radius: 11px 11px 0 0; }
+body .card-title { line-height: 1.4; }
+body .card-header .card-title, body .section-title { color: var(--color-primary) !important; font-weight: 700 !important; }
+body .card-body { padding: 24px; }
+body .scrollable-table-container { box-shadow: none; }
+body .empty-state { box-shadow: none; border-style: solid; }
+body .badge { font-weight: 500; letter-spacing: 0; }
+body .form-label { font-weight: 550; }
+body label { color: var(--text-secondary); }
+body .form-control::placeholder { color: var(--input-placeholder); opacity: 1; }
+body .form-control:disabled { opacity: 1; }
+body .bg-light { background: var(--surface-hover) !important; }
+body .text-primary { color: var(--color-primary) !important; }
+body .text-secondary { color: var(--text-secondary) !important; }
+body .text-muted { color: var(--text-muted) !important; }
+body .border { border-color: var(--border-color) !important; }
+body .alert { border-radius: 10px; font-size: 0.875rem; }
+body .alert-danger { color: var(--color-error); background: var(--color-error-bg); border-color: var(--color-error-border); }
+body .alert-warning { color: var(--color-warning); background: var(--color-warning-bg); border-color: var(--color-warning-border); }
+body .btn { min-height: 40px; box-shadow: none !important; transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease; }
+body .btn:hover { box-shadow: none; }
+.form-card { width: 100%; }
+
+/* Emphasis: page title accent, primary section headings */
+.page-intro h1 { position: relative; padding-left: 14px; }
+.page-intro h1::before { content: ''; position: absolute; left: 0; top: 18%; bottom: 18%; width: 4px; border-radius: 4px; background: var(--color-primary); }
+.section-title { color: var(--text-main); font-weight: 650; }

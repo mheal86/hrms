@@ -1,85 +1,16 @@
-// ─── Variables ───────────────────────────────────────────────
-$login-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #0f0e2a 100%);
-$icon-indigo-shadow: 0 8px 20px rgba(79, 70, 229, 0.4);
-$easing-spring: cubic-bezier(0.16, 1, 0.3, 1);
-
-// ─── Mixin ───────────────────────────────────────────────────
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin theme-transition {
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease,
-    border-color 0.3s ease;
-}
-
-// ─── Login Wrapper ───────────────────────────────────────────
-.login-wrapper {
-  @include flex-center;
-  min-height: 100vh;
-  background: $login-gradient;
-  padding: 20px;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background:
-      radial-gradient(ellipse at 60% 40%, rgba(79, 70, 229, 0.15) 0%, transparent 60%),
-      radial-gradient(ellipse at 20% 80%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
-    pointer-events: none;
-  }
-}
-
-// ─── Login Card ──────────────────────────────────────────────
-.login-card {
-  @include theme-transition;
-  background: var(--bg-secondary);
-  color: var(--text-main);
-  padding: 44px 40px;
-  border-radius: 20px;
-  box-shadow:
-    0 24px 64px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-color);
-  width: 100%;
-  max-width: 400px;
-  position: relative;
-  z-index: 1;
-  animation: loginCardIn 0.4s $easing-spring;
-
-  .login-icon {
-    @include flex-center;
-    width: 64px;
-    height: 64px;
-    background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary-light) 100%);
-    border-radius: 16px;
-    margin: 0 auto;
-    box-shadow: $icon-indigo-shadow;
-
-    i {
-      font-size: 1.75rem;
-    }
-  }
-}
-
-@keyframes loginCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
+.login-wrapper { min-height: 100svh; display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-card); }
+.login-introduction { display: flex; flex-direction: column; justify-content: space-between; padding: 56px 64px; background: #153e43; color: #e8f4f1; }
+.login-brand { display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: 650; }
+.login-brand i { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #5e898a; border-radius: 10px; }
+.login-introduction h1 { font-size: 2.5rem; line-height: 1.2; font-weight: 600; letter-spacing: -.03em; max-width: 14ch; color: #ffffff; margin: 0 0 24px; }
+.login-introduction p { color: #b7d1cf; max-width: 42ch; font-size: 1rem; line-height: 1.75; }
+.login-capabilities { display: flex; flex-direction: column; gap: 18px; padding-top: 28px; border-top: 1px solid #406366; }
+.login-capabilities span { display: flex; align-items: center; gap: 12px; color: #e8f4f1; }
+.login-content { display: flex; align-items: center; justify-content: center; padding: 48px; }
+.login-card { width: 100%; max-width: 380px; padding: 0; color: var(--text-main); }
+.login-card h2 { font-size: 1.75rem; font-weight: 650; letter-spacing: -.025em; margin-bottom: 10px; }
+.login-card p { color: var(--text-muted); font-size: .875rem; line-height: 1.6; margin-bottom: 32px; }
+.login-card form { margin-top: 24px; }
+:host ::ng-deep .login-card p-button { display: block; margin-top: 24px; }
+:host ::ng-deep .login-card .p-button { width: 100%; min-height: 44px; }
+@media (max-width: 900px) { .login-wrapper { grid-template-columns: 1fr; } .login-introduction { display: none; } }

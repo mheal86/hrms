@@ -812,6 +812,23 @@ describe('EmployeeDetail', () => {
   });
 
   describe('Cancel editing states', () => {
+    it('discards unsaved personal edits without updating the employee', () => {
+      component.startEditPersonal();
+      component.personalModel = { ...component.personalModel, phone: '0999999999', address: 'Unsaved address' };
+      component.cancelEditPersonal();
+      expect(component.personalModel['phone']).toBe(mockEmployee.phone);
+      expect(component.personalModel['address']).toBe(mockEmployee.address);
+      expect(mockEmployeeService.update).not.toHaveBeenCalled();
+    });
+
+    it('discards unsaved work edits without transferring the employee', () => {
+      component.startEditDepartment();
+      component.departmentModel = { position: 'Unsaved position', department: 'd2' };
+      component.cancelEditDepartment();
+      expect(component.departmentModel).toEqual({ position: mockEmployee.position, department: 'd1' });
+      expect(mockEmployeeService.update).not.toHaveBeenCalled();
+    });
+
     it('should cancel editing personal state', () => {
       component.isEditingPersonal.set(true);
       component.cancelEditPersonal();

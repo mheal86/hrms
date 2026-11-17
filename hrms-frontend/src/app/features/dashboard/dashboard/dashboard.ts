@@ -134,6 +134,10 @@ export class Dashboard implements OnInit, OnDestroy {
   }
 
   animateCountUp(target: ReturnType<typeof signal<number>>, endValue: number) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      target.set(endValue);
+      return;
+    }
     const duration = 800; // ms
     const startTime = performance.now();
 
@@ -217,12 +221,7 @@ export class Dashboard implements OnInit, OnDestroy {
       responsive: true,
       maintainAspectRatio: false,
       cutout: '55%',
-      animation: {
-        animateScale: true,
-        animateRotate: true,
-        duration: 1200,
-        easing: 'easeOutQuart',
-      },
+      animation: false,
       layout: {
         padding: {
           right: 10,

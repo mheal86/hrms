@@ -53,7 +53,7 @@ describe('Sidebar', () => {
     expect(labels).toContain('SIDEBAR.PROFILE');
   }));
 
-  it('should render only non-admin menu items for regular user', fakeAsync(() => {
+  it('should hide only the admin-only menu items (audit logs) for regular user', fakeAsync(() => {
     mockAuth.isAdmin.and.returnValue(false);
     sidebarState.isOpen.set(true);
 
@@ -61,13 +61,14 @@ describe('Sidebar', () => {
     tick();
 
     const links = fixture.debugElement.queryAll(By.css('.nav-link'));
-    expect(links.length).toBe(2);
+    expect(links.length).toBe(4);
 
     const labels = links.map(el => el.query(By.css('.nav-text')).nativeElement.textContent.trim());
     expect(labels).toContain('SIDEBAR.DASHBOARD');
+    expect(labels).toContain('SIDEBAR.DEPARTMENTS');
+    expect(labels).toContain('SIDEBAR.EMPLOYEES');
     expect(labels).toContain('SIDEBAR.PROFILE');
-    expect(labels).not.toContain('SIDEBAR.DEPARTMENTS');
-    expect(labels).not.toContain('SIDEBAR.EMPLOYEES');
+    expect(labels).not.toContain('SIDEBAR.AUDIT_LOGS');
   }));
 
   it('should call sidebarState.close when backdrop is clicked', fakeAsync(() => {

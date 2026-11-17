@@ -1,9 +1,23 @@
 const Employee = require('../models/Employee');
 const DepartmentHistory = require('../models/DepartmentHistory');
+const User = require('../models/User');
 const { logActivity } = require('../utils/auditLogger');
 
 const escapeRegex = (string) => {
   return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+};
+
+// User thường chỉ thấy thông tin liên hệ cơ bản; SĐT, địa chỉ, ngày sinh chỉ hiện với Admin hoặc chính chủ.
+const PRIVATE_FIELDS = ['phone', 'address', 'dateOfBirth'];
+const maskEmployee = (doc, ownEmployeeId, isAdmin) => {
+  if (isAdmin || (ownEmployeeId && String(doc._id) === String(ownEmployeeId))) return doc;
+  const obj = doc.toObject ? doc.toObject() : { ...doc };
+  PRIVATE_FIELDS.forEach((f) => delete obj[f]);
+  return obj;
+};
+const getOwnEmployeeId = async (req) => {
+  const user = await User.findById(req.user.id).select('employee');
+  return user?.employee || null;
 };
 
 // GET /api/employees?page=1&limit=10&sort=hireDate&order=desc&search=nguyen
@@ -71,8 +85,11 @@ exports.getAll = async (req, res) => {
       Employee.countDocuments(filter),
     ]);
 
+    const isAdmin = req.user.role === 'ADMIN';
+    const ownId = isAdmin ? null : await getOwnEmployeeId(req);
+
     res.status(200).json({
-      data: employees,
+      data: employees.map((e) => maskEmployee(e, ownId, isAdmin)),
       pagination: {
         total,
         page,
@@ -92,7 +109,9 @@ exports.getById = async (req, res) => {
     if (!employee) {
       return res.status(404).json({ message: 'Employee not found' });
     }
-    res.status(200).json(employee);
+    const isAdmin = req.user.role === 'ADMIN';
+    const ownId = isAdmin ? null : await getOwnEmployeeId(req);
+    res.status(200).json(maskEmployee(employee, ownId, isAdmin));
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -277,6 +296,12 @@ exports.uploadAvatar = async (req, res) => {
 // GET /api/employees/:id/history
 exports.getHistory = async (req, res) => {
   try {
+    if (req.user.role !== 'ADMIN') {
+      const ownId = await getOwnEmployeeId(req);
+      if (!ownId || String(ownId) !== String(req.params.id)) {
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+    }
     const history = await DepartmentHistory.find({ employee: req.params.id })
       .populate('fromDepartment', 'name')
       .populate('toDepartment', 'name')
