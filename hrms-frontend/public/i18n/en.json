@@ -483,6 +483,7 @@
       "CREATE_EMPLOYEE": "Create Employee",
       "UPDATE_EMPLOYEE": "Update Employee",
       "DELETE_EMPLOYEE": "Delete Employee",
+      "IMPORT_EMPLOYEES": "Import Employees",
       "CREATE_DEPARTMENT": "Create Department",
       "UPDATE_DEPARTMENT": "Update Department",
       "DELETE_DEPARTMENT": "Delete Department",

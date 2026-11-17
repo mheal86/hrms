@@ -483,6 +483,7 @@
       "CREATE_EMPLOYEE": "Thêm nhân viên",
       "UPDATE_EMPLOYEE": "Cập nhật nhân viên",
       "DELETE_EMPLOYEE": "Xóa nhân viên",
+      "IMPORT_EMPLOYEES": "Import nhân viên",
       "CREATE_DEPARTMENT": "Thêm phòng ban",
       "UPDATE_DEPARTMENT": "Cập nhật phòng ban",
       "DELETE_DEPARTMENT": "Xóa phòng ban",

@@ -240,6 +240,8 @@ export class AuditLogList implements OnInit, OnDestroy {
       case 'CREATE_EMPLOYEE':
       case 'CREATE_DEPARTMENT':
         return { severity: 'success', icon: 'pi pi-plus-circle' };
+      case 'IMPORT_EMPLOYEES':
+        return { severity: 'success', icon: 'pi pi-file-excel' };
       case 'UPDATE_EMPLOYEE':
       case 'UPDATE_DEPARTMENT':
       case 'UPDATE_USER':
