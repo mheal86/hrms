@@ -310,6 +310,7 @@ export class AuditLogList implements OnInit, OnDestroy {
 
       if (
         keyName === 'department' ||
+        keyName === 'name' ||
         keyName === 'fromDepartmentName' ||
         keyName === 'toDepartmentName' ||
         keyName === 'fromDepartment' ||
@@ -388,6 +389,14 @@ export class AuditLogList implements OnInit, OnDestroy {
     const translationKey = `AUDIT.FIELDS.${key}`;
     const translated = this.translate.instant(translationKey);
     return translated !== translationKey ? translated : key;
+  }
+
+  getTargetDisplayName(log: AuditLog): string {
+    if (!log.targetName) return '-';
+    if (log.targetType === 'DEPARTMENT') {
+      return this.languageService.getDepartmentName(log.targetName);
+    }
+    return log.targetName;
   }
 
   showDetails(details?: AuditLogDetails) {

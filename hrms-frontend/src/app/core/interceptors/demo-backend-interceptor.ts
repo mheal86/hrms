@@ -36,6 +36,26 @@ function nextObjectId(prefix = '66800000000000000000'): string {
   return `${prefix}${String(idCounter).padStart(4, '0')}`;
 }
 
+const LEGACY_ID_MAP: Record<string, string> = {
+  'dept-1': '668000000000000000000101',
+  'dept-2': '668000000000000000000102',
+  'dept-3': '668000000000000000000103',
+  'dept-4': '668000000000000000000104',
+  'emp-1': '668000000000000000000201',
+  'emp-2': '668000000000000000000202',
+  'emp-3': '668000000000000000000203',
+  'emp-4': '668000000000000000000204',
+  'emp-5': '668000000000000000000205',
+  'emp-6': '668000000000000000000206',
+  'emp-7': '668000000000000000000207',
+  'emp-8': '668000000000000000000208',
+};
+
+function resolveId(rawId?: string | null): string {
+  if (!rawId) return '';
+  return LEGACY_ID_MAP[rawId] ?? rawId;
+}
+
 const depts: DemoDepartment[] = [
   {
     _id: '668000000000000000000101',
@@ -580,8 +600,8 @@ function handleExcelImport(file: File): Observable<HttpResponse<any>> {
         }
 
         const nameParts = fullNameVal.split(/\s+/).filter(Boolean);
-        const firstName = nameParts[nameParts.length - 1] || fullNameVal;
-        const lastName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : firstName;
+        const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : fullNameVal;
+        const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
 
         const parsedDob = dobVal ? new Date(dobVal as string | number | Date) : null;
         const dobIso =
@@ -751,7 +771,7 @@ function handleDemoRequest(
   }
 
   if (path.startsWith('departments/') && method === 'GET') {
-    const id = path.split('/')[1];
+    const id = resolveId(path.split('/')[1]);
     const found = depts.find((d) => d._id === id) ?? depts[0];
     return new HttpResponse({ status: 200, body: found });
   }
@@ -781,7 +801,7 @@ function handleDemoRequest(
 
   if (path.startsWith('departments/') && method === 'PUT') {
     const actor = getCurrentDemoUser();
-    const id = path.split('/')[1];
+    const id = resolveId(path.split('/')[1]);
     const idx = depts.findIndex((d) => d._id === id);
     if (idx !== -1) {
       const before = { ...depts[idx] };
@@ -806,7 +826,7 @@ function handleDemoRequest(
 
   if (path.startsWith('departments/') && method === 'DELETE') {
     const actor = getCurrentDemoUser();
-    const id = path.split('/')[1];
+    const id = resolveId(path.split('/')[1]);
     const empCount = employees.filter((e) => e.department._id === id).length;
     if (empCount > 0) {
       return throwError(
@@ -854,7 +874,7 @@ function handleDemoRequest(
   // 5. Employees CRUD
   if (path === 'employees' && method === 'GET') {
     const search = (params.get('search') || '').toLowerCase();
-    const deptFilter = params.get('department') || '';
+    const deptFilter = resolveId(params.get('department') || '');
     const statusFilter = params.get('status') || '';
     const sortField = params.get('sort') || 'createdAt';
     const sortOrder = params.get('order') === 'asc' ? 1 : -1;
@@ -891,7 +911,7 @@ function handleDemoRequest(
   }
 
   if (path.endsWith('/history') && path.startsWith('employees/') && method === 'GET') {
-    const id = path.split('/')[1];
+    const id = resolveId(path.split('/')[1]);
     const emp = employees.find((e) => e._id === id) ?? employees[0];
     const list = histories[id] ?? [
       {
@@ -904,7 +924,7 @@ function handleDemoRequest(
   }
 
   if (path.startsWith('employees/') && method === 'GET') {
-    const id = path.split('/')[1];
+    const id = resolveId(path.split('/')[1]);
     const emp = employees.find((e) => e._id === id) ?? employees[0];
     return new HttpResponse({ status: 200, body: emp });
   }

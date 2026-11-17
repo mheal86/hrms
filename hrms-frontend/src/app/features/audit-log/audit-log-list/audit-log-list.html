@@ -82,7 +82,7 @@
               [icon]="config.icon" styleClass="action-tag"></p-tag>
             } @else if (col.field === 'targetName') {
             <div class="d-flex flex-column">
-              <span class="fw-semibold">{{ log.targetName || '-' }}</span>
+              <span class="fw-semibold">{{ getTargetDisplayName(log) }}</span>
               <span class="text-muted font-xs">{{ 'AUDIT.TARGET_TYPES.' + log.targetType | translate }}</span>
             </div>
             } @else if (col.field === 'details') {
