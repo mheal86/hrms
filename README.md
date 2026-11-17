@@ -3,8 +3,14 @@
 A full-stack web application for HR staff to manage employees and departments, with role-based access
 control and a complete audit trail of every change.
 
-Built as my individual project during a software engineering internship (Jul – Aug 2026), with code
+Built as my individual project during a full-stack developer internship (Jul – Aug 2026), with code
 reviews from a mentor.
+
+## Live Demo
+
+- **URL:** https://mheal86.github.io/hrms/
+- **One-click preview accounts:** use **Demo Admin (Full)** (full CRUD, Excel import validation, Audit Logs) or **Demo Staff (User)** (read-only browsing; admin routes protected with `403` guards).
+- When hosted statically without a live MongoDB backend, an Angular HTTP interceptor runs an in-memory simulated API supporting CRUD, department transfers, RBAC, field-level audit diffs, and client-side Excel import validation.
 
 ## Features
 

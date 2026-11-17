@@ -1,9 +1,10 @@
-import { ApplicationConfig } from '@angular/core';
+import { ApplicationConfig, inject, LOCALE_ID, provideAppInitializer } from '@angular/core';
 import { provideRouter, withRouterConfig } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeVi from '@angular/common/locales/vi';
-import { LOCALE_ID } from '@angular/core';
+import { firstValueFrom, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/themes';
@@ -20,6 +21,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { TitleStrategy } from '@angular/router';
 import { CustomTitleStrategy } from './core/services/custom-title-strategy';
+import { LanguageService } from './core/services/language.service';
 
 registerLocaleData(localeVi);
 
@@ -65,11 +67,15 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     ConfirmationService,
     provideTranslateService({
-      fallbackLang: 'vi',
+      fallbackLang: 'en',
       loader: provideTranslateHttpLoader({
         prefix: './i18n/',
         suffix: '.json',
       }),
+    }),
+    provideAppInitializer(() => {
+      const langService = inject(LanguageService);
+      return firstValueFrom(langService.init().pipe(catchError(() => of(null))));
     }),
     provideFormlyCore({
       types: [

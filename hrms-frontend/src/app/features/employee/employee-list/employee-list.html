@@ -47,7 +47,7 @@
     <p-table [columns]="cols" [value]="employees()" styleClass="p-datatable-sm p-datatable-hoverable">
       <ng-template #header let-columns>
         <tr>
-          <th class="text-center" style="width: 60px"></th>
+          <th class="text-center" style="width: 52px"></th>
           @for (col of columns; track col.field) {
           @if (col.sortable) {
           <th class="sortable-header" tabindex="0" (click)="onSort(col.field)" (keydown.enter)="onSort(col.field)"
@@ -67,11 +67,11 @@
           <th>{{ col.header | translate }}</th>
           }
           }
-          <th class="text-center" style="width: 150px">
+          <th class="text-center" style="width: 112px">
             {{ 'EMPLOYEE.COL_STATUS' | translate }}
           </th>
           @if (authService.isAdmin()) {
-          <th class="text-center" style="width: 130px">
+          <th class="text-center" style="width: 72px">
             {{ 'EMPLOYEE.COL_ACTIONS' | translate }}
           </th>
           }

@@ -7,6 +7,7 @@ import { Subject, takeUntil, finalize, merge, of } from 'rxjs';
 import { Button } from 'primeng/button';
 import { FormlyModule, FormlyFieldConfig } from '@ngx-formly/core';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LanguageService } from '../../../core/services/language.service';
 
 @Component({
   selector: 'app-login',
@@ -19,6 +20,7 @@ export class Login implements OnInit, OnDestroy {
   authService = inject(Auth);
   router = inject(Router);
   translate = inject(TranslateService);
+  languageService = inject(LanguageService);
 
   loginForm: FormGroup = this.fb.group({});
   loginModel = {

@@ -10,11 +10,11 @@ export const LANG_STORAGE_KEY = 'hrms_lang';
   providedIn: 'root',
 })
 export class LanguageService {
-  currentLang = signal<SupportedLang>('vi');
+  currentLang = signal<SupportedLang>('en');
 
   readonly languages = [
-    { code: 'vi' as SupportedLang, label: 'Tiếng Việt', flag: '🇻🇳' },
     { code: 'en' as SupportedLang, label: 'English', flag: 'en' },
+    { code: 'vi' as SupportedLang, label: 'Tiếng Việt', flag: '🇻🇳' },
   ];
 
   constructor(
@@ -72,9 +72,9 @@ export class LanguageService {
     );
 
     const saved = localStorage.getItem(LANG_STORAGE_KEY) as SupportedLang | null;
-    const lang: SupportedLang = saved === 'en' ? 'en' : 'vi';
+    const lang: SupportedLang = saved === 'vi' ? 'vi' : 'en';
     this.currentLang.set(lang);
-    this.translate.use(lang);
+    return this.translate.use(lang);
   }
 
   /**

@@ -643,7 +643,7 @@ function handleExcelImport(file: File): Observable<HttpResponse<any>> {
         action: 'IMPORT_EMPLOYEES',
         targetType: 'EMPLOYEE',
         targetId: toCreate[0]?._id ?? '',
-        targetName: `Imported ${toCreate.length} employees`,
+        targetName: `Imported ${toCreate.length} ${toCreate.length === 1 ? 'employee' : 'employees'}`,
         details: {
           filename: file.name,
           count: toCreate.length,
@@ -698,7 +698,9 @@ function handleDemoRequest(
   if (path === 'dashboard/summary' && method === 'GET') {
     const activeCount = employees.filter((e) => e.status === EmployeeStatus.ACTIVE).length;
     const byDept = depts.map((d) => {
-      const count = employees.filter((e) => e.department._id === d._id).length;
+      const count = employees.filter(
+        (e) => e.department._id === d._id && e.status === EmployeeStatus.ACTIVE,
+      ).length;
       return {
         departmentName: d.name,
         lastMonthCount: Math.max(0, count - 1),

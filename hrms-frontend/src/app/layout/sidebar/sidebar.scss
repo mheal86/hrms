@@ -5,8 +5,9 @@
   z-index: 998; scrollbar-width: thin;
   .nav { padding: 24px 12px; gap: 6px; }
   .nav-item { margin: 0; }
-  .nav-link { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 11px 14px; color: var(--text-secondary); border: 1px solid transparent; border-radius: 8px; font-size: 0.875rem; font-weight: 500; transition: background-color 160ms ease, color 160ms ease; }
-  .nav-link:hover { background: var(--surface-hover); color: var(--text-main); }
+  .nav-link { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 11px 14px; color: var(--text-secondary); background: transparent; border: 1px solid transparent; border-radius: 8px; font-size: 0.875rem; font-weight: 500; transition: background-color 160ms ease, color 160ms ease; }
+  .nav-link:not(.active):focus { background: transparent; color: var(--text-secondary); }
+  .nav-link:hover, .nav-link:not(.active):focus:hover { background: var(--surface-hover); color: var(--text-main); }
   .nav-link { position: relative; }
   .nav-link.active { color: var(--color-primary); background: var(--surface-selected); border-color: transparent; font-weight: 600; box-shadow: none; }
   .nav-link.active::before { content: ''; position: absolute; left: -12px; top: 9px; bottom: 9px; width: 4px; border-radius: 0 4px 4px 0; background: var(--color-primary); }
